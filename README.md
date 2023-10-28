@@ -20,9 +20,9 @@ This Streamlit application provides a user-friendly interface for analyzing fina
 
 ## How to Run
 
-1. Navigate to the project directory:
+1. Run bat:
     ```bash
-    {PWD}/KAFKA2306/finBI/blob/main/code/first.bat
+    ./KAFKA2306/finBI/blob/main/code/first.bat
     ```
 
 ## Dependencies
