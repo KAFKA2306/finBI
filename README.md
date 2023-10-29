@@ -1,26 +1,26 @@
 ---
 
 ## Overview
-This Streamlit application provides a user-friendly interface for analyzing financial and economic data across various categories. It fetches stock data as well as economic data from the FRED (Federal Reserve Economic Data) database, offering a comprehensive view of financial markets.
+Dive into the financial realm with this intuitive Streamlit application, your gateway to a wealth of economic and stock market data. With data right from the reputable FRED database and stock market indexes, it’s more than just numbers—it’s the pulse of the financial market at your fingertips.
 
 ## Features
 
-- **User-friendly Interface**: Features an easy-to-navigate sidebar for selecting data categories or series.
-- **Data Caching**: Efficiently fetches and stores data using Pickle files, reducing redundant API calls and improving loading times.
-- **Interactive Visualization**: Leverages Streamlit and Plotly charts for interactive data visualization, offering insightful views into the data.
-- **Extensive Data Sources**: Integrates multiple data sources including Yahoo Finance, FRED, SimFin, and Finnhub, for a wide range of financial data.
+- **Ease of Navigation**: Glide through data categories or series with a streamlined sidebar, making your exploration intuitive.
+- **Data at Speed**: Through Pickle files, data caching cuts down redundant API calls, ensuring a swift response and reduced loading times.
+- **Engaging Visuals**: The marriage of Streamlit and Plotly charts brings forth interactive visualizations, turning data into insights you can almost touch.
+- **A Confluence of Sources**: Delve into a broad spectrum of financial data, thanks to integration with Yahoo Finance, FRED, SimFin, and Finnhub.
 
-## Installation
+## Get Started
 
-1. Clone the repository:
+1. Clone your new financial companion:
 ```bash
 git clone https://github.com/KAFKA2306/finBI.git
 ```
-2. Obtain the necessary API keys for FRED_API_KEY, SIMFIN_API_KEY, ALPHA_VANTAGE_API_KEY, FinancialModelingPrep_API_KEY, FINNHUB_API_KEY, and update them in the `categories.py` file.
+2. Obtain and fill in your API keys for `FRED_API_KEY`, `SIMFIN_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `FinancialModelingPrep_API_KEY`, `FINNHUB_API_KEY` in the `categories.py` file.
 
-## How to Run
+## How to Launch
 
-- Run the batch file:
+- Kickstart the application:
 ```bash
 ./KAFKA2306/finBI/blob/main/code/first.bat
 ```
@@ -34,97 +34,71 @@ git clone https://github.com/KAFKA2306/finBI.git
 - Plotly
 - requests
 
-## Contributing
+## Join the Journey
 
-If you come across any bugs, or if you have additional features you think would be nice to have, feel free to open a GitHub issue. Contributions are always welcome.
-
----
-
-
-
+Stumbled upon a bug or have a feature in mind? Your insights are invaluable. Feel free to open a GitHub issue—let’s refine this financial lens together.
 
 ---
 
-## 株価と経済データ分析ウェブアプリ
+---
 
-このPythonスクリプトは、異なるデータソースから株価や経済データを取得し、それらのデータを分析し、Streamlitを使用して表示するものです。
+## Financial and Economic Data Analysis Web App
 
-### 1. **インポートと設定:**
-コードの最初の部分で、必要なライブラリと設定を準備します。
+Dive deep into stock and economic data analysis with this Python script, which fetches, analyzes, and displays data from varied sources using Streamlit.
+
+### 1. **Preparation:**
+Set up the stage with necessary libraries and configurations right at the outset.
 
 ```python
-import os
-import pandas as pd
-import yfinance as yf
-import pickle
-from fredapi import Fred
-import simfin as sf
-from simfin.names import *
-import streamlit as st
-import requests
-from categories import (
-    CATEGORIES, FRED_CATEGORIES, FRED_API_KEY, DATA_DIR, 
-    SIMFIN_API_KEY, ALPHA_VANTAGE_API_KEY, INDIVIDUAL_STOCKS, 
-    FinancialModelingPrep_API_KEY, FINNHUB_API_KEY
-)
+# Import libraries and configurations
+# ...
 
 fred = Fred(api_key=FRED_API_KEY)
 sf.set_api_key(SIMFIN_API_KEY)
 sf.set_data_dir(DATA_DIR)
 
 DEFAULT_TICKERS = ['MSFT', 'AAPL', 'AMZN']
-
 ```
 
-### 2. **DataHandlerクラス:**
-`DataHandler` クラスはデータの取得と保存を担当します。
+### 2. **DataHandler Class:**
+The `DataHandler` class is your data custodian, managing retrieval and storage seamlessly.
 
 ```python
 class DataHandler:
     # ...
 ```
 
-- `_get_file_path`, `_save_to_pickle`, `_load_from_pickle`: ファイルパスの生成、データの保存と読み込み。
-- `_fetch_data`, `get_data`: 異なるデータソースからデータを取得。
-- `process_and_save_simfin_data`, `merge_and_save_data`: データの処理とマージ。
+- File path creation, data storage, and retrieval functions.
+- Data fetching from a variety of sources.
 
-### 3. **StreamlitDisplayクラス:**
-`StreamlitDisplay` クラスは、Streamlitウェブアプリでのデータ表示を制御します。
+### 3. **StreamlitDisplay Class:**
+`StreamlitDisplay` orchestrates data presentation in the Streamlit web app, making it visually appealing and insightful.
 
 ```python
 class StreamlitDisplay:
     # ...
 ```
 
-- `display_chart`, `display_table`, `display_earnings`: チャートやテーブルの表示。
-- `select_category_and_tickers`, `display_selected_data`: カテゴリやティッカーの選択と表示。
+- Functions for displaying charts, tables, and earnings.
+- Selection and display of data categories and tickers.
 
 ### 4. **Main Functions:**
-各 `main_` 関数は、特定のデータセットと表示タイプに基づいてStreamlitウェブアプリの異なるセクションを制御します。
+The `main_` functions control different sections of the Streamlit web app based on specific datasets and display types.
 
 ```python
-def main_yf_chart(data_handler, display_handler):
-    # ...
-def main_yf_table(data_handler, display_handler):
-    # ...
-def main_simfin(data_handler, display_handler):
-    # ...
-def main_finnhub(data_handler, display_handler):
-    # ...
+# Controlling different sections of the app
+# ...
 ```
 
-### 5. **メイン実行ブロック:**
-`__main__` ブロックで、`DataHandler`と`StreamlitDisplay`のインスタンスを作成し、各 `main_` 関数を呼び出します。
+### 5. **Execution Block:**
+In the `__main__` block, craft instances of `DataHandler` and `StreamlitDisplay`, and call the `main_` functions to bring the app to life.
 
 ```python
 if __name__ == "__main__":
-    data_handler = DataHandler()
-    display_handler = StreamlitDisplay(data_handler)
-
-    main_yf_chart(data_handler, display_handler)
-    main_yf_table(data_handler, display_handler)
-    main_simfin(data_handler, display_handler)
-    main_finnhub(data_handler, display_handler)
-
+    # Creating instances and calling functions
+    # ...
 ```
 
+Make your financial analysis more engaging and insightful with this well-structured, user-friendly application.
+
+---
