@@ -28,7 +28,6 @@ git clone https://github.com/KAFKA2306/finBI.git
 | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/39ac06ae-bb9c-4626-93f5-59fd8fd47285) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/8df85103-edb5-46db-b7d8-837ca217796e) |
 |:---:|:---:|
 | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/b556019e-eecc-44bf-a681-515931a85ecf) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/a155714c-8c00-4afb-b2f3-af443997d952) |
-|:---:|:---:|
 | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/540fa83b-da02-451c-a41b-7f90a5895bff) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/bd9928cc-5875-4f03-9015-954973d484a4) |
 
 ## Join the Journey
