@@ -36,3 +36,71 @@ This Streamlit application provides a user-friendly interface for analyzing fina
 ## Contributing
 
 If you find any bugs, or if you have additional features you think would be nice to have, please do open a GitHub issue. Contributions are welcome.
+
+
+
+
+
+---
+
+## 株価と経済データ分析ウェブアプリ
+
+このPythonスクリプトは、異なるデータソースから株価や経済データを取得し、それらのデータを分析し、Streamlitを使用して表示するものです。
+
+### 1. **インポートと設定:**
+コードの最初の部分で、必要なライブラリと設定を準備します。
+
+```python
+import os
+import pandas as pd
+import yfinance as yf
+# ... (他のインポート)
+DEFAULT_TICKERS = ['MSFT', 'AAPL', 'AMZN']
+```
+
+### 2. **DataHandlerクラス:**
+`DataHandler` クラスはデータの取得と保存を担当します。
+
+```python
+class DataHandler:
+    # ...
+```
+
+- `_get_file_path`, `_save_to_pickle`, `_load_from_pickle`: ファイルパスの生成、データの保存と読み込み。
+- `_fetch_data`, `get_data`: 異なるデータソースからデータを取得。
+- `process_and_save_simfin_data`, `merge_and_save_data`: データの処理とマージ。
+
+### 3. **StreamlitDisplayクラス:**
+`StreamlitDisplay` クラスは、Streamlitウェブアプリでのデータ表示を制御します。
+
+```python
+class StreamlitDisplay:
+    # ...
+```
+
+- `display_chart`, `display_table`, `display_earnings`: チャートやテーブルの表示。
+- `select_category_and_tickers`, `display_selected_data`: カテゴリやティッカーの選択と表示。
+
+### 4. **Main Functions:**
+各 `main_` 関数は、特定のデータセットと表示タイプに基づいてStreamlitウェブアプリの異なるセクションを制御します。
+
+```python
+def main_yf_chart(data_handler, display_handler):
+    # ...
+def main_yf_table(data_handler, display_handler):
+    # ...
+def main_simfin(data_handler, display_handler):
+    # ...
+def main_finnhub(data_handler, display_handler):
+    # ...
+```
+
+### 5. **メイン実行ブロック:**
+`__main__` ブロックで、`DataHandler`と`StreamlitDisplay`のインスタンスを作成し、各 `main_` 関数を呼び出します。
+
+```python
+if __name__ == "__main__":
+    data_handler = DataHandler()
+    display_handler = StreamlitDisplay(data_handler)
+    # ... (他の関数呼び出し)
+```
