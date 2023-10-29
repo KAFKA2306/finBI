@@ -25,6 +25,11 @@ git clone https://github.com/KAFKA2306/finBI.git
 ./KAFKA2306/finBI/blob/main/code/first.bat
 ```
 
+## You Can Check Data
+![image](https://github.com/KAFKA2306/finBI/assets/137051370/39ac06ae-bb9c-4626-93f5-59fd8fd47285)
+![image](https://github.com/KAFKA2306/finBI/assets/137051370/8df85103-edb5-46db-b7d8-837ca217796e)
+![image](https://github.com/KAFKA2306/finBI/assets/137051370/de609fad-862b-4d14-acf2-05bc6b16350c)
+![image](https://github.com/KAFKA2306/finBI/assets/137051370/8c3dea92-720e-4d3f-9c8e-9d6af7a0d06f)
 
 
 ## Join the Journey
