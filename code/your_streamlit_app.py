@@ -3,10 +3,15 @@ import pandas as pd
 import yfinance as yf
 import pickle
 from fredapi import Fred
+import simfin as sf
+from simfin.names import *
 import streamlit as st
-from  categories import CATEGORIES, FRED_CATEGORIES, FRED_API_KEY,DATA_DIR,FILE_PATHS
+from categories import CATEGORIES, FRED_CATEGORIES, FRED_API_KEY, DATA_DIR, FILE_PATHS, SIMFIN_API_KEY
 
+DATA_DIR = "./../data/"
 fred = Fred(api_key=FRED_API_KEY)
+sf.set_api_key(SIMFIN_API_KEY)
+sf.set_data_dir(DATA_DIR)
 
 def save_to_pickle(data_dict, source):
     file_path = os.path.join(DATA_DIR, f"{source}.pkl")
@@ -41,7 +46,7 @@ def fetch_or_load_data(identifier, source):
     return data
 
 def main():
-    st.title("Efficient Financial Data Dashboard using Source-Based Pickle Files")
+    st.title("Stock and Financial Index Chart")
 
     # Combine both category lists for selection
     all_categories = list(CATEGORIES.keys()) + list(FRED_CATEGORIES.keys())
@@ -62,6 +67,7 @@ if __name__ == "__main__":
 
 
 
+
 def load_and_merge_data(file_paths):
     merged_df = pd.DataFrame()
     for file_path in file_paths:
@@ -72,11 +78,11 @@ def load_and_merge_data(file_paths):
 
 def main():
     # Streamlit title
-    st.title("Select Time Series Data")
+    st.title("Stock and Financial Index Table")
 
     # Load and merge data
     merged_data = load_and_merge_data([FILE_PATHS['stock'], FILE_PATHS['fred']])
-    merged_data.to_csv(FILE_PATHS['stock_fred_csv'])
+    #merged_data.to_csv(FILE_PATHS['stock_fred_csv'])
     merged_data.to_pickle(FILE_PATHS['stock_fred_pkl'])
 
     # Get column names and allow selection in Streamlit
@@ -87,4 +93,71 @@ def main():
         #st.dataframe(pd.read_pickle(FILE_PATHS['stock']))
 
 if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+# Constants and SimFin settings
+REVENUE, NET_INCOME, DEFAULT_TICKERS = 'Revenue', 'Net Income', ['MSFT', 'AAPL', 'AMZN']
+
+def fetch_or_load_data(variant='quarterly', market='us'):
+    path = f"{DATA_DIR}/simfin_{variant}_{market}.pkl"
+    try:
+        with open(path, 'rb') as f: return pickle.load(f)
+    except:
+        df = sf.load_income(variant=variant, market=market)
+        with open(path, 'wb') as f: pickle.dump(df, f)
+        return df
+
+def fetch_or_load_data(variant='quarterly', market='us', force_update=False):
+    path = f"{DATA_DIR}/simfin_{variant}_{market}.pkl"
+
+    # Check if data file exists and if a force update is required
+    if os.path.exists(path) and not force_update:
+        try:
+            with open(path, 'rb') as f:
+                return pickle.load(f)
+        except:
+            pass
+
+    # Fetch new data if file doesn't exist or an update is forced
+    df = sf.load_income(variant=variant, market=market)
+    with open(path, 'wb') as f:
+        pickle.dump(df, f)
+    return df
+
+
+def prepare_data(df_income):
+    df = df_income.loc[:, [REVENUE, NET_INCOME]].reset_index()
+    df.index = pd.to_datetime(df.index)
+    resample_sum = lambda df: df.resample("3M").sum()
+    return [df.pivot(index='Report Date', columns='Ticker', values=col).pipe(resample_sum) for col in [REVENUE, NET_INCOME]]
+
+def main():
+    st.title("Earnings Chart")
+
+    
+    # Add an option to force data update
+    force_update = st.checkbox("Force data update")
+
+
+    df_revenue, df_net_income = prepare_data(fetch_or_load_data())
+    tickers = df_revenue.columns.tolist()
+
+    category = st.selectbox("Select Category", ['Revenue', 'Net Income'])
+    df = df_revenue if category == 'Revenue' else df_net_income
+    st.line_chart(df[st.multiselect("Select Tickers", tickers, default=DEFAULT_TICKERS)])
+
+    st.title("Earnings Table")
+    selected_tickers = st.multiselect("Select tickers", tickers, default=DEFAULT_TICKERS)
+    if selected_tickers:
+        for title, df in zip(["Revenue", "Net Income"], [df_revenue, df_net_income]):
+            st.write(title)
+            st.dataframe(df[selected_tickers])
+
+
+if __name__ == "__main__": 
     main()
