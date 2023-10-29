@@ -54,8 +54,24 @@ If you find any bugs, or if you have additional features you think would be nice
 import os
 import pandas as pd
 import yfinance as yf
-# ... (他のインポート)
+import pickle
+from fredapi import Fred
+import simfin as sf
+from simfin.names import *
+import streamlit as st
+import requests
+from categories import (
+    CATEGORIES, FRED_CATEGORIES, FRED_API_KEY, DATA_DIR, 
+    SIMFIN_API_KEY, ALPHA_VANTAGE_API_KEY, INDIVIDUAL_STOCKS, 
+    FinancialModelingPrep_API_KEY, FINNHUB_API_KEY
+)
+
+fred = Fred(api_key=FRED_API_KEY)
+sf.set_api_key(SIMFIN_API_KEY)
+sf.set_data_dir(DATA_DIR)
+
 DEFAULT_TICKERS = ['MSFT', 'AAPL', 'AMZN']
+
 ```
 
 ### 2. **DataHandlerクラス:**
@@ -102,5 +118,11 @@ def main_finnhub(data_handler, display_handler):
 if __name__ == "__main__":
     data_handler = DataHandler()
     display_handler = StreamlitDisplay(data_handler)
-    # ... (他の関数呼び出し)
+
+    main_yf_chart(data_handler, display_handler)
+    main_yf_table(data_handler, display_handler)
+    main_simfin(data_handler, display_handler)
+    main_finnhub(data_handler, display_handler)
+
 ```
+
