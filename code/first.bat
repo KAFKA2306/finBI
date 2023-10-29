@@ -17,6 +17,13 @@ pip show poetry || pip install poetry
 call poetry install
 
 :: Run the Streamlit app
-call streamlit run your_streamlit_app.py
+start cmd /k call streamlit run your_streamlit_app.py
+
+:: Start ngrok
+start cmd /k M:\Apps\ngrok-v3-stable-windows-amd64\ngrok http 8501
+python get_ngrok_url.py
+
+:: Optionally set PATH for Heroku
+set PATH=%PATH%;C:\Program Files\heroku\bin
 
 endlocal
