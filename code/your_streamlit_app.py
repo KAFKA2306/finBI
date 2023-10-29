@@ -7,6 +7,7 @@ import simfin as sf
 from simfin.names import *
 import streamlit as st
 import requests
+import plotly.graph_objects as go
 from categories import (
     CATEGORIES, FRED_CATEGORIES, FRED_API_KEY, DATA_DIR, 
     SIMFIN_API_KEY, ALPHA_VANTAGE_API_KEY, INDIVIDUAL_STOCKS, 
@@ -42,19 +43,27 @@ def fetch_data(identifier, source):
 
 def fetch_or_load_data(identifier, source):
     data_dict = load_from_pickle(source)
-    
+
     if identifier in data_dict:
         return data_dict[identifier]
-    
+
     data = fetch_data(identifier, source)
-    
+
     if data is not None:
         data_dict[identifier] = data
         save_to_pickle(data_dict, source)
-        
+
     return data
 
-def main():
+def save_data():
+    all_categories = list(CATEGORIES.keys()) + list(FRED_CATEGORIES.keys())
+    for category in all_categories:
+        options_list = CATEGORIES.get(category, []) + FRED_CATEGORIES.get(category, [])
+        for identifier in options_list:
+            source = "stock" if category in CATEGORIES else "fred"
+            fetch_or_load_data(identifier, source)
+
+def plot_data():
     st.title("Stock and FRED")
 
     # Combine both category lists for selection
@@ -70,12 +79,11 @@ def main():
 
     data = fetch_or_load_data(selected_identifier, source)
     st.line_chart(data)
-    
+
 if __name__ == "__main__":
-    main()
-
-
-
+    save_data()
+    plot_data()
+    
 # YahooFinance_Table
 def load_and_merge_data(file_paths):
     merged_df = pd.DataFrame()
@@ -108,9 +116,93 @@ if __name__ == "__main__":
 
 
 
+# Stock-FX
+st.title("FX")
+stocks_list = pd.read_pickle(f"{DATA_DIR}/stock.pkl")
+stocks_df = pd.DataFrame(stocks_list).resample("D").mean()
+stocks_df['EUR=X'] = 1 / (stocks_df['EURJPY=X'] / stocks_df['JPY=X'])
+FX = stocks_df[['JPY=X','EUR=X']]
+
+stocks_dollars = stocks_df[['VOO', 'VT', 'QQQ', 'VIG', 'TLT', 'AGG', 'GLD']]
+stocks_yen = stocks_dollars.multiply(FX['JPY=X'], axis=0)
+stocks_euro = stocks_dollars.multiply(FX['EUR=X'], axis=0)
+
+# Create an empty dictionary to store the ticker DataFrames
+ticker_dfs = {}
+
+for ticker in stocks_dollars.columns:
+    # Create a DataFrame for each ticker with USD, JPY, and EUR values
+    ticker_dfs[ticker] = pd.DataFrame({
+        f"{ticker}_USD": stocks_dollars[ticker],
+        f"{ticker}_JPY": stocks_yen[ticker],
+        f"{ticker}_EUR": stocks_euro[ticker]
+    })
+
+# Concatenate all the ticker DataFrames along with the FX DataFrame into a single DataFrame
+stocks_FX = pd.concat([*ticker_dfs.values(), FX], axis=1)
 
 
-# 定数を定義
+# Streamlit UI
+unique_tickers = stocks_dollars.columns.tolist()
+default_selected = ['VOO']
+all_options = unique_tickers + FX.columns.tolist()
+
+selected_tickers = st.multiselect(
+    'Select Tickers to Plot',
+    options=all_options,  # Use the combined list here
+    default=default_selected
+)
+
+selected_currencies = st.multiselect(
+    'Select Currencies',
+    options=FX.columns.tolist()+['USD'],
+    default=FX.columns.tolist()+['USD']
+)
+
+def get_matching_columns(selected_tickers, selected_currencies):
+    matching_columns = []
+    for ticker in selected_tickers:
+        for currency in selected_currencies:
+            if currency == 'USD':
+                matching_columns.append(f"{ticker}_USD")
+            else:
+                currency_suffix = currency.replace('=X', '')
+                matching_columns.extend([col for col in stocks_FX.columns if col.startswith(f"{ticker}_") and col.endswith(currency_suffix)])
+    return matching_columns
+
+
+# Plot
+def multi_yaxis_plot(df):
+    fig = go.Figure()
+    for idx, column in enumerate(df.columns, 1):
+        fig.add_trace(
+            go.Scatter(
+                x=df.index,
+                y=df[column],
+                name=column,
+                yaxis=f'y{idx}' if idx > 1 else 'y'
+            )
+        )
+    yaxis_dict = {
+        f'yaxis{idx}' if idx > 1 else 'yaxis': dict(
+            title=f'yaxis {idx} title',
+            overlaying='y' if idx > 1 else None,
+            side='right' if idx % 2 == 0 else 'left'
+        )
+        for idx in range(1, len(df.columns) + 1)
+    }
+    fig.update_layout(**yaxis_dict)
+    st.plotly_chart(fig)
+
+
+matching_columns = get_matching_columns(selected_tickers, selected_currencies)  # updated line
+multi_yaxis_plot(stocks_FX[matching_columns])
+
+
+
+
+
+# SIMFIN
 REVENUE, NET_INCOME, DEFAULT_TICKERS = 'Revenue', 'Net Income', ['MSFT', 'AAPL', 'AMZN']
 
 def fetch_or_load_data(variant='quarterly', market='us'):
