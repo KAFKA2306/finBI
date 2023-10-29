@@ -105,23 +105,28 @@ if __name__ == "__main__":
 
 
 
-## SimpleFinance
+# 定数を定義
 REVENUE, NET_INCOME, DEFAULT_TICKERS = 'Revenue', 'Net Income', ['MSFT', 'AAPL', 'AMZN']
 
 def fetch_or_load_data(variant='quarterly', market='us'):
-    path = f"{DATA_DIR}/simfin_{variant}_{market}.pkl"
+    path = f"simfin_{variant}_{market}.pkl"
     try:
-        with open(path, 'rb') as f: return pickle.load(f)
+        with open(path, 'rb') as f:
+            df_income = pickle.load(f)
     except:
-        df = sf.load_income(variant=variant, market=market)
-        with open(path, 'wb') as f: pickle.dump(df, f)
-        return df
+        df_income = sf.load_income(variant=variant, market=market)
+        with open(path, 'wb') as f:
+            pickle.dump(df_income, f)
+    return df_income
 
 def prepare_data(df_income):
-    df = df_income.loc[:, [REVENUE, NET_INCOME]].reset_index()
-    df.index = pd.to_datetime(df.index)
-    resample_sum = lambda df: df.resample("3M").sum()
-    return [df.pivot(index='Report Date', columns='Ticker', values=col).pipe(resample_sum) for col in [REVENUE, NET_INCOME]]
+    df = df_income.reset_index()
+    df['Report Date'] = pd.to_datetime(df['Report Date'])  # 確実に日付型に変換
+    # RevenueとNet Incomeのデータフレームを作成
+    df_revenue = df.pivot(index='Report Date', columns='Ticker', values=REVENUE).resample('3M').sum()
+    df_net_income = df.pivot(index='Report Date', columns='Ticker', values=NET_INCOME).resample('3M').sum()
+    return df_revenue, df_net_income
+
 
 def main():
     st.title("Earnings Chart SimFin")
@@ -140,17 +145,9 @@ def main():
             st.write(title)
             st.dataframe(df[selected_tickers])
 
-
-if __name__ == "__main__": 
+if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
+fetch_or_load_data(variant='quarterly', market='us')
 
 
 
