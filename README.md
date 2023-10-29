@@ -1,4 +1,4 @@
----
+![image](https://github.com/KAFKA2306/finBI/assets/137051370/4826facc-2664-4108-9257-2599fa0e1345)---
 
 ## Overview
 Explore the world of finance with this easy-to-use Streamlit app. Get a wealth of economic and stock market data straight from trusted sources like the FRED database and market indexes. It's more than just numbers—it’s the financial market coming alive at your fingertips.
@@ -28,8 +28,8 @@ git clone https://github.com/KAFKA2306/finBI.git
 ## You Can Check Data
 ![image](https://github.com/KAFKA2306/finBI/assets/137051370/39ac06ae-bb9c-4626-93f5-59fd8fd47285)
 ![image](https://github.com/KAFKA2306/finBI/assets/137051370/8df85103-edb5-46db-b7d8-837ca217796e)
-![image](https://github.com/KAFKA2306/finBI/assets/137051370/de609fad-862b-4d14-acf2-05bc6b16350c)
-![image](https://github.com/KAFKA2306/finBI/assets/137051370/8c3dea92-720e-4d3f-9c8e-9d6af7a0d06f)
+![image](https://github.com/KAFKA2306/finBI/assets/137051370/540fa83b-da02-451c-a41b-7f90a5895bff)
+![image](https://github.com/KAFKA2306/finBI/assets/137051370/dacfb657-e18e-41f7-aef4-a3805dca5f28)
 
 
 ## Join the Journey
