@@ -15,7 +15,7 @@ def get_ngrok_url():
             time.sleep(2)  # wait for 2 seconds before retrying
 
 def send_to_discord(url):
-    webhook_url = 'https://discord.com/api/webhooks/1168139684690542594/gOYUZPOgg8LHbuA8ypiLvQpidR-MoilVd39cOvLw91POQTE5gyB0SPOP8va_PMpUQimR'
+    webhook_url = 'https://discord.com/api/webhooks/name/name'
     webhook = DiscordWebhook(url=webhook_url, content=f'ngrok public URL: {url}')
     webhook.execute()
 
