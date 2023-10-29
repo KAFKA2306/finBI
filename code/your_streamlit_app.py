@@ -7,14 +7,19 @@ import simfin as sf
 from simfin.names import *
 import streamlit as st
 import requests
-from categories import CATEGORIES, FRED_CATEGORIES, FRED_API_KEY, DATA_DIR, FILE_PATHS, SIMFIN_API_KEY, ALPHA_VANTAGE_API_KEY , INDIVIDUAL_STOCKS, FinancialModelingPrep_API_KEY,FINNHUB_API_KEY
+from categories import (
+    CATEGORIES, FRED_CATEGORIES, FRED_API_KEY, DATA_DIR, 
+    SIMFIN_API_KEY, ALPHA_VANTAGE_API_KEY, INDIVIDUAL_STOCKS, 
+    FinancialModelingPrep_API_KEY, FINNHUB_API_KEY
+)
 
-
-DATA_DIR = "./../data/"
 fred = Fred(api_key=FRED_API_KEY)
 sf.set_api_key(SIMFIN_API_KEY)
 sf.set_data_dir(DATA_DIR)
 
+DEFAULT_TICKERS = ['MSFT', 'AAPL', 'AMZN']  # ここにデフォルトのティッカーをリストとして提供します
+
+st.title("KaFin")
 
 # YahooFinance
 def save_to_pickle(data_dict, source):
@@ -50,7 +55,7 @@ def fetch_or_load_data(identifier, source):
     return data
 
 def main():
-    st.title("Stock and Financial Index Chart")
+    st.title("Stock and FRED")
 
     # Combine both category lists for selection
     all_categories = list(CATEGORIES.keys()) + list(FRED_CATEGORIES.keys())
@@ -82,7 +87,7 @@ def load_and_merge_data(file_paths):
 
 def main():
     # Streamlit title
-    st.title("Stock and Financial Index Table")
+    st.title("Stock and FRED Table")
 
     # Load and merge data
     merged_data = load_and_merge_data([f"{DATA_DIR}/stock.pkl",f"{DATA_DIR}/fred.pkl"])
@@ -129,7 +134,7 @@ def prepare_data(df_income):
 
 
 def main():
-    st.title("Earnings Chart SimFin")
+    st.title("Earnings")
 
     df_revenue, df_net_income = prepare_data(fetch_or_load_data())
     tickers = df_revenue.columns.tolist()
@@ -138,7 +143,7 @@ def main():
     df = df_revenue if category == 'Revenue' else df_net_income
     st.line_chart(df[st.multiselect("Select Tickers", tickers, default=DEFAULT_TICKERS)])
 
-    st.title("Earnings Table SimFin")
+    st.title("Earnings Table")
     selected_tickers = st.multiselect("Select tickers", tickers, default=DEFAULT_TICKERS)
     if selected_tickers:
         for title, df in zip(["Revenue", "Net Income"], [df_revenue, df_net_income]):
@@ -211,7 +216,7 @@ def load_and_organize_data(file_path):
 
 
 def main():
-    st.title("Earnings FINNHUB")
+    st.title("Earnings Surprise")
 
     # Save and organize data
     save_earnings_data(COMPANIES, DATA_DIR, FINNHUB_API_KEY)
