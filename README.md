@@ -1,41 +1,34 @@
 ---
 
 ## Overview
-Dive into the financial realm with this intuitive Streamlit application, your gateway to a wealth of economic and stock market data. With data right from the reputable FRED database and stock market indexes, it’s more than just numbers—it’s the pulse of the financial market at your fingertips.
+Explore the world of finance with this easy-to-use Streamlit app. Get a wealth of economic and stock market data straight from trusted sources like the FRED database and market indexes. It's more than just numbers—it’s the financial market coming alive at your fingertips.
 
 ## Features
 
-- **Ease of Navigation**: Glide through data categories or series with a streamlined sidebar, making your exploration intuitive.
-- **Data at Speed**: Through Pickle files, data caching cuts down redundant API calls, ensuring a swift response and reduced loading times.
-- **Engaging Visuals**: The marriage of Streamlit and Plotly charts brings forth interactive visualizations, turning data into insights you can almost touch.
-- **A Confluence of Sources**: Delve into a broad spectrum of financial data, thanks to integration with Yahoo Finance, FRED, SimFin, and Finnhub.
+- **Easy Navigation**: Move through data categories or series with a simple sidebar, making your search easy.
+- **Fast Data Access**: With Pickle files, data caching reduces extra API calls, making responses quick and loading times short.
+- **Engaging Visuals**: The combination of Streamlit and Plotly charts offers interactive visuals, turning data into insights you can see.
+- **Wide Range of Data**: Explore a lot of financial data thanks to connections with Yahoo Finance, FRED, SimFin, and Finnhub.
 
 ## Get Started
 
-1. Clone your new financial companion:
+1. To begin, clone the app:
 ```bash
 git clone https://github.com/KAFKA2306/finBI.git
 ```
-2. Obtain and fill in your API keys for `FRED_API_KEY`, `SIMFIN_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `FinancialModelingPrep_API_KEY`, `FINNHUB_API_KEY` in the `categories.py` file.
+2. Get and enter your API keys for `FRED_API_KEY`, `SIMFIN_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `FinancialModelingPrep_API_KEY`, `FINNHUB_API_KEY` in the `categories.py` file.
 
 ## How to Launch
 
-- Kickstart the application:
+- Start the app with:
 ```bash
 ./KAFKA2306/finBI/blob/main/code/first.bat
 ```
 
-## Dependencies
 
-- Streamlit
-- pandas
-- yfinance
-- fredapi
-- Plotly
-- requests
 
 ## Join the Journey
 
-Stumbled upon a bug or have a feature in mind? Your insights are invaluable. Feel free to open a GitHub issue—let’s refine this financial lens together.
+Found a bug or have a new feature in mind? Your feedback is important. Feel free to open a GitHub issue—let’s make this financial tool better together.
 
 ---
