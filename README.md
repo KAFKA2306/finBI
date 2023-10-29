@@ -25,11 +25,10 @@ git clone https://github.com/KAFKA2306/finBI.git
 ```
 
 ## Example
-| ![image](https://github.com/KAFKA2306/finBI/assets/137051370/39ac06ae-bb9c-4626-93f5-59fd8fd47285) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/8df85103-edb5-46db-b7d8-837ca217796e) |
+| ![Image 1](https://github.com/KAFKA2306/finBI/raw/main/assets/137051370/39ac06ae-bb9c-4626-93f5-59fd8fd47285.png) | ![Image 2](https://github.com/KAFKA2306/finBI/raw/main/assets/137051370/8df85103-edb5-46db-b7d8-837ca217796e.png) |
 |:---:|:---:|
-| ![image](https://github.com/KAFKA2306/finBI/assets/137051370/b556019e-eecc-44bf-a681-515931a85ecf) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/a155714c-8c00-4afb-b2f3-af443997d952) |
-|:---:|:---:|
-| ![image](https://github.com/KAFKA2306/finBI/assets/137051370/540fa83b-da02-451c-a41b-7f90a5895bff) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/bd9928cc-5875-4f03-9015-954973d484a4) |
+| ![Image 3](https://github.com/KAFKA2306/finBI/raw/main/assets/137051370/b556019e-eecc-44bf-a681-515931a85ecf.png) | ![Image 4](https://github.com/KAFKA2306/finBI/raw/main/assets/137051370/a155714c-8c00-4afb-b2f3-af443997d952.png) |
+| ![Image 5](https://github.com/KAFKA2306/finBI/raw/main/assets/137051370/540fa83b-da02-451c-a41b-7f90a5895bff.png) | ![Image 6](https://github.com/KAFKA2306/finBI/raw/main/assets/137051370/bd9928cc-5875-4f03-9015-954973d484a4.png) |
 
 ## Join the Journey
 
