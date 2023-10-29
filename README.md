@@ -1,29 +1,29 @@
-# finBI
+---
 
 ## Overview
-
-This Streamlit application provides a user-friendly interface for analyzing financial data across various categories. The application not only handles stock data but also economic data from the FRED (Federal Reserve Economic Data) database. 
+This Streamlit application provides a user-friendly interface for analyzing financial and economic data across various categories. It fetches stock data as well as economic data from the FRED (Federal Reserve Economic Data) database, offering a comprehensive view of financial markets.
 
 ## Features
 
-- **User-friendly Interface**: Easy-to-navigate sidebar for selecting data categories or series.
-- **Data Caching**: Efficiently fetches and stores data using CSV and pkl files, reducing redundant API calls.
-- **Interactive Visualization**: Utilizes Plotly charts for interactive data visualization.
+- **User-friendly Interface**: Features an easy-to-navigate sidebar for selecting data categories or series.
+- **Data Caching**: Efficiently fetches and stores data using Pickle files, reducing redundant API calls and improving loading times.
+- **Interactive Visualization**: Leverages Streamlit and Plotly charts for interactive data visualization, offering insightful views into the data.
+- **Extensive Data Sources**: Integrates multiple data sources including Yahoo Finance, FRED, SimFin, and Finnhub, for a wide range of financial data.
 
 ## Installation
 
 1. Clone the repository:
-    ```bash
-    git clone https://github.com/KAFKA2306/finBI.git  
-    ```
-2. Obtain the FRED and SIMFIN API Key and update it in the categories.py file.
+```bash
+git clone https://github.com/KAFKA2306/finBI.git
+```
+2. Obtain the necessary API keys for FRED_API_KEY, SIMFIN_API_KEY, ALPHA_VANTAGE_API_KEY, FinancialModelingPrep_API_KEY, FINNHUB_API_KEY, and update them in the `categories.py` file.
 
 ## How to Run
 
-1. Run bat:
-    ```bash
-    ./KAFKA2306/finBI/blob/main/code/first.bat
-    ```
+- Run the batch file:
+```bash
+./KAFKA2306/finBI/blob/main/code/first.bat
+```
 
 ## Dependencies
 
@@ -32,11 +32,13 @@ This Streamlit application provides a user-friendly interface for analyzing fina
 - yfinance
 - fredapi
 - Plotly
+- requests
 
 ## Contributing
 
-If you find any bugs, or if you have additional features you think would be nice to have, please do open a GitHub issue. Contributions are welcome.
+If you come across any bugs, or if you have additional features you think would be nice to have, feel free to open a GitHub issue. Contributions are always welcome.
 
+---
 
 
 
