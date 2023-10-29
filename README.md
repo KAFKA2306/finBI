@@ -16,7 +16,7 @@ This Streamlit application provides a user-friendly interface for analyzing fina
     ```bash
     git clone https://github.com/KAFKA2306/finBI.git  
     ```
-2. Obtain a FRED API Key and update it in the categories.py file.
+2. Obtain the FRED and SIMFIN API Key and update it in the categories.py file.
 
 ## How to Run
 
