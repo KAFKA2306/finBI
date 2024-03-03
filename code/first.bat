@@ -2,7 +2,7 @@
 setlocal
 
 :: Navigate to project directory
-cd M:\ML\Finance\BI\code
+cd .\finBI\code
 
 :: Check if conda environment exists and create if not
 conda info --envs | findstr /C:"my_streamlit_env" 1>nul 2>&1 || conda create --name my_streamlit_env python=3.8 -y

@@ -114,16 +114,20 @@ if __name__ == "__main__":
 
 
 
-
-
 # Stock-FX
 st.title("FX")
 stocks_list = pd.read_pickle(f"{DATA_DIR}/stock.pkl")
 stocks_df = pd.DataFrame(stocks_list).resample("D").mean()
+
+# 存在する列のみを選択するためのコードを追加
+columns_to_select = ['VOO', 'VIG', 'TLT', 'AGG', 'GLD']
+existing_columns = [col for col in columns_to_select if col in stocks_df.columns]
+
+stocks_dollars = stocks_df[existing_columns]
 stocks_df['EUR=X'] = 1 / (stocks_df['EURJPY=X'] / stocks_df['JPY=X'])
 FX = stocks_df[['JPY=X','EUR=X']]
 
-stocks_dollars = stocks_df[['VOO', 'VT', 'QQQ', 'VIG', 'TLT', 'AGG', 'GLD']]
+stocks_dollars = stocks_df[['VOO', 'VIG', 'TLT', 'AGG', 'GLD']]
 stocks_yen = stocks_dollars.multiply(FX['JPY=X'], axis=0)
 stocks_euro = stocks_dollars.multiply(FX['EUR=X'], axis=0)
 
@@ -203,8 +207,8 @@ multi_yaxis_plot(stocks_FX[matching_columns])
 
 
 # SIMFIN
-REVENUE, NET_INCOME, DEFAULT_TICKERS = 'Revenue', 'Net Income', ['MSFT', 'AAPL', 'AMZN']
-
+REVENUE, NET_INCOME, DEFAULT_TICKERS = 'Revenue', 'Net Income', ['MSFT', 'AAPL', 'AMZN','NVDA', 'TSM', 'AMD', 'AVGO', 'ASML', 'LRCX', 'INTC', 'AMAT', 'QCOM', 'ADI']  # Semiconductor
+ 
 def fetch_or_load_data(variant='quarterly', market='us'):
     path = f"simfin_{variant}_{market}.pkl"
     try:
@@ -220,8 +224,8 @@ def prepare_data(df_income):
     df = df_income.reset_index()
     df['Report Date'] = pd.to_datetime(df['Report Date'])  # 確実に日付型に変換
     # RevenueとNet Incomeのデータフレームを作成
-    df_revenue = df.pivot(index='Report Date', columns='Ticker', values=REVENUE).resample('3M').sum()
-    df_net_income = df.pivot(index='Report Date', columns='Ticker', values=NET_INCOME).resample('3M').sum()
+    df_revenue = df.pivot_table(index='Report Date', columns='Ticker', values=REVENUE, aggfunc='sum').resample('3M').sum()
+    df_net_income = df.pivot_table(index='Report Date', columns='Ticker', values=NET_INCOME, aggfunc='sum').resample('3M').sum()
     return df_revenue, df_net_income
 
 
@@ -241,10 +245,32 @@ def main():
         for title, df in zip(["Revenue", "Net Income"], [df_revenue, df_net_income]):
             st.write(title)
             st.dataframe(df[selected_tickers])
+def main():
+    st.title("Earnings")
 
+    df_revenue, df_net_income = prepare_data(fetch_or_load_data())
+    tickers = df_revenue.columns.tolist()
+
+    # DEFAULT_TICKERSの中で実際にtickersリストに存在するもののみをフィルタリング
+    valid_default_tickers = [ticker for ticker in DEFAULT_TICKERS if ticker in tickers]
+
+    category = st.selectbox("Select Category", ['Revenue', 'Net Income'])
+    df = df_revenue if category == 'Revenue' else df_net_income
+    # フィルタリングされたデフォルト値を使用
+    st.line_chart(df[st.multiselect("Select Tickers", tickers, default=valid_default_tickers)])
+
+    st.title("Earnings Table")
+    selected_tickers = st.multiselect("Select tickers", tickers, default=valid_default_tickers)
+    if selected_tickers:
+        for title, df in zip(["Revenue", "Net Income"], [df_revenue, df_net_income]):
+            st.write(title)
+            st.dataframe(df[selected_tickers])
+    
 if __name__ == "__main__":
     main()
 fetch_or_load_data(variant='quarterly', market='us')
+
+
 
 
 
@@ -349,8 +375,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
 
 

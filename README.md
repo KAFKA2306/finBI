@@ -17,6 +17,8 @@ git clone https://github.com/KAFKA2306/finBI.git
 ```
 2. Get and enter your API keys for `FRED_API_KEY`, `SIMFIN_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `FinancialModelingPrep_API_KEY`, `FINNHUB_API_KEY` in the `categories.py` file.
 
+https://app.simfin.com/data-api
+
 ## How to Launch
 
 - Start the app with:
