@@ -31,9 +31,3 @@ https://app.simfin.com/data-api
 |:---:|:---:|
 | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/b556019e-eecc-44bf-a681-515931a85ecf) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/a155714c-8c00-4afb-b2f3-af443997d952) |
 | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/540fa83b-da02-451c-a41b-7f90a5895bff) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/bd9928cc-5875-4f03-9015-954973d484a4) |
-
-## Join the Journey
-
-Found a bug or have a new feature in mind? Your feedback is important. Feel free to open a GitHub issue—let’s make this financial tool better together.
-
----
