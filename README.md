@@ -1,33 +1,108 @@
+# finBI — 金融・経済データのStreamlitダッシュボード
 
-## Overview
-Explore the world of finance with this easy-to-use Streamlit app. Get a wealth of economic and stock market data straight from trusted sources like the FRED database and market indexes. It's more than just numbers—it’s the financial market coming alive at your fingertips.
+**リポジトリ:** https://github.com/KAFKA2306/finBI
 
-## Features
+FRED、株価、企業財務などの時系列データを取得・キャッシュし、StreamlitとPlotlyで確認する金融BIプロトタイプです。
 
-- **Easy Navigation**: Move through data categories or series with a simple sidebar, making your search easy.
-- **Fast Data Access**: With Pickle files, data caching reduces extra API calls, making responses quick and loading times short.
-- **Engaging Visuals**: The combination of Streamlit and Plotly charts offers interactive visuals, turning data into insights you can see.
-- **Wide Range of Data**: Explore a lot of financial data thanks to connections with Yahoo Finance, FRED, SimFin, and Finnhub.
+外部APIの値を一つの画面へ集めることを目的としますが、データ源ごとに定義、更新頻度、単位、改訂方針が異なるため、単純結合した値を同じ意味として扱わないでください。
 
-## Get Started
+## 主な機能
 
-1. To begin, clone the app:
+- Streamlitのサイドバーからデータカテゴリを選択
+- 経済指標・市場系列の表示
+- Plotlyによるインタラクティブグラフ
+- 取得結果のローカルキャッシュ
+- 複数データ源の比較
+
+READMEに以前記載されていた主な候補データ源:
+
+- FRED
+- Yahoo Finance
+- SimFin
+- Finnhub
+- Alpha Vantage
+- Financial Modeling Prep
+
+現在のコードが実際に呼び出しているデータ源だけを設定してください。
+
+## セットアップ
+
 ```bash
 git clone https://github.com/KAFKA2306/finBI.git
+cd finBI
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
-2. Get and enter your API keys for `FRED_API_KEY`, `SIMFIN_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `FinancialModelingPrep_API_KEY`, `FINNHUB_API_KEY` in the `categories.py` file.
 
-https://app.simfin.com/data-api
+Windowsでは仮想環境の有効化コマンドを変更してください。
 
-## How to Launch
+## APIキー
 
-- Start the app with:
+APIキーを`categories.py`へ直接書き込まないでください。環境変数またはGit管理外の`.env`を使用します。
+
+```text
+FRED_API_KEY=...
+SIMFIN_API_KEY=...
+ALPHA_VANTAGE_API_KEY=...
+FMP_API_KEY=...
+FINNHUB_API_KEY=...
+```
+
+実際の環境変数名はコードへ統一し、`.env.example`を作成することを推奨します。
+
+## 起動
+
+リポジトリに含まれるWindows用バッチファイルを使う場合は、内容とパスを確認してから実行します。
+
+```text
+code/first.bat
+```
+
+Streamlitを直接起動する場合は、現在のエントリーファイルを確認し、次の形式で実行します。
+
 ```bash
-./KAFKA2306/finBI/blob/main/code/first.bat
+streamlit run <app-file>.py
 ```
 
-## Example
-| ![image](https://github.com/KAFKA2306/finBI/assets/137051370/39ac06ae-bb9c-4626-93f5-59fd8fd47285) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/8df85103-edb5-46db-b7d8-837ca217796e) |
-|:---:|:---:|
-| ![image](https://github.com/KAFKA2306/finBI/assets/137051370/b556019e-eecc-44bf-a681-515931a85ecf) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/a155714c-8c00-4afb-b2f3-af443997d952) |
-| ![image](https://github.com/KAFKA2306/finBI/assets/137051370/540fa83b-da02-451c-a41b-7f90a5895bff) | ![image](https://github.com/KAFKA2306/finBI/assets/137051370/bd9928cc-5875-4f03-9015-954973d484a4) |
+READMEに以前記載されていたGitHubの`blob` URLは実行コマンドではないため削除しました。
+
+## キャッシュの注意
+
+pickleキャッシュは読み込み元を信頼できる場合だけ使用してください。pickleはデータ形式ではなくPythonオブジェクトを復元する仕組みであり、悪意あるファイルを読むと任意コードが実行される可能性があります。
+
+推奨:
+
+- 外部から取得したpickleを読み込まない
+- キャッシュへデータ源と取得日時を付ける
+- TTLを設定する
+- JSON、Parquet、SQLiteなどへ置き換える
+- APIエラー時に古いキャッシュであることを表示する
+
+## データ表示の原則
+
+- 系列名だけでなくデータ源とシリーズIDを表示する
+- 取得日と観測日を分ける
+- 季節調整済み・未調整を区別する
+- 名目値・実質値を区別する
+- 日次、月次、四半期を無条件に補間しない
+- 改訂される統計はヴィンテージを保存する
+- 通貨、単位、倍率を表示する
+- 株価と経済統計を同じ更新時刻と見なさない
+
+## 画面の確認
+
+- API未設定時に秘密情報を要求せず停止できるか
+- 空系列や欠損を0として描画していないか
+- タイムゾーンが正しいか
+- グラフの軸と単位が表示されているか
+- 異なる系列を比較するとき基準化方法が明示されているか
+- キャッシュが古い場合に警告するか
+
+## 現在の位置づけ
+
+本リポジトリは金融データ可視化の学習・試作です。最新市場データの完全性、API可用性、計算結果の正確性を保証しません。
+
+本プロジェクトは投資助言や売買推奨ではありません。
+
+**README最終監査:** 2026-08-01
