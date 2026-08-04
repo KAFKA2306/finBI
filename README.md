@@ -1,108 +1,112 @@
-# finBI — 金融・経済データのStreamlitダッシュボード
+# finBI
 
-**リポジトリ:** https://github.com/KAFKA2306/finBI
+`finBI`は、FRED、Yahoo Finance、SimFinなどの金融・経済データをStreamlitで表示するために2023年に作成した試作コードです。
 
-FRED、株価、企業財務などの時系列データを取得・キャッシュし、StreamlitとPlotlyで確認する金融BIプロトタイプです。
+**現在のdefault branchは、そのままでは起動できません。** 現行の金融BI application、稼働中のdashboard、最新市場データ基盤として利用しないでください。
 
-外部APIの値を一つの画面へ集めることを目的としますが、データ源ごとに定義、更新頻度、単位、改訂方針が異なるため、単純結合した値を同じ意味として扱わないでください。
+## 現在の状態
 
-## 主な機能
+| 項目 | 状態 |
+|---|---|
+| 稼働中のapplication | なし |
+| 公開dashboard | なし |
+| 再現可能なsetup | 未整備 |
+| CI・自動test | なし |
+| 外部API接続の動作確認 | 未実施 |
+| 最新市場データの保証 | なし |
+| 主な実装時期 | 2023年 |
 
-- Streamlitのサイドバーからデータカテゴリを選択
-- 経済指標・市場系列の表示
-- Plotlyによるインタラクティブグラフ
-- 取得結果のローカルキャッシュ
-- 複数データ源の比較
+このREADMEは、存在するコードと既知の制約を説明するための人間向け入口です。実装されていない機能や、現在確認できない外部API連携を稼働中とは扱いません。
 
-READMEに以前記載されていた主な候補データ源:
+## 残っているもの
 
-- FRED
-- Yahoo Finance
-- SimFin
-- Finnhub
-- Alpha Vantage
-- Financial Modeling Prep
+`code/your_streamlit_app.py`には、次の試作処理が混在しています。
 
-現在のコードが実際に呼び出しているデータ源だけを設定してください。
+- Yahoo Financeからの価格系列取得
+- FRED系列の取得
+- pickleによるローカルcache
+- Streamlitでの系列選択とchart表示
+- 通貨換算を含むETF比較
+- SimFinを使った売上高・純利益表示
+- 複数の外部金融APIを使う構想
 
-## セットアップ
+これらは一つのfileへtop-level処理と複数の`main`関数が混在した状態であり、個別機能が現在動作することを保証しません。
 
-```bash
-git clone https://github.com/KAFKA2306/finBI.git
-cd finBI
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+## 起動できない主な理由
 
-Windowsでは仮想環境の有効化コマンドを変更してください。
+### 依存関係
 
-## APIキー
+rootに`requirements.txt`はありません。依存定義は`code/pyproject.toml`にありますが、Python `^3.8`と当時のlibrary versionを前提としており、現在環境での解決・実行は確認していません。
 
-APIキーを`categories.py`へ直接書き込まないでください。環境変数またはGit管理外の`.env`を使用します。
+### 設定の不整合
+
+`code/your_streamlit_app.py`は、`code/categories.py`から次の変数をimportします。
+
+- `SIMFIN_API_KEY`
+- `ALPHA_VANTAGE_API_KEY`
+- `FinancialModelingPrep_API_KEY`
+- `FINNHUB_API_KEY`
+
+現在の`code/categories.py`にはこれらの定義がないため、default branchのコードはimport時点で失敗します。
+
+### 個人環境への依存
+
+`code/first.bat`には、次のような個人環境のpathと前提が残っています。
+
+- `M:\Apps\ngrok-v3-stable-windows-amd64\ngrok`
+- Windows、Conda、Poetry、ngrok、Heroku CLI
+- repositoryを特定のdirectory構造へ配置する前提
+
+このbatch fileを一般環境向けの起動手順として使用しないでください。
+
+### dataとcache
+
+コードは`data/`配下やlocal pathのpickle fileを前提とします。必要な入力data、取得日時、source metadata、schema、再生成手順は正準化されていません。
+
+## 構造
 
 ```text
-FRED_API_KEY=...
-SIMFIN_API_KEY=...
-ALPHA_VANTAGE_API_KEY=...
-FMP_API_KEY=...
-FINNHUB_API_KEY=...
+finBI/
+├── README.md
+├── code/
+│   ├── your_streamlit_app.py  # 複数の可視化試作を含む旧entry file
+│   ├── categories.py          # ticker・FRED系列・旧local path設定
+│   ├── first.bat              # 個人Windows環境向けの旧起動script
+│   └── pyproject.toml         # Poetry依存定義
+└── data/                      # local cacheを想定した領域
 ```
 
-実際の環境変数名はコードへ統一し、`.env.example`を作成することを推奨します。
+## セキュリティ
 
-## 起動
+- API keyをrepository、Python file、batch fileへ直接記載しないでください。
+- `categories.py`のplaceholderを実credentialへ置換してcommitしないでください。
+- 外部から取得したpickleを読み込まないでください。pickleの復元は任意コード実行につながる可能性があります。
+- ngrokなどでlocal Streamlitを公開する場合、認証なしでprivate dataやAPI結果を露出させないでください。
+- 金融dataにはsource、series ID、観測日、取得日、単位、通貨、改訂状態を付与してください。
 
-リポジトリに含まれるWindows用バッチファイルを使う場合は、内容とパスを確認してから実行します。
+## 再開する場合
 
-```text
-code/first.bat
-```
+このrepositoryをそのまま本番化するのではなく、必要な機能を現行基盤へ移植します。金融・企業dataの正準候補は`KAFKA2306/investor`です。
 
-Streamlitを直接起動する場合は、現在のエントリーファイルを確認し、次の形式で実行します。
+再実装する場合の最低条件は次のとおりです。
 
-```bash
-streamlit run <app-file>.py
-```
+1. 使用するdata sourceを限定し、公式API・利用規約・licenseを記録する
+2. Python versionと依存を固定し、再現可能なlock fileを作る
+3. credentialを環境変数またはsecret managerへ分離する
+4. sourceごとのadapter、schema、cache、UIを分割する
+5. pickleをParquet、SQLite、PostgreSQLなど検証可能な形式へ置換する
+6. 欠損、API停止、rate limit、古いcacheをUIへ明示する
+7. unit test、integration test、CI、data freshness監査を追加する
 
-READMEに以前記載されていたGitHubの`blob` URLは実行コマンドではないため削除しました。
+## 既知の制約
 
-## キャッシュの注意
+- 現在のコードはas-isでは起動しません。
+- READMEに列挙した外部APIの接続成功は確認していません。
+- 最新価格、企業財務、経済統計の完全性・正確性・鮮度を保証しません。
+- 投資判断、売買執行、投資助言に使用できる状態ではありません。
 
-pickleキャッシュは読み込み元を信頼できる場合だけ使用してください。pickleはデータ形式ではなくPythonオブジェクトを復元する仕組みであり、悪意あるファイルを読むと任意コードが実行される可能性があります。
+## 関連
 
-推奨:
-
-- 外部から取得したpickleを読み込まない
-- キャッシュへデータ源と取得日時を付ける
-- TTLを設定する
-- JSON、Parquet、SQLiteなどへ置き換える
-- APIエラー時に古いキャッシュであることを表示する
-
-## データ表示の原則
-
-- 系列名だけでなくデータ源とシリーズIDを表示する
-- 取得日と観測日を分ける
-- 季節調整済み・未調整を区別する
-- 名目値・実質値を区別する
-- 日次、月次、四半期を無条件に補間しない
-- 改訂される統計はヴィンテージを保存する
-- 通貨、単位、倍率を表示する
-- 株価と経済統計を同じ更新時刻と見なさない
-
-## 画面の確認
-
-- API未設定時に秘密情報を要求せず停止できるか
-- 空系列や欠損を0として描画していないか
-- タイムゾーンが正しいか
-- グラフの軸と単位が表示されているか
-- 異なる系列を比較するとき基準化方法が明示されているか
-- キャッシュが古い場合に警告するか
-
-## 現在の位置づけ
-
-本リポジトリは金融データ可視化の学習・試作です。最新市場データの完全性、API可用性、計算結果の正確性を保証しません。
-
-本プロジェクトは投資助言や売買推奨ではありません。
-
-**README最終監査:** 2026-08-01
+- 現行の投資・企業data基盤: `KAFKA2306/investor`
+- README監査の正準: `KAFKA2306/com` Issue #3
+- 本repositoryの不一致記録: Issue #2
