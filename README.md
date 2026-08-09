@@ -1,8 +1,8 @@
 # finBI
 
-`finBI`は、FRED、Yahoo Finance、SimFinなどの金融・経済データをStreamlitで表示するために2023年に作成した試作コードです。
+**金融BIで危険なのは、古い数字だけではない。動かない試作を「現行システム」だと思って使うことだ。**
 
-**現在のdefault branchは、そのままでは起動できません。** 現行の金融BI application、稼働中のdashboard、最新市場データ基盤として利用しないでください。
+`finBI`は、FRED、Yahoo Finance、SimFinなどの金融・経済データをStreamlitで表示するために2023年に作成した試作コードです。現在のdefault branchはそのままでは起動できず、稼働中のdashboardや最新市場データ基盤として扱える状態ではありません。
 
 ## 現在の状態
 
