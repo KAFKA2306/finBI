@@ -1,0 +1,50 @@
+name: Static Python BI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Compile Python core
+        run: python -m py_compile code/static_bi.py
+      - name: Run offline tests
+        run: python -m unittest discover -s code/tests -v
+      - name: Validate JavaScript syntax
+        run: |
+          node --check web/app.js
+          node --check web/worker.mjs
+      - name: Build static site
+        run: |
+          mkdir -p site/web site/data/snapshots site/code
+          cp web/index.html web/app.js web/worker.mjs site/web/
+          cp data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json site/data/snapshots/
+          cp code/static_bi.py site/code/
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./web/"><title>finBI</title><a href="./web/">Open finBI</a>' > site/index.html
+      - name: Smoke-test static routes
+        run: |
+          python -m http.server 8123 -d site >/tmp/finbi-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          sleep 1
+          curl --fail --silent http://127.0.0.1:8123/ >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/web/ >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/code/static_bi.py >/dev/null
+      - name: Remove generated residue
+        run: |
+          rm -rf site
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+      - name: Verify clean checkout
+        run: test -z "$(git status --porcelain --untracked-files=all)"
