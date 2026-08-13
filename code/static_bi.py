@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Any
 
 REQUIRED_SOURCE_FIELDS = {
@@ -12,6 +12,24 @@ REQUIRED_SOURCE_FIELDS = {
     "source_url",
     "release",
 }
+REQUIRED_AVAILABILITY_FIELDS = {
+    "verified",
+    "source_updated_at",
+    "latest_available_observation",
+    "evidence_url",
+}
+
+
+def _parse_timestamp(value: Any, field: str) -> datetime:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"missing snapshot field: {field}")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"invalid timestamp: {field}") from exc
+    if parsed.tzinfo is None:
+        raise ValueError(f"timestamp must include timezone: {field}")
+    return parsed.astimezone(timezone.utc)
 
 
 def validate_snapshot(snapshot: dict[str, Any]) -> None:
@@ -25,6 +43,23 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
     for field in ("retrieved_at", "observation_start", "observation_end", "unit", "frequency"):
         if not snapshot.get(field):
             raise ValueError(f"missing snapshot field: {field}")
+
+    retrieved_at = _parse_timestamp(snapshot["retrieved_at"], "retrieved_at")
+    availability = snapshot.get("availability")
+    if not isinstance(availability, dict) or not REQUIRED_AVAILABILITY_FIELDS <= availability.keys():
+        raise ValueError("snapshot availability evidence is incomplete")
+    if availability["verified"] is not True:
+        raise ValueError("snapshot availability is not verified")
+    if not str(availability["evidence_url"]).startswith("https://"):
+        raise ValueError("availability evidence_url must be HTTPS")
+    source_updated_at = _parse_timestamp(availability["source_updated_at"], "availability.source_updated_at")
+    if source_updated_at > retrieved_at:
+        raise ValueError("source availability is later than retrieved_at")
+    try:
+        latest_available = date.fromisoformat(str(availability["latest_available_observation"]))
+    except ValueError as exc:
+        raise ValueError("invalid latest_available_observation") from exc
+
     observations = snapshot.get("observations")
     if not isinstance(observations, list) or len(observations) < 2:
         raise ValueError("snapshot needs at least two observations")
@@ -34,6 +69,12 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         if not isinstance(row, dict) or set(row) != {"date", "value"}:
             raise ValueError("invalid observation record")
         row_date = row["date"]
+        try:
+            parsed_row_date = date.fromisoformat(row_date)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("invalid observation date") from exc
+        if parsed_row_date > latest_available:
+            raise ValueError("observation was not available at retrieved_at")
         if row_date in dates:
             raise ValueError("duplicate observation date")
         if previous_date is not None and row_date <= previous_date:
@@ -42,6 +83,11 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         previous_date = row_date
         if not isinstance(row["value"], (int, float)) or isinstance(row["value"], bool):
             raise ValueError("observation value must be numeric")
+
+    if snapshot["observation_start"] != observations[0]["date"]:
+        raise ValueError("observation_start does not match first observation")
+    if snapshot["observation_end"] != observations[-1]["date"]:
+        raise ValueError("observation_end does not match last observation")
 
 
 def compare_dates(snapshot: dict[str, Any], start_date: str, end_date: str) -> dict[str, Any]:
