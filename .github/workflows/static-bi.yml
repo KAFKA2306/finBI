@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -13,38 +14,103 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+
       - name: Compile Python core
         run: python -m py_compile code/static_bi.py
+
       - name: Run offline tests
         run: python -m unittest discover -s code/tests -v
-      - name: Validate JavaScript syntax
+
+      - name: Validate browser assets
         run: |
           node --check web/app.js
           node --check web/worker.mjs
-      - name: Build static site
+          test -s web/styles.css
+          grep -q 'prefers-reduced-motion' web/styles.css
+          grep -q 'aria-live="polite"' web/index.html
+          grep -q 'role="status"' web/index.html
+
+      - name: Build public root
         run: |
-          mkdir -p site/web site/data/snapshots site/code
-          cp web/index.html web/app.js web/worker.mjs site/web/
+          mkdir -p site/data/snapshots site/code
+          cp web/index.html web/app.js web/worker.mjs web/styles.css site/
           cp data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json site/data/snapshots/
           cp code/static_bi.py site/code/
-          printf '%s\n' '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./web/"><title>finBI</title><a href="./web/">Open finBI</a>' > site/index.html
-      - name: Smoke-test static routes
+
+      - name: Smoke-test public routes
         run: |
           python -m http.server 8123 -d site >/tmp/finbi-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 1
-          curl --fail --silent http://127.0.0.1:8123/ >/dev/null
-          curl --fail --silent http://127.0.0.1:8123/web/ >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/ | grep -q '金利の動きを'
+          curl --fail --silent http://127.0.0.1:8123/styles.css >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/code/static_bi.py >/dev/null
+
       - name: Remove generated residue
         run: |
           rm -rf site
           find . -type d -name __pycache__ -prune -exec rm -rf {} +
+
       - name: Verify clean checkout
         run: test -z "$(git status --porcelain --untracked-files=all)"
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check whether Pages is enabled
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(curl --silent --output /tmp/pages.json --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${GH_TOKEN}" \
+            --header 'Accept: application/vnd.github+json' \
+            --header 'X-GitHub-Api-Version: 2022-11-28' \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages")
+          if [ "$code" = "200" ]; then
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+            echo 'GitHub Pages is not enabled yet; deployment is intentionally skipped.'
+          fi
+
+      - name: Build Pages artifact
+        if: steps.pages.outputs.enabled == 'true'
+        run: |
+          mkdir -p site/data/snapshots site/code
+          cp web/index.html web/app.js web/worker.mjs web/styles.css site/
+          cp data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json site/data/snapshots/
+          cp code/static_bi.py site/code/
+
+      - name: Configure Pages
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy Pages
+        if: steps.pages.outputs.enabled == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v5

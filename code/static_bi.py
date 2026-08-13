@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from typing import Any
 
 REQUIRED_SOURCE_FIELDS = {
@@ -28,13 +29,18 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
     if not isinstance(observations, list) or len(observations) < 2:
         raise ValueError("snapshot needs at least two observations")
     dates: set[str] = set()
+    previous_date: str | None = None
     for row in observations:
         if not isinstance(row, dict) or set(row) != {"date", "value"}:
             raise ValueError("invalid observation record")
-        if row["date"] in dates:
+        row_date = row["date"]
+        if row_date in dates:
             raise ValueError("duplicate observation date")
-        dates.add(row["date"])
-        if not isinstance(row["value"], (int, float)):
+        if previous_date is not None and row_date <= previous_date:
+            raise ValueError("observations must be strictly chronological")
+        dates.add(row_date)
+        previous_date = row_date
+        if not isinstance(row["value"], (int, float)) or isinstance(row["value"], bool):
             raise ValueError("observation value must be numeric")
 
 
@@ -45,9 +51,14 @@ def compare_dates(snapshot: dict[str, Any], start_date: str, end_date: str) -> d
         raise ValueError("selected date is outside the committed snapshot")
     if start_date >= end_date:
         raise ValueError("end_date must be later than start_date")
+
     start_value = by_date[start_date]
     end_value = by_date[end_date]
     delta = end_value - start_value
+    direction = "up" if delta > 0 else "down" if delta < 0 else "flat"
+    basis_points = round(delta * 100, 4) if snapshot["unit"].casefold() == "percent" else None
+    calendar_days = (date.fromisoformat(end_date) - date.fromisoformat(start_date)).days
+
     return {
         "series_id": snapshot["source"]["series_id"],
         "start_date": start_date,
@@ -55,6 +66,9 @@ def compare_dates(snapshot: dict[str, Any], start_date: str, end_date: str) -> d
         "start_value": start_value,
         "end_value": end_value,
         "delta": round(delta, 10),
+        "basis_points": basis_points,
+        "direction": direction,
+        "calendar_days": calendar_days,
         "unit": snapshot["unit"],
         "currency": snapshot.get("currency"),
         "retrieved_at": snapshot["retrieved_at"],
