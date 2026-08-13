@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p site/data/snapshots site/code
           cp web/index.html web/app.js web/worker.mjs web/styles.css site/
-          cp data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json site/data/snapshots/
+          cp data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json site/data/snapshots/
           cp code/static_bi.py site/code/
 
       - name: Smoke-test public routes
@@ -49,7 +49,7 @@ jobs:
           sleep 1
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '金利の動きを'
           curl --fail --silent http://127.0.0.1:8123/styles.css >/dev/null
-          curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/code/static_bi.py >/dev/null
 
       - name: Remove generated residue
@@ -97,7 +97,7 @@ jobs:
         run: |
           mkdir -p site/data/snapshots site/code
           cp web/index.html web/app.js web/worker.mjs web/styles.css site/
-          cp data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json site/data/snapshots/
+          cp data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json site/data/snapshots/
           cp code/static_bi.py site/code/
 
       - name: Configure Pages
