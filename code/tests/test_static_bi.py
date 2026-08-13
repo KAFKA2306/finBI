@@ -8,6 +8,7 @@ from static_bi import compare_dates, validate_snapshot
 
 SNAPSHOT = Path(__file__).resolve().parents[2] / "data" / "snapshots" / "fred-dgs10-2026-07-20_2026-07-24.json"
 
+
 class StaticBITest(unittest.TestCase):
     def snapshot(self):
         return json.loads(SNAPSHOT.read_text(encoding="utf-8"))
@@ -18,6 +19,15 @@ class StaticBITest(unittest.TestCase):
         result = compare_dates(data, "2026-07-20", "2026-07-24")
         self.assertEqual(result["series_id"], "DGS10")
         self.assertAlmostEqual(result["delta"], 0.09)
+        self.assertAlmostEqual(result["basis_points"], 9.0)
+        self.assertEqual(result["direction"], "up")
+        self.assertEqual(result["calendar_days"], 4)
+
+    def test_one_day_decline_is_explained(self):
+        result = compare_dates(self.snapshot(), "2026-07-23", "2026-07-24")
+        self.assertAlmostEqual(result["basis_points"], -2.0)
+        self.assertEqual(result["direction"], "down")
+        self.assertEqual(result["calendar_days"], 1)
 
     def test_bad_range_fails(self):
         with self.assertRaises(ValueError):
@@ -28,6 +38,13 @@ class StaticBITest(unittest.TestCase):
         del data["source"]["source_url"]
         with self.assertRaises(ValueError):
             validate_snapshot(data)
+
+    def test_unsorted_observations_fail(self):
+        data = self.snapshot()
+        data["observations"][0], data["observations"][1] = data["observations"][1], data["observations"][0]
+        with self.assertRaises(ValueError):
+            validate_snapshot(data)
+
 
 if __name__ == "__main__":
     unittest.main()
