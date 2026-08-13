@@ -7,9 +7,16 @@ ROOT = Path(__file__).resolve().parents[2]
 class PublicContractTest(unittest.TestCase):
     def test_public_ui_keeps_financial_math_out_of_javascript(self):
         app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
-        self.assertNotIn("* 100", app)
-        self.assertNotIn("basis_points =", app)
-        self.assertIn("out.basis_points", app)
+        for forbidden in (
+            "out.delta * 100",
+            "snapshot.unit === \"Percent\"",
+            "snapshot.unit === 'Percent'",
+            "const basisPoints",
+            "let basisPoints",
+        ):
+            self.assertNotIn(forbidden, app)
+        self.assertGreaterEqual(app.count("out.basis_points"), 2)
+        self.assertIn("out.direction", app)
 
     def test_public_ui_has_no_live_financial_provider_fetch(self):
         browser_files = "\n".join(
