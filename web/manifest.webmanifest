@@ -1,9 +1,0 @@
-{
-  "name": "finBI",
-  "short_name": "finBI",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#f7f3ea",
-  "theme_color": "#176b4b",
-  "description": "検証済み金融snapshotを触って読む静的BI"
-}
