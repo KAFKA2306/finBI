@@ -15,9 +15,11 @@ const windowLabel = document.querySelector("#window-label");
 const quickPicks = document.querySelector("#quick-picks");
 const chart = document.querySelector("#chart");
 const chartDesc = document.querySelector("#chart-desc");
+const chartHint = document.querySelector("#chart-hint");
 
 let snapshot;
 let pending = false;
+let chartPickPhase = "start";
 
 function el(name, attrs = {}, text = null) {
   const node = document.createElementNS(SVG_NS, name);
@@ -42,6 +44,30 @@ function formatDate(value) {
 
 function formatNumber(value) {
   return new Intl.NumberFormat("ja-JP", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+}
+
+function selectedPointLabel(row, role) {
+  return `${role} ${formatDate(row.date)} · ${formatNumber(row.value)}%`;
+}
+
+function chooseChartPoint(date) {
+  if (chartPickPhase === "start") {
+    start.value = date;
+    chartPickPhase = "end";
+    status.textContent = `${formatDate(date)}を開始日にしました。次に終了日を選んでください。`;
+    chartHint.textContent = "2点目を選ぶと比較します。selectから選ぶ方法も使えます。";
+    renderChart();
+    return;
+  }
+
+  if (date <= start.value) {
+    status.textContent = "終了日は開始日より後の点を選んでください。";
+    return;
+  }
+  end.value = date;
+  chartPickPhase = "start";
+  chartHint.textContent = "グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。";
+  runComparison();
 }
 
 function renderChart(selectedStart = start.value, selectedEnd = end.value) {
@@ -80,16 +106,41 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
   chart.append(el("path", { d: linePath, class: "chart-line dynamic" }));
 
   rows.forEach((row, index) => {
-    const selected = row.date === selectedStart || row.date === selectedEnd;
+    const isStart = row.date === selectedStart;
+    const isEnd = row.date === selectedEnd;
+    const selected = isStart || isEnd;
+    const [cx, cy] = points[index];
     const dot = el("circle", {
-      cx: points[index][0],
-      cy: points[index][1],
+      cx,
+      cy,
       r: selected ? 7 : 5,
       class: `chart-dot dynamic${selected ? " is-selected" : ""}`,
+      "aria-hidden": "true",
     });
-    const title = el("title", {}, `${row.date}: ${formatNumber(row.value)} ${snapshot.unit}`);
-    dot.append(title);
-    chart.append(dot);
+    const hit = el("circle", {
+      cx,
+      cy,
+      r: 18,
+      class: "chart-hit dynamic",
+      role: "button",
+      "aria-label": `${row.date} ${formatNumber(row.value)}%。比較点として選択`,
+      tabindex: "-1",
+      "data-date": row.date,
+    });
+    hit.addEventListener("click", () => chooseChartPoint(row.date));
+    chart.append(dot, hit);
+
+    if (selected) {
+      const role = isStart ? "開始" : "終了";
+      const labelX = Math.min(Math.max(cx, 100), width - 100);
+      const labelY = Math.max(cy - 18, 20);
+      chart.append(el("text", {
+        x: labelX,
+        y: labelY,
+        "text-anchor": "middle",
+        class: "chart-selected-label dynamic",
+      }, selectedPointLabel(row, role)));
+    }
   });
 
   chart.append(el("text", { x: left, y: height - 14, class: "chart-label dynamic" }, formatDate(rows[0].date)));
@@ -100,7 +151,7 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
 function setBusy(value) {
   pending = value;
   compareButton.disabled = value;
-  compareButton.textContent = value ? "Pythonで計算中…" : "Pythonで比べる";
+  compareButton.textContent = value ? "計算中…" : "比べる";
 }
 
 function runComparison() {
@@ -110,19 +161,20 @@ function runComparison() {
     return;
   }
   setBusy(true);
-  status.textContent = "repositoryと同じPythonをブラウザ内で実行しています…";
+  status.textContent = "比較を計算しています…";
   renderChart();
   worker.postMessage({ snapshot, startDate: start.value, endDate: end.value });
 }
 
-function addQuickPick(label, startDate, endDate) {
+function addQuickPick(startDate, endDate, prefix) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "chip";
-  button.textContent = label;
+  button.textContent = `${prefix} ${formatDate(startDate)} → ${formatDate(endDate)}`;
   button.addEventListener("click", () => {
     start.value = startDate;
     end.value = endDate;
+    chartPickPhase = "start";
     runComparison();
   });
   quickPicks.append(button);
@@ -133,7 +185,7 @@ worker.addEventListener("message", (event) => {
   if (event.data.error) {
     status.textContent = `計算失敗: ${event.data.error}`;
     headline.textContent = "—";
-    story.textContent = "snapshotとPython計算を確認してください。";
+    story.textContent = "snapshotと比較条件を確認してください。";
     return;
   }
 
@@ -142,18 +194,29 @@ worker.addEventListener("message", (event) => {
   const sign = out.basis_points > 0 ? "+" : "";
   const bpText = out.basis_points === null ? `${sign}${formatNumber(out.delta)} ${out.unit}` : `${sign}${formatNumber(out.basis_points)} bp`;
   headline.textContent = `${arrow} ${bpText}`;
-  story.textContent = `${formatDate(out.start_date)}の${formatNumber(out.start_value)}%から、${formatDate(out.end_date)}の${formatNumber(out.end_value)}%へ。${out.calendar_days}暦日の比較です。`;
-  status.textContent = `Python計算完了 · snapshot取得 ${out.retrieved_at}`;
+  const pointSign = out.delta > 0 ? "+" : "";
+  const pointText = out.basis_points === null ? "" : ` 差は${pointSign}${formatNumber(out.delta)} percentage point = ${sign}${formatNumber(out.basis_points)} bpです。`;
+  story.textContent = `${formatDate(out.start_date)} ${formatNumber(out.start_value)}% → ${formatDate(out.end_date)} ${formatNumber(out.end_value)}%。${pointText}${out.calendar_days}暦日の比較です。`;
+  status.textContent = `比較完了 · snapshot取得 ${out.retrieved_at}`;
 });
 
 worker.addEventListener("error", (event) => {
   setBusy(false);
-  status.textContent = `Worker起動失敗: ${event.message}`;
+  status.textContent = `計算処理を起動できません: ${event.message}`;
 });
 
-compareButton.addEventListener("click", runComparison);
-start.addEventListener("change", renderChart);
-end.addEventListener("change", renderChart);
+compareButton.addEventListener("click", () => {
+  chartPickPhase = "start";
+  runComparison();
+});
+start.addEventListener("change", () => {
+  chartPickPhase = "start";
+  renderChart();
+});
+end.addEventListener("change", () => {
+  chartPickPhase = "start";
+  renderChart();
+});
 
 async function init() {
   const response = await fetch(SNAPSHOT_URL);
@@ -183,12 +246,12 @@ async function init() {
   addMeta("観測期間", `${snapshot.observation_start} → ${snapshot.observation_end}`);
   addMeta("取得時刻", snapshot.retrieved_at);
 
-  addQuickPick("全期間", dates[0], dates.at(-1));
-  if (dates.length >= 3) addQuickPick("最初の変化", dates[0], dates[1]);
-  if (dates.length >= 3) addQuickPick("直近の変化", dates.at(-2), dates.at(-1));
+  addQuickPick(dates[0], dates.at(-1), "全期間");
+  if (dates.length >= 3) addQuickPick(dates[0], dates[1], "最初");
+  if (dates.length >= 3) addQuickPick(dates.at(-2), dates.at(-1), "直近");
 
   renderChart();
-  status.textContent = "snapshot確認済み。Pythonを準備します…";
+  status.textContent = "データを読み込みました。";
   runComparison();
 }
 

@@ -14,7 +14,7 @@
     <header class="hero">
       <p class="eyebrow">finBI · verified snapshot</p>
       <h1>金利の動きを、<br>触って読む。</h1>
-      <p class="lead">難しいダッシュボードではなく、2つの日付を選ぶだけ。保存済みの公的データを、repositoryと同じPythonで比較します。</p>
+      <p class="lead">難しいダッシュボードではなく、2つの日付を選ぶだけ。保存済みの公的データを比較します。</p>
       <p class="notice">現在値ではありません · live market dataではありません · 投資助言ではありません</p>
     </header>
 
@@ -25,8 +25,9 @@
           <span id="window-label"></span>
         </div>
 
+        <p class="chart-hint" id="chart-hint">グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。</p>
         <div class="chart-wrap">
-          <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc">
+          <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc" aria-describedby="chart-hint">
             <title id="chart-title">米国10年国債利回りの推移</title>
             <desc id="chart-desc">保存済み期間の各観測値を線で結んだグラフです。</desc>
           </svg>
@@ -34,7 +35,7 @@
 
         <div class="big-answer" aria-live="polite">
           <span class="value" id="headline">—</span>
-          <span class="story" id="story">開始日と終了日を選ぶと、Pythonが差を計算します。</span>
+          <span class="story" id="story">開始日と終了日を選ぶと、差を計算します。</span>
         </div>
       </article>
 
@@ -52,7 +53,7 @@
               <select id="end" aria-label="比較の終了日"></select>
             </label>
           </div>
-          <button class="primary" id="compare" type="button">Pythonで比べる</button>
+          <button class="primary" id="compare" type="button">比べる</button>
           <p class="status" id="status" role="status">snapshotを読み込み中…</p>
         </section>
 
@@ -70,8 +71,9 @@
     </section>
 
     <details class="explain">
-      <summary>finBIは何をしている？</summary>
-      <p>画面は保存済みsnapshotだけを読みます。比較ボタンを押すとPyodide Web Workerが起動し、このrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
+      <summary>計算方法と実装を見る</summary>
+      <p>bp（basis point）は金利差の単位で、1 bp = 0.01 percentage pointです。4.60%から4.69%への変化なら +0.09 percentage point = +9 bpです。</p>
+      <p>画面は保存済みsnapshotだけを読みます。比較時はPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
     </details>
   </main>
   <script type="module" src="./app.js"></script>
