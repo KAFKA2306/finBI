@@ -3,24 +3,77 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>finBI static snapshot viewer</title>
-  <style>
-    body{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;line-height:1.5}main{display:grid;gap:1rem}.panel{border:1px solid #ccc;border-radius:12px;padding:1rem}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem}.warning{font-weight:700}button,select{font:inherit;padding:.5rem}.result{font-size:1.2rem;font-weight:700}
-  </style>
+  <meta name="description" content="検証済み金融snapshotを、Pythonで比較しながら直感的に読めるfinBI。">
+  <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111712" media="(prefers-color-scheme: dark)">
+  <title>finBI — 金利の動きを、触って読む</title>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<main>
-  <h1>finBI — 検証済みsnapshot比較</h1>
-  <p class="warning">これは保存済みsnapshotの探索UIです。現在値・live market dashboard・投資助言ではありません。</p>
-  <section class="panel meta" id="metadata"></section>
-  <section class="panel">
-    <label>開始日 <select id="start"></select></label>
-    <label>終了日 <select id="end"></select></label>
-    <button id="compare">Pythonで比較</button>
-    <p id="status">snapshotを読み込み中…</p>
-    <p class="result" id="result"></p>
-  </section>
-</main>
-<script type="module" src="./app.js"></script>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">finBI · verified snapshot</p>
+      <h1>金利の動きを、<br>触って読む。</h1>
+      <p class="lead">難しいダッシュボードではなく、2つの日付を選ぶだけ。保存済みの公的データを、repositoryと同じPythonで比較します。</p>
+      <p class="notice">現在値ではありません · live market dataではありません · 投資助言ではありません</p>
+    </header>
+
+    <section class="dashboard" aria-label="米国10年国債利回りの比較">
+      <article class="card chart-card">
+        <div class="kicker">
+          <strong id="series-name">データを読み込み中…</strong>
+          <span id="window-label"></span>
+        </div>
+
+        <div class="chart-wrap">
+          <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc">
+            <title id="chart-title">米国10年国債利回りの推移</title>
+            <desc id="chart-desc">保存済み期間の各観測値を線で結んだグラフです。</desc>
+          </svg>
+        </div>
+
+        <div class="big-answer" aria-live="polite">
+          <span class="value" id="headline">—</span>
+          <span class="story" id="story">開始日と終了日を選ぶと、Pythonが差を計算します。</span>
+        </div>
+      </article>
+
+      <aside class="card side-card">
+        <section class="controls" aria-labelledby="compare-heading">
+          <div>
+            <p class="eyebrow">Compare</p>
+            <h2 id="compare-heading">どこから、どこまで？</h2>
+          </div>
+          <div class="control-grid">
+            <label>開始日
+              <select id="start" aria-label="比較の開始日"></select>
+            </label>
+            <label>終了日
+              <select id="end" aria-label="比較の終了日"></select>
+            </label>
+          </div>
+          <button class="primary" id="compare" type="button">Pythonで比べる</button>
+          <p class="status" id="status" role="status">snapshotを読み込み中…</p>
+        </section>
+
+        <section class="quick-picks" aria-labelledby="quick-heading">
+          <p id="quick-heading">すぐ試す</p>
+          <div class="chips" id="quick-picks"></div>
+        </section>
+
+        <section class="trust" aria-labelledby="trust-heading">
+          <h2 id="trust-heading">この数字はどこから？</h2>
+          <dl class="meta" id="metadata"></dl>
+          <a id="source-link" href="#" target="_blank" rel="noreferrer">一次情報を開く</a>
+        </section>
+      </aside>
+    </section>
+
+    <details class="explain">
+      <summary>finBIは何をしている？</summary>
+      <p>画面は保存済みsnapshotだけを読みます。比較ボタンを押すとPyodide Web Workerが起動し、このrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
+    </details>
+  </main>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
