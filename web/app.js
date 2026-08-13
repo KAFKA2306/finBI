@@ -1,4 +1,4 @@
-const SNAPSHOT_URL = "./data/snapshots/fred-dgs10-2026-07-20_2026-07-24.json";
+const SNAPSHOT_URL = "./data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json";
 const worker = new Worker("./worker.mjs", { type: "module" });
 const SVG_NS = "http://www.w3.org/2000/svg";
 

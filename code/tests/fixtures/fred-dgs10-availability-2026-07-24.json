@@ -1,0 +1,17 @@
+{
+  "series_id": "DGS10",
+  "retrieved_at": "2026-07-24T20:17:00Z",
+  "verified_availability": {
+    "source_updated_at": "2026-07-24T20:17:00Z",
+    "latest_available_observation": "2026-07-23",
+    "latest_available_value": 4.71,
+    "evidence_url": "https://fred.stlouisfed.org/graph/?graph_id=907169"
+  },
+  "known_unavailable_observation": {
+    "date": "2026-07-24",
+    "value": 4.69,
+    "first_visible_at": "2026-07-27T20:16:00Z",
+    "evidence_url": "https://fred.stlouisfed.org/graph/?s%5B1%5D%5Bid%5D=DGS10"
+  },
+  "vintage_url": "https://alfred.stlouisfed.org/series/downloaddata?seid=DGS10"
+}
