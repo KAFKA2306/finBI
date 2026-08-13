@@ -2,7 +2,7 @@
 
 金融データは、数字を並べるだけでは「何が起きたか」が分かりにくい。`finBI` は、保存済みの検証済みデータから **2つの日付を選ぶだけで、変化を見て・比べて・出典まで確かめられる** 小さな金融BIです。
 
-2023年の壊れたStreamlit試作は復旧しません。現在の正準線は **verified snapshot → pure Python calculation → one-screen static Pages** です。
+2023年の壊れたStreamlit試作は復旧しません。現在の正準線は **verified snapshot → pure Python calculation → one-screen static Pages** だけです。
 
 ## 使い方
 
@@ -48,7 +48,7 @@ python -m unittest discover -s code/tests -v
 
 ## Pages UI
 
-`web/index.html` / `web/styles.css` / `web/app.js` / `web/worker.mjs` が公開UIです。
+`web/index.html` / `web/styles.css` / `web/app.js` / `web/worker.mjs` の4ファイルが公開UIの全runtime surfaceです。
 
 - frameworkなし
 - build toolなし
@@ -69,6 +69,10 @@ Pyodideはmodule Web Workerで動かし、`code/static_bi.py` をそのまま実
 
 採用・不採用の境界は `docs/design-2026.md`、一次参照一覧は `docs/references-2026.md` に固定しています。
 
+## 2023互換層は削除
+
+旧 `your_streamlit_app.py` / `categories.py` / `settings.py` / `provider_status.py` と、それら専用のimport/credential互換testsは現行treeから削除しました。必要ならGit履歴から参照できますが、現行アーキテクチャとしては維持しません。判断理由は `docs/legacy-removal.md` に残します。
+
 ## CI / Pages
 
 `.github/workflows/static-bi.yml` が以下を直接検証します。
@@ -84,10 +88,6 @@ Pyodideはmodule Web Workerで動かし、`code/static_bi.py` をそのまま実
 
 Pagesがrepository設定で有効な場合だけ、main / workflow_dispatchから同じbuildを `configure-pages → upload-pages-artifact → deploy-pages` で公開します。未有効ならdeployは意図的にskipし、検証jobはgreenを維持します。
 
-## Legacy
-
-`code/your_streamlit_app.py`、`categories.py`、`settings.py`、`provider_status.py` は2023試作のrecovery/archive文脈です。公開UIのentry pointではありません。
-
 ## Security / boundary
 
 - browserへAPI keyを置かない
@@ -97,6 +97,9 @@ Pagesがrepository設定で有効な場合だけ、main / workflow_dispatchか�
 - 未検証providerを自動的に復活させない
 - 現在値でないsnapshotを現在値に見せない
 
-## Issue
+## Issues
 
-Static Python BIへの縮約とPages公開は Issue #6 で管理しています。2026 UI再設計はその正準経路を壊さず、公開体験だけを単純化する変更です。
+- Issue #6: Static Python BIへの縮約とPages実公開
+- Issue #8: 2026年の公開UIを、初見ユーザー向け1画面体験へ破壊的に再設計
+
+どちらも、Pages有効化後の公開URL E2E確認まではcloseしません。
