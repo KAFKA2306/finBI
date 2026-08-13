@@ -6,12 +6,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from static_bi import compare_dates, validate_snapshot
 
-SNAPSHOT = Path(__file__).resolve().parents[2] / "data" / "snapshots" / "fred-dgs10-2026-07-20_2026-07-23.json"
+ROOT = Path(__file__).resolve().parents[2]
+SNAPSHOT = ROOT / "data" / "snapshots" / "fred-dgs10-2026-07-20_2026-07-23.json"
+AVAILABILITY_FIXTURE = ROOT / "code" / "tests" / "fixtures" / "fred-dgs10-availability-2026-07-24.json"
 
 
 class StaticBITest(unittest.TestCase):
     def snapshot(self):
         return json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+
+    def availability_fixture(self):
+        return json.loads(AVAILABILITY_FIXTURE.read_text(encoding="utf-8"))
 
     def test_snapshot_and_comparison(self):
         data = self.snapshot()
@@ -31,8 +36,12 @@ class StaticBITest(unittest.TestCase):
 
     def test_known_future_observation_regression_fails(self):
         data = self.snapshot()
-        data["observations"].append({"date": "2026-07-24", "value": 4.69})
-        data["observation_end"] = "2026-07-24"
+        fixture = self.availability_fixture()
+        rejected = fixture["known_unavailable_observation"]
+        self.assertEqual(data["retrieved_at"], fixture["retrieved_at"])
+        self.assertEqual(data["availability"]["latest_available_observation"], fixture["verified_availability"]["latest_available_observation"])
+        data["observations"].append({"date": rejected["date"], "value": rejected["value"]})
+        data["observation_end"] = rejected["date"]
         with self.assertRaisesRegex(ValueError, "observation was not available at retrieved_at"):
             validate_snapshot(data)
 
@@ -44,7 +53,8 @@ class StaticBITest(unittest.TestCase):
 
     def test_source_update_after_retrieval_fails(self):
         data = self.snapshot()
-        data["availability"]["source_updated_at"] = "2026-07-27T20:16:00Z"
+        fixture = self.availability_fixture()
+        data["availability"]["source_updated_at"] = fixture["known_unavailable_observation"]["first_visible_at"]
         with self.assertRaisesRegex(ValueError, "source availability is later than retrieved_at"):
             validate_snapshot(data)
 
