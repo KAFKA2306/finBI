@@ -48,10 +48,11 @@ def run_viewport(width, height):
         source = driver.find_element(By.CSS_SELECTOR, "#source-link").get_attribute("href")
         assert source and "fred.stlouisfed.org" in source, source
 
-        # Each chart click can re-render the SVG, invalidating previously located
-        # Selenium elements. Resolve the target afresh for every interaction.
+        # The first chart pick re-renders the SVG and enters the explicit
+        # two-point selection state. Re-resolve the second point after that
+        # re-render instead of retaining a stale Selenium element.
         click_chart_date(driver, "2026-07-20")
-        wait_text(driver, "#status", lambda value: "比較完了" in value)
+        wait_text(driver, "#status", lambda value: "次に終了日" in value)
         click_chart_date(driver, "2026-07-23")
 
         wait_text(driver, "#status", lambda value: "比較完了" in value)
