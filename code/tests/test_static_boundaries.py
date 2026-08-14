@@ -21,10 +21,20 @@ class StaticBoundaryTests(unittest.TestCase):
     def test_no_personal_path_pickle_or_legacy_runtime(self) -> None:
         source = "\n".join(
             path.read_text(encoding="utf-8")
-            for path in [CODE_DIR / "static_bi.py", WEB_DIR / "app.js", WEB_DIR / "worker.mjs"]
+            for path in [
+                CODE_DIR / "static_bi.py",
+                WEB_DIR / "app.js",
+                WEB_DIR / "worker.mjs",
+            ]
         )
         self.assertIsNone(re.search(r"[A-Za-z]:\\\\(?:Users|ML|Documents)\\\\", source))
-        for forbidden in ("pickle.load", "pd.read_pickle", "streamlit", "ngrok", "heroku"):
+        for forbidden in (
+            "pickle.load",
+            "pd.read_pickle",
+            "streamlit",
+            "ngrok",
+            "heroku",
+        ):
             self.assertNotIn(forbidden, source.casefold())
 
 
