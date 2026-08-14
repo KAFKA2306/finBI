@@ -57,9 +57,13 @@ Not applicable. The maintained application has no Python or JS dependency manife
 - Runtime financial validation: `validate_snapshot` is the single authority for committed snapshot identity, provenance, ordering, availability, and fail-closed validation.
 - Fast repository check orchestration: `scripts/check.sh` is the single repository-owned entrypoint.
 
-## Baseline timing
+## Repository-local timing
 
-GitHub Actions run 31824615155 (`dc3dea202aaf591cc2265e5d24e9a9fc130ebf1e`) completed the `validate` job from 17:34:33Z to 17:34:39Z on 2026-08-14: **6 seconds wall-clock**. This is the before-change baseline. The exact-head PR CI after this consolidation is the after-change measurement; no vendor benchmark multiplier is used as repository evidence.
+Before consolidation, GitHub Actions run 31824615155 (`dc3dea202aaf591cc2265e5d24e9a9fc130ebf1e`) completed `validate` from 17:34:33Z to 17:34:39Z on 2026-08-14: **6 seconds wall-clock**.
+
+PR #18 exact-head run 31825344891 (`b08712d3af39d4742c0a3bb61253453be68e295b`) completed `validate` from 17:44:00Z to 17:44:07Z: **7 seconds wall-clock**; the repository-owned `Run canonical fast checks` step itself ran from 17:44:02Z to 17:44:04Z: **2 seconds**.
+
+The observed before/after wall-clock difference is **+1 second** on separate hosted runners. It is recorded rather than interpreted as a tooling speedup or regression. No vendor benchmark multiplier is used as repository evidence.
 
 ## Primary documentation consulted
 
