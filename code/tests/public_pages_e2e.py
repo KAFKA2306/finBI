@@ -16,6 +16,20 @@ def wait_text(driver, selector, predicate, timeout=90):
     return WebDriverWait(driver, timeout).until(_ready)
 
 
+def click_chart_date(driver, date, timeout=30):
+    selector = f"circle.chart-hit[data-date='{date}']"
+
+    def _click(_driver):
+        element = _driver.find_element(By.CSS_SELECTOR, selector)
+        _driver.execute_script(
+            "arguments[0].dispatchEvent(new MouseEvent('click', {bubbles:true}));",
+            element,
+        )
+        return True
+
+    WebDriverWait(driver, timeout).until(_click)
+
+
 def run_viewport(width, height):
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
@@ -34,10 +48,11 @@ def run_viewport(width, height):
         source = driver.find_element(By.CSS_SELECTOR, "#source-link").get_attribute("href")
         assert source and "fred.stlouisfed.org" in source, source
 
-        first = driver.find_element(By.CSS_SELECTOR, "circle.chart-hit[data-date='2026-07-20']")
-        last = driver.find_element(By.CSS_SELECTOR, "circle.chart-hit[data-date='2026-07-23']")
-        driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles:true}));", first)
-        driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', {bubbles:true}));", last)
+        # Each chart click can re-render the SVG, invalidating previously located
+        # Selenium elements. Resolve the target afresh for every interaction.
+        click_chart_date(driver, "2026-07-20")
+        wait_text(driver, "#status", lambda value: "比較完了" in value)
+        click_chart_date(driver, "2026-07-23")
 
         wait_text(driver, "#status", lambda value: "比較完了" in value)
         headline = driver.find_element(By.CSS_SELECTOR, "#headline").text
