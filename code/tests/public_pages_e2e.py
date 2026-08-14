@@ -45,7 +45,9 @@ def run_viewport(width, height):
         assert "2026-07-20 → 2026-07-23" in metadata, metadata
         assert "2026-07-24T20:17:00Z" in metadata, metadata
 
-        source = driver.find_element(By.CSS_SELECTOR, "#source-link").get_attribute("href")
+        source = driver.find_element(By.CSS_SELECTOR, "#source-link").get_attribute(
+            "href"
+        )
         assert source and "fred.stlouisfed.org" in source, source
 
         # The first chart pick re-renders the SVG and enters the explicit
@@ -62,7 +64,9 @@ def run_viewport(width, height):
         assert "4.60%" in story and "4.71%" in story, story
         assert "+0.11 percentage point" in story, story
 
-        start_value = driver.find_element(By.CSS_SELECTOR, "#start").get_attribute("value")
+        start_value = driver.find_element(By.CSS_SELECTOR, "#start").get_attribute(
+            "value"
+        )
         end_value = driver.find_element(By.CSS_SELECTOR, "#end").get_attribute("value")
         assert start_value == "2026-07-20", start_value
         assert end_value == "2026-07-23", end_value
