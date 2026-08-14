@@ -16,7 +16,7 @@ files = "^code/.*\\.py$"
 id = "ruff-check"
 name = "ruff check"
 language = "python"
-entry = "ruff check --target-version py312 code"
+entry = "ruff check --select E9,F,B,UP,RUF --target-version py312 code"
 additional_dependencies = ["ruff==0.16.0"]
 pass_filenames = false
 files = "^code/.*\\.py$"
