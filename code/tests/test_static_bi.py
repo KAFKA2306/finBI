@@ -8,7 +8,9 @@ from static_bi import compare_dates, validate_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
 SNAPSHOT = ROOT / "data" / "snapshots" / "fred-dgs10-2026-07-20_2026-07-23.json"
-AVAILABILITY_FIXTURE = ROOT / "code" / "tests" / "fixtures" / "fred-dgs10-availability-2026-07-24.json"
+AVAILABILITY_FIXTURE = (
+    ROOT / "code" / "tests" / "fixtures" / "fred-dgs10-availability-2026-07-24.json"
+)
 
 
 class StaticBITest(unittest.TestCase):
@@ -39,10 +41,17 @@ class StaticBITest(unittest.TestCase):
         fixture = self.availability_fixture()
         rejected = fixture["known_unavailable_observation"]
         self.assertEqual(data["retrieved_at"], fixture["retrieved_at"])
-        self.assertEqual(data["availability"]["latest_available_observation"], fixture["verified_availability"]["latest_available_observation"])
-        data["observations"].append({"date": rejected["date"], "value": rejected["value"]})
+        self.assertEqual(
+            data["availability"]["latest_available_observation"],
+            fixture["verified_availability"]["latest_available_observation"],
+        )
+        data["observations"].append(
+            {"date": rejected["date"], "value": rejected["value"]}
+        )
         data["observation_end"] = rejected["date"]
-        with self.assertRaisesRegex(ValueError, "observation was not available at retrieved_at"):
+        with self.assertRaisesRegex(
+            ValueError, "observation was not available at retrieved_at"
+        ):
             validate_snapshot(data)
 
     def test_unverified_availability_fails_closed(self):
@@ -54,8 +63,12 @@ class StaticBITest(unittest.TestCase):
     def test_source_update_after_retrieval_fails(self):
         data = self.snapshot()
         fixture = self.availability_fixture()
-        data["availability"]["source_updated_at"] = fixture["known_unavailable_observation"]["first_visible_at"]
-        with self.assertRaisesRegex(ValueError, "source availability is later than retrieved_at"):
+        data["availability"]["source_updated_at"] = fixture[
+            "known_unavailable_observation"
+        ]["first_visible_at"]
+        with self.assertRaisesRegex(
+            ValueError, "source availability is later than retrieved_at"
+        ):
             validate_snapshot(data)
 
     def test_missing_availability_evidence_fails(self):
@@ -76,7 +89,10 @@ class StaticBITest(unittest.TestCase):
 
     def test_unsorted_observations_fail(self):
         data = self.snapshot()
-        data["observations"][0], data["observations"][1] = data["observations"][1], data["observations"][0]
+        data["observations"][0], data["observations"][1] = (
+            data["observations"][1],
+            data["observations"][0],
+        )
         with self.assertRaises(ValueError):
             validate_snapshot(data)
 
