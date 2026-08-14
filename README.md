@@ -4,9 +4,29 @@
 
 **公開版:** https://kafka2306.github.io/finBI/
 
-2023年の壊れたStreamlit試作は復旧しません。現在の正準線は **verified snapshot → pure Python calculation → one-screen static Pages** だけです。
+## Vision
 
-## 使い方
+金融dashboardを大きくすることではなく、**利用者が任意の2観測日を選び、元の値・差・bpを読み、その場で「いつ取得し、いつ利用可能だった、どの一次情報か」まで確認できる一画面の比較体験**を作ります。
+
+現在値の速報や売買判断を出すことは目的ではありません。保存済みsnapshotの変化を、時点整合性と根拠を保ったまま読むためのUIです。
+
+## Design philosophy
+
+- 現在値の速報性より、snapshotの時点整合性を優先する
+- `%` / percentage point / basis point を混同させない
+- chart操作だけに依存せず、keyboard/select経路を維持する
+- 金融計算はpure Pythonを正準とし、JavaScriptへ二重実装しない
+- source availabilityを一次情報で証明できない観測をverifiedへ昇格させない
+- Pages deploy成功と、公開browser上のdesktop/mobile E2E成功を分離する
+- snapshot外の値を補間・推定しない
+
+## Why / 差別化
+
+一般的なlive金融dashboardのように「最新値を多く並べる」ことではなく、**小さなsnapshotを「比較 → 意味理解 → 出典確認」まで一画面で完結させ、PIT（point-in-time）整合性を利用者から隠さないこと**を中心にしています。
+
+Pyodide、frameworkなし、44px controls、GitHub Actionsはその体験を支える実装手段であり、価値そのものではありません。
+
+## 2-point comparison user journey
 
 公開Pagesでは次の順だけで完結します。
 
@@ -16,17 +36,18 @@
 4. 元の%値、percentage point差、basis point差を読む
 5. 同じ画面で一次情報・観測期間・取得時刻を確認する
 
-現在値、live market dashboard、投資助言としては扱いません。
+たとえば `4.60% → 4.69%` なら、`+0.09 percentage point = +9 bp` のように、元の値と差の単位を同時に読める設計です。
 
-## 現在の正準データ
+## What the current snapshot means
 
-現在のsnapshotは `data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json` です。
+現在の正準snapshotは `data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json` です。
 
 - series: `DGS10`
 - source: Federal Reserve Bank of St. Louis (FRED) / Board of Governors H.15
 - unit: Percent
 - frequency: Daily
 - observed: 2026-07-20〜2026-07-23
+- observations: 4
 - retrieved_at: `2026-07-24T20:17:00Z`
 - source updated at: `2026-07-24T20:17:00Z`
 - latest available observation at retrieval: `2026-07-23 = 4.71`
@@ -34,13 +55,50 @@
 - FRED availability evidence: https://fred.stlouisfed.org/graph/?graph_id=907169
 - ALFRED vintage download: https://alfred.stlouisfed.org/series/downloaddata?seid=DGS10
 
+これは現在値ではありません。`2026-07-24T20:17:00Z` に取得・検証した保存済みsnapshotです。
+
+## PIT provenance / fail-close
+
 snapshotには source / series ID / observation range / retrieved_at / unit / currency / frequency に加え、`availability.verified` / source更新時刻 / その時点の最新利用可能観測日 / 一次証拠URLを保持します。
 
-`observation_date <= retrieved_at.date()` だけではPIT整合性を保証できません。観測日当日にまだ公開されていない値があるため、finBIは **source availability timestamp <= retrieved_at** と、その時点のlatest available observationを検証します。availabilityを一次情報で証明できないsnapshotはfail-closeし、`verified` として扱いません。
+`observation_date <= retrieved_at.date()` だけではPIT整合性を保証できません。観測日当日にまだ公開されていない値があるため、finBIは **source availability timestamp <= retrieved_at** と、その時点のlatest available observationを検証します。
 
-## 計算はPythonだけ
+availabilityを一次情報で証明できないsnapshot、取得時刻より後に利用可能になった観測、provenance欠落、観測順序破損はfail-closeし、`verified` として扱いません。
 
-`code/static_bi.py` が正準計算です。現在は以下を返します。
+## Pages UI / accessibility
+
+`web/index.html` / `web/styles.css` / `web/app.js` / `web/worker.mjs` の4ファイルが公開UIのruntime surfaceです。
+
+- responsive
+- light / dark mode
+- visible keyboard focus
+- reduced-motion対応
+- drag操作不要
+- グラフの観測点をclick / tapして比較範囲を選択可能
+- selectによるkeyboard経路を維持
+- 選択した2点の日付と値をhover不要で表示
+- 元の%値 / percentage point / basis pointを同じ結果で説明
+- 主要button / select / chipはfinBI独自contractとして44px以上
+- source / observed range / retrieved_atを1画面表示
+- browserから金融APIへのlive fetchなし
+- API keyなし
+
+GitHub PagesはGitHub Actions sourceで有効化されています。
+
+- public URL: https://kafka2306.github.io/finBI/
+- Pages settings: https://github.com/KAFKA2306/finBI/settings/pages
+- build type: `workflow`
+- source: `main`
+- public: `true`
+- HTTPS enforced: `true`
+
+Pagesの公開成功と、公開browser上で全操作がdesktop/mobileともE2E確認済みであることは別の状態として扱います。
+
+## Calculation / CI / architecture
+
+2023年の壊れたStreamlit試作は復旧しません。現在の正準線は **verified snapshot → pure Python calculation → one-screen static Pages** だけです。
+
+`code/static_bi.py` が正準計算で、現在は次を返します。
 
 - 2観測日の値
 - 差分
@@ -49,82 +107,26 @@ snapshotには source / series ID / observation range / retrieved_at / unit / cu
 - 暦日差
 - provenance
 
-snapshot外の日付、逆転した期間、provenance欠落、観測順序の破損、未検証availability、取得時刻より後のsource availability、当該時点で未公開だった観測はfail-closeします。金融計算式をJavaScriptへ複製しません。
+Pyodideはmodule Web Workerで `code/static_bi.py` を実行します。JavaScriptはI/O、操作、文字整形、SVG描画だけを担当します。
+
+ローカル検証:
 
 ```bash
 python -m unittest discover -s code/tests -v
 ```
 
-## Pages UI
+`.github/workflows/static-bi.yml` はPython compile、offline unit tests、PIT provenance regression、JS syntax、UI contract、public root build、HTTP route smoke test、generated residue cleanup、clean checkoutを検証します。
 
-`web/index.html` / `web/styles.css` / `web/app.js` / `web/worker.mjs` の4ファイルが公開UIの全runtime surfaceです。
+## Dependency boundary
 
-- frameworkなし
-- build toolなし
-- API keyなし
-- browserから金融APIへのlive fetchなし
-- responsive
-- light / dark mode
-- visible keyboard focus
-- reduced-motion対応
-- drag操作不要
-- グラフの観測点をclick / tapして比較範囲を選択可能
-- selectによるkeyboard経路を維持
-- 元の%値 / percentage point / basis pointを同じ結果で説明
-- 主要button / select / chipはfinBI独自contractとして44px以上
-- source / observed range / retrieved_atを1画面表示
+DuckDB-Wasm / Perspective / marimoは有力な選択肢ですが、現在の小さなsnapshotでは分析runtimeを増やす方が複雑です。採用・不採用の境界は `docs/design-2026.md`、一次参照一覧は `docs/references-2026.md` に固定しています。
 
-Pyodideはmodule Web Workerで動かし、`code/static_bi.py` をそのまま実行します。JavaScriptはI/O、操作、文字整形、SVG描画だけを担当します。
+旧 `your_streamlit_app.py` / `categories.py` / `settings.py` / `provider_status.py` と、それら専用のimport/credential互換testsは現行treeから削除済みです。判断理由は `docs/legacy-removal.md` に残します。
 
-## なぜDuckDB-Wasm / Perspective / marimoを入れていないか
-
-どれも2026年時点で有力なOSSですが、小さなsnapshotに分析runtimeを追加すると複雑性が増えます。考え方は参照し、必要になるまで依存は増やしません。
-
-採用・不採用の境界は `docs/design-2026.md`、一次参照一覧は `docs/references-2026.md` に固定しています。
-
-## 2023互換層は削除
-
-旧 `your_streamlit_app.py` / `categories.py` / `settings.py` / `provider_status.py` と、それら専用のimport/credential互換testsは現行treeから削除しました。必要ならGit履歴から参照できますが、現行アーキテクチャとしては維持しません。判断理由は `docs/legacy-removal.md` に残します。
-
-## CI / GitHub Pages
-
-`.github/workflows/static-bi.yml` が以下を直接検証します。
-
-- Python compile
-- offline unit tests
-- PIT provenance / availability regression
-- JS syntax
-- accessibility / UI contractの最低限チェック
-- public root build
-- HTTP route smoke test
-- generated residue cleanup
-- clean checkout
-
-GitHub Pagesは **GitHub Actions sourceで有効化済み**です。`main` の同じ正準buildを `configure-pages → upload-pages-artifact → deploy-pages` で公開します。
-
-2026-08-13にPages有効化後のdeployを実行し、`Build Pages artifact` / `Configure Pages` / `Upload Pages artifact` / `Deploy Pages` がすべて成功しました。
-
-- public URL: https://kafka2306.github.io/finBI/
-- Pages settings: https://github.com/KAFKA2306/finBI/settings/pages
-- deploy evidence: https://github.com/KAFKA2306/finBI/actions/runs/31678299234
-
-GitHub Pages API上では `build_type: workflow`、sourceは `main`、public、HTTPS enforcedです。
-
-## Security / boundary
-
-- browserへAPI keyを置かない
-- pickleを公開UI input/cacheとして使わない
-- source URL、series ID、observed range、retrieved_at、unit、currencyをsnapshotに保持する
-- availabilityを一次情報で証明できないsnapshotをverified扱いしない
-- retrieved_atより後に利用可能になった観測をsnapshotへ混入させない
-- snapshot外を補間・推定しない
-- 未検証providerを自動的に復活させない
-- 現在値でないsnapshotを現在値に見せない
-
-## Issues / current status
+## Current issues
 
 - [Issue #8](https://github.com/KAFKA2306/finBI/issues/8): 公開UIの最終E2E。Pages有効化・deployまでは完了し、公開URLでのdesktop / mobile操作確認が残る
-- [Issue #10](https://github.com/KAFKA2306/finBI/issues/10): PIT provenance / availability fail-close — **completed**
-- [Issue #11](https://github.com/KAFKA2306/finBI/issues/11): グラフ直接選択・bpの意味づけ — 実装済み。公開URLでのdesktop / mobile E2Eが残る
+- [Issue #11](https://github.com/KAFKA2306/finBI/issues/11): グラフ直接選択・bpの意味づけは実装済み。公開URLでのdesktop / mobile E2Eが残る
+- [Issue #14](https://github.com/KAFKA2306/finBI/issues/14): READMEのUX framing
 
-Pagesが公開されたこと自体と、公開ブラウザ上で全操作がE2E確認済みであることは分けて扱います。後者を確認するまでは #8 / #11 をcloseしません。
+現在値、live market dashboard、投資助言、自動売買許可としては扱いません。
