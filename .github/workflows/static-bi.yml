@@ -114,3 +114,20 @@ jobs:
         if: steps.pages.outputs.enabled == 'true'
         id: deployment
         uses: actions/deploy-pages@v5
+
+  public-e2e:
+    if: github.event_name == 'push'
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install browser test driver
+        run: python -m pip install 'selenium>=4,<5'
+      - name: Verify deployed Pages on desktop and mobile widths
+        env:
+          FINBI_PUBLIC_URL: https://kafka2306.github.io/finBI/
+        run: python code/tests/public_pages_e2e.py
