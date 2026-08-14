@@ -10,7 +10,7 @@ class PublicContractTest(unittest.TestCase):
         app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
         for forbidden in (
             "out.delta * 100",
-            "snapshot.unit === \"Percent\"",
+            'snapshot.unit === "Percent"',
             "snapshot.unit === 'Percent'",
             "const basisPoints",
             "let basisPoints",
@@ -24,7 +24,11 @@ class PublicContractTest(unittest.TestCase):
             (ROOT / "web" / name).read_text(encoding="utf-8")
             for name in ("app.js", "worker.mjs")
         )
-        for forbidden in ("api.stlouisfed.org", "query1.finance.yahoo.com", "simfin.com/api"):
+        for forbidden in (
+            "api.stlouisfed.org",
+            "query1.finance.yahoo.com",
+            "simfin.com/api",
+        ):
             self.assertNotIn(forbidden, browser_files)
 
     def test_worker_is_module_pyodide_and_python_core_is_same_origin(self):
@@ -48,7 +52,9 @@ class PublicContractTest(unittest.TestCase):
     def test_quick_picks_show_dates_and_bp_is_explained(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
-        self.assertIn('`${prefix} ${formatDate(startDate)} → ${formatDate(endDate)}`', app)
+        self.assertIn(
+            "`${prefix} ${formatDate(startDate)} → ${formatDate(endDate)}`", app
+        )
         self.assertIn("percentage point", app)
         self.assertIn("1 bp = 0.01 percentage point", html)
 
