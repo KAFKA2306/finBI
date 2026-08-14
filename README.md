@@ -109,24 +109,20 @@ Pagesの公開成功と、公開browser上で全操作がdesktop/mobileともE2E
 
 Pyodideはmodule Web Workerで `code/static_bi.py` を実行します。JavaScriptはI/O、操作、文字整形、SVG描画だけを担当します。
 
-ローカル検証:
+ローカルのfast validationはCIと同じrepository-owned entrypointを使います。
 
 ```bash
-python -m unittest discover -s code/tests -v
+bash scripts/check.sh
 ```
 
-`.github/workflows/static-bi.yml` はPython compile、offline unit tests、PIT provenance regression、JS syntax、UI contract、public root build、HTTP route smoke test、generated residue cleanup、clean checkoutを検証します。
+`.github/workflows/static-bi.yml` はこのscriptでPython compile、offline unit tests、PIT provenance regression、JS syntax、UI contract、public root build、HTTP route smoke test、generated residue cleanupを検証し、その後clean checkoutを確認します。公開Pagesのdesktop/mobile Selenium E2Eはdeploy後の独立jobです。
 
 ## Dependency boundary
 
 DuckDB-Wasm / Perspective / marimoは有力な選択肢ですが、現在の小さなsnapshotでは分析runtimeを増やす方が複雑です。採用・不採用の境界は `docs/design-2026.md`、一次参照一覧は `docs/references-2026.md` に固定しています。
 
+formatter/linter/type checkerを含む2026 tooling監査は `docs/tooling-2026.md` に記録しています。現行treeにmanifest/lockや重複authorityがないため、Ruff/Pyrefly/Pydantic/Biome/Oxlint/TypeScript/Zod/Turborepo/Nx/prekはこの保守単位では追加していません。
+
 旧 `your_streamlit_app.py` / `categories.py` / `settings.py` / `provider_status.py` と、それら専用のimport/credential互換testsは現行treeから削除済みです。判断理由は `docs/legacy-removal.md` に残します。
-
-## Current issues
-
-- [Issue #8](https://github.com/KAFKA2306/finBI/issues/8): 公開UIの最終E2E。Pages有効化・deployまでは完了し、公開URLでのdesktop / mobile操作確認が残る
-- [Issue #11](https://github.com/KAFKA2306/finBI/issues/11): グラフ直接選択・bpの意味づけは実装済み。公開URLでのdesktop / mobile E2Eが残る
-- [Issue #14](https://github.com/KAFKA2306/finBI/issues/14): READMEのUX framing
 
 現在値、live market dashboard、投資助言、自動売買許可としては扱いません。
