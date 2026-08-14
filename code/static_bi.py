@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Any
 
 REQUIRED_SOURCE_FIELDS = {
@@ -24,12 +24,12 @@ def _parse_timestamp(value: Any, field: str) -> datetime:
     if not isinstance(value, str) or not value:
         raise ValueError(f"missing snapshot field: {field}")
     try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value)
     except ValueError as exc:
         raise ValueError(f"invalid timestamp: {field}") from exc
     if parsed.tzinfo is None:
         raise ValueError(f"timestamp must include timezone: {field}")
-    return parsed.astimezone(timezone.utc)
+    return parsed.astimezone(UTC)
 
 
 def validate_snapshot(snapshot: dict[str, Any]) -> None:
@@ -40,23 +40,36 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         raise ValueError("snapshot source metadata is incomplete")
     if not str(source["source_url"]).startswith("https://"):
         raise ValueError("source_url must be HTTPS")
-    for field in ("retrieved_at", "observation_start", "observation_end", "unit", "frequency"):
+    for field in (
+        "retrieved_at",
+        "observation_start",
+        "observation_end",
+        "unit",
+        "frequency",
+    ):
         if not snapshot.get(field):
             raise ValueError(f"missing snapshot field: {field}")
 
     retrieved_at = _parse_timestamp(snapshot["retrieved_at"], "retrieved_at")
     availability = snapshot.get("availability")
-    if not isinstance(availability, dict) or not REQUIRED_AVAILABILITY_FIELDS <= availability.keys():
+    if (
+        not isinstance(availability, dict)
+        or not REQUIRED_AVAILABILITY_FIELDS <= availability.keys()
+    ):
         raise ValueError("snapshot availability evidence is incomplete")
     if availability["verified"] is not True:
         raise ValueError("snapshot availability is not verified")
     if not str(availability["evidence_url"]).startswith("https://"):
         raise ValueError("availability evidence_url must be HTTPS")
-    source_updated_at = _parse_timestamp(availability["source_updated_at"], "availability.source_updated_at")
+    source_updated_at = _parse_timestamp(
+        availability["source_updated_at"], "availability.source_updated_at"
+    )
     if source_updated_at > retrieved_at:
         raise ValueError("source availability is later than retrieved_at")
     try:
-        latest_available = date.fromisoformat(str(availability["latest_available_observation"]))
+        latest_available = date.fromisoformat(
+            str(availability["latest_available_observation"])
+        )
     except ValueError as exc:
         raise ValueError("invalid latest_available_observation") from exc
 
@@ -90,7 +103,9 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         raise ValueError("observation_end does not match last observation")
 
 
-def compare_dates(snapshot: dict[str, Any], start_date: str, end_date: str) -> dict[str, Any]:
+def compare_dates(
+    snapshot: dict[str, Any], start_date: str, end_date: str
+) -> dict[str, Any]:
     validate_snapshot(snapshot)
     by_date = {row["date"]: float(row["value"]) for row in snapshot["observations"]}
     if start_date not in by_date or end_date not in by_date:
@@ -102,7 +117,9 @@ def compare_dates(snapshot: dict[str, Any], start_date: str, end_date: str) -> d
     end_value = by_date[end_date]
     delta = end_value - start_value
     direction = "up" if delta > 0 else "down" if delta < 0 else "flat"
-    basis_points = round(delta * 100, 4) if snapshot["unit"].casefold() == "percent" else None
+    basis_points = (
+        round(delta * 100, 4) if snapshot["unit"].casefold() == "percent" else None
+    )
     calendar_days = (date.fromisoformat(end_date) - date.fromisoformat(start_date)).days
 
     return {
