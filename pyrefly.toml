@@ -1,2 +1,3 @@
 project-includes = ["code/**/*.py"]
+search-path = ["code"]
 python-version = "3.12"
