@@ -1,0 +1,55 @@
+default_language_version.python = "3.12"
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "ruff-format"
+name = "ruff format --check"
+language = "python"
+entry = "ruff format --check --target-version py312 code"
+additional_dependencies = ["ruff==0.16.0"]
+pass_filenames = false
+files = "^code/.*\\.py$"
+
+[[repos.hooks]]
+id = "ruff-check"
+name = "ruff check"
+language = "python"
+entry = "ruff check --target-version py312 code"
+additional_dependencies = ["ruff==0.16.0"]
+pass_filenames = false
+files = "^code/.*\\.py$"
+
+[[repos.hooks]]
+id = "pyrefly"
+name = "pyrefly check"
+language = "python"
+entry = "pyrefly check --summarize-errors"
+additional_dependencies = ["pyrefly==1.1.1", "selenium==4.47.0"]
+pass_filenames = false
+files = "^code/.*\\.py$"
+
+[[repos.hooks]]
+id = "python-tests"
+name = "offline Python tests"
+language = "system"
+entry = "python -m unittest discover -s code/tests -v"
+pass_filenames = false
+files = "^code/.*\\.py$"
+
+[[repos.hooks]]
+id = "browser-assets"
+name = "browser asset contract"
+language = "system"
+entry = """
+node --check web/app.js
+node --check web/worker.mjs
+test -s web/styles.css
+grep -q 'prefers-reduced-motion' web/styles.css
+grep -q 'aria-live=\"polite\"' web/index.html
+grep -q 'role=\"status\"' web/index.html
+"""
+shell = "bash"
+pass_filenames = false
+files = "^web/"

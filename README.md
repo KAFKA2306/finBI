@@ -109,20 +109,44 @@ Pagesの公開成功と、公開browser上で全操作がdesktop/mobileともE2E
 
 Pyodideはmodule Web Workerで `code/static_bi.py` を実行します。JavaScriptはI/O、操作、文字整形、SVG描画だけを担当します。
 
-ローカルのfast validationはCIと同じrepository-owned entrypointを使います。
+### Fast quality gate
+
+localとPR CIのfast gateは `prek.toml` に一本化します。fresh cloneでuvが利用可能なら、検証コマンドは1つです。
 
 ```bash
-bash scripts/check.sh
+uvx --from prek==0.4.11 prek run --all-files
 ```
 
-`.github/workflows/static-bi.yml` はこのscriptでPython compile、offline unit tests、PIT provenance regression、JS syntax、UI contract、public root build、HTTP route smoke test、generated residue cleanupを検証し、その後clean checkoutを確認します。公開Pagesのdesktop/mobile Selenium E2Eはdeploy後の独立jobです。
+この1コマンドが次のownerを固定します。
+
+- Python format: Ruff `0.16.0`
+- Python lint: Ruff `0.16.0`
+- Python type check: Pyrefly `1.1.1`
+- offline tests: `unittest`
+- browser syntax / accessibility contract: Node native checks + repository assertions
+- hook orchestration: prek `0.4.11`
+
+`.github/workflows/static-bi.yml` も同じprek commandを実行し、その後にpublic root build / HTTP route smoke test / clean checkoutを行います。公開Pagesのdesktop/mobile Selenium E2Eはdeploy後のintegration gateとして分離したままです。
 
 ## Dependency boundary
 
+現在のproduction runtimeは第三者Python packageを持ちません。そのためproject dependency graph用の `pyproject.toml` / `uv.lock` は追加せず、quality toolのversionを `prek.toml` 内でexact pinします。production dependencyを追加する時点でuv project + lockfileへ移行し、CIでlock driftをfailさせます。
+
+Pydanticは現在N/Aです。snapshot JSONは `code/static_bi.py` の単一のuntrusted-data boundaryでfail-close検証され、その同じpure Python codeがPyodideでも実行されます。現在の4観測snapshotだけのためにPydanticを導入するとbrowser runtime dependencyを増やすため、複数schema・外部API・backend boundaryが生まれるまで導入しません。
+
+Biome / Oxlint / `tsc --noEmit` / Zodも現在N/Aです。公開Web面は小さなplain JavaScript 2 moduleで、TypeScript・npm dependency graph・bundlerを持ちません。現状はNode native syntax checkを維持し、TypeScript導入またはJS surface拡大時に再評価します。
+
+Nx / Turborepoも単一static projectのためN/Aです。monorepo化しない限り追加しません。
+
 DuckDB-Wasm / Perspective / marimoは有力な選択肢ですが、現在の小さなsnapshotでは分析runtimeを増やす方が複雑です。採用・不採用の境界は `docs/design-2026.md`、一次参照一覧は `docs/references-2026.md` に固定しています。
 
-formatter/linter/type checkerを含む2026 tooling監査は `docs/tooling-2026.md` に記録しています。現行treeにmanifest/lockや重複authorityがないため、Ruff/Pyrefly/Pydantic/Biome/Oxlint/TypeScript/Zod/Turborepo/Nx/prekはこの保守単位では追加していません。
-
 旧 `your_streamlit_app.py` / `categories.py` / `settings.py` / `provider_status.py` と、それら専用のimport/credential互換testsは現行treeから削除済みです。判断理由は `docs/legacy-removal.md` に残します。
+
+## Issue workflow
+
+現在の未解決作業はGitHub Issuesを正準とし、READMEへ個別Issueの状態を複製しません。closed Issueを「現在の課題」として残さないためです。
+
+- Issues: https://github.com/KAFKA2306/finBI/issues
+- Actions: https://github.com/KAFKA2306/finBI/actions
 
 現在値、live market dashboard、投資助言、自動売買許可としては扱いません。
