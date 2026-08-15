@@ -179,7 +179,10 @@ def compare_curve(
 
     return {
         "schema_version": "finbi.comparison-brief.v1",
-        "hypothesis": "The 2s10s Treasury curve steepened over the selected window.",
+        "hypothesis": (
+            f"The Treasury curve between {short_move['series_id']} and "
+            f"{long_move['series_id']} steepened over the selected window."
+        ),
         "decision": steepening_hypothesis,
         "curve_shape": shape,
         "start_date": start_date,
