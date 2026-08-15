@@ -1,4 +1,5 @@
 const SNAPSHOT_URL = "./data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json";
+const SHORT_SNAPSHOT_URL = "./data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json";
 const worker = new Worker("./worker.mjs", { type: "module" });
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -16,8 +17,14 @@ const quickPicks = document.querySelector("#quick-picks");
 const chart = document.querySelector("#chart");
 const chartDesc = document.querySelector("#chart-desc");
 const chartHint = document.querySelector("#chart-hint");
+const curveBriefHeadline = document.querySelector("#curve-brief-headline");
+const curveBriefDetail = document.querySelector("#curve-brief-detail");
+const curveBriefStatus = document.querySelector("#curve-brief-status");
+const curveLongSource = document.querySelector("#curve-long-source");
+const curveShortSource = document.querySelector("#curve-short-source");
 
 let snapshot;
+let shortSnapshot;
 let pending = false;
 let chartPickPhase = "start";
 
@@ -44,6 +51,10 @@ function formatDate(value) {
 
 function formatNumber(value) {
   return new Intl.NumberFormat("ja-JP", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+}
+
+function signed(value) {
+  return `${value > 0 ? "+" : ""}${value.toFixed(1)}`;
 }
 
 function selectedPointLabel(row, role) {
@@ -155,15 +166,21 @@ function setBusy(value) {
 }
 
 function runComparison() {
-  if (!snapshot || pending) return;
+  if (!snapshot || !shortSnapshot || pending) return;
   if (start.value >= end.value) {
     status.textContent = "終了日は開始日より後を選んでください。";
     return;
   }
   setBusy(true);
   status.textContent = "比較を計算しています…";
+  curveBriefStatus.textContent = "2s10sを計算しています…";
   renderChart();
-  worker.postMessage({ snapshot, startDate: start.value, endDate: end.value });
+  worker.postMessage({
+    snapshot,
+    shortSnapshot,
+    startDate: start.value,
+    endDate: end.value,
+  });
 }
 
 function addQuickPick(startDate, endDate, prefix) {
@@ -184,6 +201,7 @@ worker.addEventListener("message", (event) => {
   setBusy(false);
   if (event.data.error) {
     status.textContent = `計算失敗: ${event.data.error}`;
+    curveBriefStatus.textContent = `2s10s計算失敗: ${event.data.error}`;
     headline.textContent = "—";
     story.textContent = "snapshotと比較条件を確認してください。";
     return;
@@ -198,11 +216,18 @@ worker.addEventListener("message", (event) => {
   const pointText = out.basis_points === null ? "" : ` 差は${pointSign}${formatNumber(out.delta)} percentage point = ${sign}${formatNumber(out.basis_points)} bpです。`;
   story.textContent = `${formatDate(out.start_date)} ${formatNumber(out.start_value)}% → ${formatDate(out.end_date)} ${formatNumber(out.end_value)}%。${pointText}${out.calendar_days}暦日の比較です。`;
   status.textContent = `比較完了 · snapshot取得 ${out.retrieved_at}`;
+
+  const brief = event.data.brief;
+  const shape = brief.curve_shape === "FLATTENED" ? "フラット化" : brief.curve_shape === "STEEPENED" ? "スティープ化" : "横ばい";
+  curveBriefHeadline.textContent = `${brief.start_spread_bp.toFixed(1)} bp → ${brief.end_spread_bp.toFixed(1)} bp · ${shape}`;
+  curveBriefDetail.textContent = `10年は${signed(brief.long_move_bp)} bp、2年は${signed(brief.short_move_bp)} bp。2s10sスプレッドは${signed(brief.spread_change_bp)} bp変化したため、「この期間にスティープ化した」という仮説は${brief.decision}です。`;
+  curveBriefStatus.textContent = `${brief.start_date} → ${brief.end_date} · ${brief.unit} · verified snapshots`;
 });
 
 worker.addEventListener("error", (event) => {
   setBusy(false);
   status.textContent = `計算処理を起動できません: ${event.message}`;
+  curveBriefStatus.textContent = `2s10s workerを起動できません: ${event.message}`;
 });
 
 compareButton.addEventListener("click", () => {
@@ -219,9 +244,16 @@ end.addEventListener("change", () => {
 });
 
 async function init() {
-  const response = await fetch(SNAPSHOT_URL);
-  if (!response.ok) throw new Error(`snapshot fetch failed: ${response.status}`);
-  snapshot = await response.json();
+  const [longResponse, shortResponse] = await Promise.all([
+    fetch(SNAPSHOT_URL),
+    fetch(SHORT_SNAPSHOT_URL),
+  ]);
+  if (!longResponse.ok) throw new Error(`snapshot fetch failed: ${longResponse.status}`);
+  if (!shortResponse.ok) throw new Error(`short snapshot fetch failed: ${shortResponse.status}`);
+  [snapshot, shortSnapshot] = await Promise.all([
+    longResponse.json(),
+    shortResponse.json(),
+  ]);
   const dates = snapshot.observations.map((row) => row.date);
 
   for (const date of dates) {
@@ -238,6 +270,8 @@ async function init() {
   seriesName.textContent = `${snapshot.source.series_id} · 米国10年国債利回り`;
   windowLabel.textContent = `${snapshot.observation_start} → ${snapshot.observation_end}`;
   sourceLink.href = snapshot.source.source_url;
+  curveLongSource.href = snapshot.source.source_url;
+  curveShortSource.href = shortSnapshot.source.source_url;
 
   addMeta("Series", snapshot.source.series_id);
   addMeta("単位", snapshot.unit);
@@ -258,5 +292,6 @@ async function init() {
 init().catch((error) => {
   setBusy(false);
   status.textContent = `初期化失敗: ${error.message}`;
+  curveBriefStatus.textContent = `2s10s初期化失敗: ${error.message}`;
   seriesName.textContent = "snapshotを読み込めませんでした";
 });

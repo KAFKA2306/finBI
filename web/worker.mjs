@@ -20,10 +20,14 @@ self.onmessage = async (event) => {
   try {
     const pyodide = await getRuntime();
     pyodide.globals.set("snapshot_json", JSON.stringify(event.data.snapshot));
+    pyodide.globals.set("short_snapshot_json", JSON.stringify(event.data.shortSnapshot));
     pyodide.globals.set("start_date", event.data.startDate);
     pyodide.globals.set("end_date", event.data.endDate);
-    const output = pyodide.runPython("compare_dates_json(snapshot_json, start_date, end_date)");
-    self.postMessage({ result: JSON.parse(output) });
+    const movement = pyodide.runPython("compare_dates_json(snapshot_json, start_date, end_date)");
+    const brief = pyodide.runPython(
+      "compare_curve_json(snapshot_json, short_snapshot_json, start_date, end_date)",
+    );
+    self.postMessage({ result: JSON.parse(movement), brief: JSON.parse(brief) });
   } catch (error) {
     self.postMessage({ error: String(error) });
   }

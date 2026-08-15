@@ -14,6 +14,7 @@ class PublicContractTest(unittest.TestCase):
             "snapshot.unit === 'Percent'",
             "const basisPoints",
             "let basisPoints",
+            "long_move_bp - short_move_bp",
         ):
             self.assertNotIn(forbidden, app)
         self.assertGreaterEqual(app.count("out.basis_points"), 2)
@@ -37,7 +38,19 @@ class PublicContractTest(unittest.TestCase):
         worker = (ROOT / "web" / "worker.mjs").read_text(encoding="utf-8")
         self.assertIn('new Worker("./worker.mjs", { type: "module" })', app)
         self.assertIn('fetch("./code/static_bi.py")', worker)
+        self.assertIn("compare_curve_json", worker)
         self.assertIn('role="status"', html)
+
+    def test_curve_brief_uses_same_date_controls_and_two_sources(self):
+        html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="curve-brief-heading"', html)
+        self.assertIn('id="curve-long-source"', html)
+        self.assertIn('id="curve-short-source"', html)
+        self.assertIn('document.querySelector("#start")', app)
+        self.assertIn('document.querySelector("#end")', app)
+        self.assertIn("fred-dgs10-2026-07-20_2026-07-23.json", app)
+        self.assertIn("fred-dgs2-2026-07-20_2026-07-23.json", app)
 
     def test_chart_points_are_directly_selectable_without_removing_selects(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")

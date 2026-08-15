@@ -139,6 +139,79 @@ def compare_dates(
     }
 
 
+def compare_curve(
+    long_snapshot: dict[str, Any],
+    short_snapshot: dict[str, Any],
+    start_date: str,
+    end_date: str,
+) -> dict[str, Any]:
+    validate_snapshot(long_snapshot)
+    validate_snapshot(short_snapshot)
+    if (
+        long_snapshot["unit"].casefold() != "percent"
+        or short_snapshot["unit"].casefold() != "percent"
+    ):
+        raise ValueError("curve comparison requires percent series")
+    if long_snapshot["source"]["series_id"] == short_snapshot["source"]["series_id"]:
+        raise ValueError("curve comparison requires distinct series")
+
+    long_move = compare_dates(long_snapshot, start_date, end_date)
+    short_move = compare_dates(short_snapshot, start_date, end_date)
+    start_spread_bp = round(
+        (long_move["start_value"] - short_move["start_value"]) * 100, 4
+    )
+    end_spread_bp = round((long_move["end_value"] - short_move["end_value"]) * 100, 4)
+    spread_change_bp = round(end_spread_bp - start_spread_bp, 4)
+    shape = (
+        "STEEPENED"
+        if spread_change_bp > 0
+        else "FLATTENED"
+        if spread_change_bp < 0
+        else "UNCHANGED"
+    )
+    steepening_hypothesis = (
+        "ACCEPT"
+        if shape == "STEEPENED"
+        else "REJECT"
+        if shape == "FLATTENED"
+        else "MAINTAIN"
+    )
+
+    return {
+        "schema_version": "finbi.comparison-brief.v1",
+        "hypothesis": "The 2s10s Treasury curve steepened over the selected window.",
+        "decision": steepening_hypothesis,
+        "curve_shape": shape,
+        "start_date": start_date,
+        "end_date": end_date,
+        "long_series_id": long_move["series_id"],
+        "short_series_id": short_move["series_id"],
+        "start_spread_bp": start_spread_bp,
+        "end_spread_bp": end_spread_bp,
+        "spread_change_bp": spread_change_bp,
+        "long_move_bp": long_move["basis_points"],
+        "short_move_bp": short_move["basis_points"],
+        "unit": "basis points",
+        "sources": [long_move["source_url"], short_move["source_url"]],
+        "retrieved_at": [long_move["retrieved_at"], short_move["retrieved_at"]],
+    }
+
+
 def compare_dates_json(snapshot_json: str, start_date: str, end_date: str) -> str:
     result = compare_dates(json.loads(snapshot_json), start_date, end_date)
+    return json.dumps(result, ensure_ascii=False, sort_keys=True)
+
+
+def compare_curve_json(
+    long_snapshot_json: str,
+    short_snapshot_json: str,
+    start_date: str,
+    end_date: str,
+) -> str:
+    result = compare_curve(
+        json.loads(long_snapshot_json),
+        json.loads(short_snapshot_json),
+        start_date,
+        end_date,
+    )
     return json.dumps(result, ensure_ascii=False, sort_keys=True)

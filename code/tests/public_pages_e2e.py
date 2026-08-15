@@ -40,6 +40,9 @@ def run_viewport(width, height):
     try:
         driver.get(URL)
         wait_text(driver, "#status", lambda value: "比較完了" in value)
+        wait_text(
+            driver, "#curve-brief-status", lambda value: "verified snapshots" in value
+        )
 
         metadata = driver.find_element(By.CSS_SELECTOR, "#metadata").text
         assert "2026-07-20 → 2026-07-23" in metadata, metadata
@@ -49,6 +52,22 @@ def run_viewport(width, height):
             "href"
         )
         assert source and "fred.stlouisfed.org" in source, source
+        for selector, series in (
+            ("#curve-long-source", "DGS10"),
+            ("#curve-short-source", "DGS2"),
+        ):
+            href = driver.find_element(By.CSS_SELECTOR, selector).get_attribute("href")
+            assert href and f"/{series}" in href, href
+
+        curve_headline = driver.find_element(
+            By.CSS_SELECTOR, "#curve-brief-headline"
+        ).text
+        curve_detail = driver.find_element(By.CSS_SELECTOR, "#curve-brief-detail").text
+        assert "39.0 bp → 34.0 bp" in curve_headline, curve_headline
+        assert "フラット化" in curve_headline, curve_headline
+        assert "10年は+11.0 bp" in curve_detail, curve_detail
+        assert "2年は+16.0 bp" in curve_detail, curve_detail
+        assert "REJECT" in curve_detail, curve_detail
 
         # The first chart pick re-renders the SVG and enters the explicit
         # two-point selection state. Re-resolve the second point after that
@@ -58,6 +77,11 @@ def run_viewport(width, height):
         click_chart_date(driver, "2026-07-23")
 
         wait_text(driver, "#status", lambda value: "比較完了" in value)
+        wait_text(
+            driver,
+            "#curve-brief-status",
+            lambda value: "2026-07-20 → 2026-07-23" in value,
+        )
         headline = driver.find_element(By.CSS_SELECTOR, "#headline").text
         story = driver.find_element(By.CSS_SELECTOR, "#story").text
         assert "+11.00 bp" in headline, headline
