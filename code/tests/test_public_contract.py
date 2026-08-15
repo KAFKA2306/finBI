@@ -7,22 +7,27 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class PublicContractTest(unittest.TestCase):
     def test_public_ui_keeps_financial_math_out_of_javascript(self):
-        app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        browser = "\n".join(
+            (ROOT / "web" / name).read_text(encoding="utf-8")
+            for name in ("app.js", "curve-brief.js")
+        )
         for forbidden in (
             "out.delta * 100",
             'snapshot.unit === "Percent"',
             "snapshot.unit === 'Percent'",
             "const basisPoints",
             "let basisPoints",
+            "long_move_bp - short_move_bp",
         ):
-            self.assertNotIn(forbidden, app)
+            self.assertNotIn(forbidden, browser)
+        app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
         self.assertGreaterEqual(app.count("out.basis_points"), 2)
         self.assertIn("out.direction", app)
 
     def test_public_ui_has_no_live_financial_provider_fetch(self):
         browser_files = "\n".join(
             (ROOT / "web" / name).read_text(encoding="utf-8")
-            for name in ("app.js", "worker.mjs")
+            for name in ("app.js", "curve-brief.js", "worker.mjs")
         )
         for forbidden in (
             "api.stlouisfed.org",
@@ -34,10 +39,24 @@ class PublicContractTest(unittest.TestCase):
     def test_worker_is_module_pyodide_and_python_core_is_same_origin(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        curve = (ROOT / "web" / "curve-brief.js").read_text(encoding="utf-8")
         worker = (ROOT / "web" / "worker.mjs").read_text(encoding="utf-8")
         self.assertIn('new Worker("./worker.mjs", { type: "module" })', app)
+        self.assertIn('new Worker("./worker.mjs", { type: "module" })', curve)
         self.assertIn('fetch("./code/static_bi.py")', worker)
+        self.assertIn("compare_curve_json", worker)
         self.assertIn('role="status"', html)
+
+    def test_curve_brief_uses_same_date_controls_and_two_sources(self):
+        html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        curve = (ROOT / "web" / "curve-brief.js").read_text(encoding="utf-8")
+        self.assertIn('id="curve-brief-heading"', html)
+        self.assertIn('id="curve-long-source"', html)
+        self.assertIn('id="curve-short-source"', html)
+        self.assertIn('document.querySelector("#start")', curve)
+        self.assertIn('document.querySelector("#end")', curve)
+        self.assertIn("fred-dgs10-2026-07-20_2026-07-23.json", curve)
+        self.assertIn("fred-dgs2-2026-07-20_2026-07-23.json", curve)
 
     def test_chart_points_are_directly_selectable_without_removing_selects(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
