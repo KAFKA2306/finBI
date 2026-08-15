@@ -160,9 +160,7 @@ def compare_curve(
     start_spread_bp = round(
         (long_move["start_value"] - short_move["start_value"]) * 100, 4
     )
-    end_spread_bp = round(
-        (long_move["end_value"] - short_move["end_value"]) * 100, 4
-    )
+    end_spread_bp = round((long_move["end_value"] - short_move["end_value"]) * 100, 4)
     spread_change_bp = round(end_spread_bp - start_spread_bp, 4)
     shape = (
         "STEEPENED"
