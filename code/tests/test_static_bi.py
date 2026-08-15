@@ -176,7 +176,8 @@ class StaticBITest(unittest.TestCase):
     def test_unsorted_observations_fail(self):
         data = self.snapshot()
         data["observations"][0], data["observations"][1] = (
-            data["observations"][1], data["observations"][0]
+            data["observations"][1],
+            data["observations"][0],
         )
         with self.assertRaises(ValueError):
             validate_snapshot(data)
