@@ -29,7 +29,7 @@ jobs:
       - name: Build public root
         run: |
           mkdir -p site/data/snapshots site/code
-          cp web/index.html web/app.js web/curve-brief.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/worker.mjs web/styles.css site/
           cp data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json site/data/snapshots/
           cp data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json site/data/snapshots/
           cp code/static_bi.py site/code/
@@ -42,7 +42,6 @@ jobs:
           sleep 1
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
           curl --fail --silent http://127.0.0.1:8123/styles.css >/dev/null
-          curl --fail --silent http://127.0.0.1:8123/curve-brief.js >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/code/static_bi.py >/dev/null
@@ -91,7 +90,7 @@ jobs:
         if: steps.pages.outputs.enabled == 'true'
         run: |
           mkdir -p site/data/snapshots site/code
-          cp web/index.html web/app.js web/curve-brief.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/worker.mjs web/styles.css site/
           cp data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json site/data/snapshots/
           cp data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json site/data/snapshots/
           cp code/static_bi.py site/code/
