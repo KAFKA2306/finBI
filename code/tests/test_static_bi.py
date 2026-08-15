@@ -60,6 +60,10 @@ class StaticBITest(unittest.TestCase):
         self.assertAlmostEqual(result["short_move_bp"], 16.0)
         self.assertEqual(result["long_series_id"], "DGS10")
         self.assertEqual(result["short_series_id"], "DGS2")
+        self.assertEqual(
+            result["hypothesis"],
+            "The Treasury curve between DGS2 and DGS10 steepened over the selected window.",
+        )
         self.assertEqual(len(result["sources"]), 2)
 
     def test_3m10y_brief_accepts_steepening_hypothesis(self):
@@ -75,6 +79,11 @@ class StaticBITest(unittest.TestCase):
         self.assertAlmostEqual(result["short_move_bp"], 9.0)
         self.assertEqual(result["long_series_id"], "DGS10")
         self.assertEqual(result["short_series_id"], "DGS3MO")
+        self.assertEqual(
+            result["hypothesis"],
+            "The Treasury curve between DGS3MO and DGS10 steepened over the selected window.",
+        )
+        self.assertNotIn("2s10s", result["hypothesis"])
 
     def test_decision_ledger_recomputes_from_verified_snapshots(self):
         ledger = self.decision_ledger()
