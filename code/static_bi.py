@@ -147,17 +147,22 @@ def compare_curve(
 ) -> dict[str, Any]:
     validate_snapshot(long_snapshot)
     validate_snapshot(short_snapshot)
-    if long_snapshot["unit"].casefold() != "percent" or short_snapshot[
-        "unit"
-    ].casefold() != "percent":
+    if (
+        long_snapshot["unit"].casefold() != "percent"
+        or short_snapshot["unit"].casefold() != "percent"
+    ):
         raise ValueError("curve comparison requires percent series")
     if long_snapshot["source"]["series_id"] == short_snapshot["source"]["series_id"]:
         raise ValueError("curve comparison requires distinct series")
 
     long_move = compare_dates(long_snapshot, start_date, end_date)
     short_move = compare_dates(short_snapshot, start_date, end_date)
-    start_spread_bp = round((long_move["start_value"] - short_move["start_value"]) * 100, 4)
-    end_spread_bp = round((long_move["end_value"] - short_move["end_value"]) * 100, 4)
+    start_spread_bp = round(
+        (long_move["start_value"] - short_move["start_value"]) * 100, 4
+    )
+    end_spread_bp = round(
+        (long_move["end_value"] - short_move["end_value"]) * 100, 4
+    )
     spread_change_bp = round(end_spread_bp - start_spread_bp, 4)
     shape = (
         "STEEPENED"
@@ -166,7 +171,13 @@ def compare_curve(
         if spread_change_bp < 0
         else "UNCHANGED"
     )
-    steepening_hypothesis = "ACCEPT" if shape == "STEEPENED" else "REJECT" if shape == "FLATTENED" else "MAINTAIN"
+    steepening_hypothesis = (
+        "ACCEPT"
+        if shape == "STEEPENED"
+        else "REJECT"
+        if shape == "FLATTENED"
+        else "MAINTAIN"
+    )
 
     return {
         "schema_version": "finbi.comparison-brief.v1",
