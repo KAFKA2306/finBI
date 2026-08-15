@@ -1,0 +1,41 @@
+{
+  "schema_version": "finbi.decision-ledger.v1",
+  "window": {
+    "start_date": "2026-07-20",
+    "end_date": "2026-07-23"
+  },
+  "retrieved_at": "2026-07-24T20:17:00Z",
+  "hypotheses": [
+    {
+      "id": "2s10s-steepening",
+      "hypothesis": "The 2s10s Treasury curve steepened over the selected window.",
+      "long_series_id": "DGS10",
+      "short_series_id": "DGS2",
+      "start_spread_bp": 39.0,
+      "end_spread_bp": 34.0,
+      "spread_change_bp": -5.0,
+      "curve_shape": "FLATTENED",
+      "decision": "REJECT",
+      "source_urls": [
+        "https://fred.stlouisfed.org/series/DGS10",
+        "https://fred.stlouisfed.org/series/DGS2"
+      ]
+    },
+    {
+      "id": "3m10y-steepening",
+      "hypothesis": "The 3m10y Treasury curve steepened over the selected window.",
+      "long_series_id": "DGS10",
+      "short_series_id": "DGS3MO",
+      "start_spread_bp": 74.0,
+      "end_spread_bp": 76.0,
+      "spread_change_bp": 2.0,
+      "curve_shape": "STEEPENED",
+      "decision": "ACCEPT",
+      "source_urls": [
+        "https://fred.stlouisfed.org/series/DGS10",
+        "https://fred.stlouisfed.org/series/DGS3MO"
+      ]
+    }
+  ],
+  "interpretation_boundary": "These decisions classify yield-curve shape over the fixed verified snapshot window only. They are not forecasts, recession calls, or investment advice."
+}
