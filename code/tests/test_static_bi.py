@@ -12,6 +12,9 @@ SHORT_SNAPSHOT = ROOT / "data" / "snapshots" / "fred-dgs2-2026-07-20_2026-07-23.
 THREE_MONTH_SNAPSHOT = (
     ROOT / "data" / "snapshots" / "fred-dgs3mo-2026-07-20_2026-07-23.json"
 )
+THIRTY_YEAR_SNAPSHOT = (
+    ROOT / "data" / "snapshots" / "fred-dgs30-2026-07-20_2026-07-23.json"
+)
 DECISION_LEDGER = (
     ROOT / "data" / "decisions" / "treasury-curves-2026-07-20_2026-07-23.json"
 )
@@ -29,6 +32,9 @@ class StaticBITest(unittest.TestCase):
 
     def three_month_snapshot(self):
         return json.loads(THREE_MONTH_SNAPSHOT.read_text(encoding="utf-8"))
+
+    def thirty_year_snapshot(self):
+        return json.loads(THIRTY_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
 
     def decision_ledger(self):
         return json.loads(DECISION_LEDGER.read_text(encoding="utf-8"))
@@ -85,6 +91,24 @@ class StaticBITest(unittest.TestCase):
         )
         self.assertNotIn("2s10s", result["hypothesis"])
 
+    def test_10s30s_brief_rejects_steepening_hypothesis(self):
+        result = compare_curve(
+            self.thirty_year_snapshot(), self.snapshot(), "2026-07-20", "2026-07-23"
+        )
+        self.assertEqual(result["decision"], "REJECT")
+        self.assertEqual(result["curve_shape"], "FLATTENED")
+        self.assertAlmostEqual(result["start_spread_bp"], 51.0)
+        self.assertAlmostEqual(result["end_spread_bp"], 46.0)
+        self.assertAlmostEqual(result["spread_change_bp"], -5.0)
+        self.assertAlmostEqual(result["long_move_bp"], 6.0)
+        self.assertAlmostEqual(result["short_move_bp"], 11.0)
+        self.assertEqual(result["long_series_id"], "DGS30")
+        self.assertEqual(result["short_series_id"], "DGS10")
+        self.assertEqual(
+            result["hypothesis"],
+            "The Treasury curve between DGS10 and DGS30 steepened over the selected window.",
+        )
+
     def test_decision_ledger_recomputes_from_verified_snapshots(self):
         ledger = self.decision_ledger()
         self.assertEqual(ledger["schema_version"], "finbi.decision-ledger.v1")
@@ -92,6 +116,7 @@ class StaticBITest(unittest.TestCase):
             "DGS10": self.snapshot(),
             "DGS2": self.short_snapshot(),
             "DGS3MO": self.three_month_snapshot(),
+            "DGS30": self.thirty_year_snapshot(),
         }
         for decision in ledger["hypotheses"]:
             result = compare_curve(
