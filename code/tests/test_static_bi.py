@@ -15,6 +15,9 @@ THREE_MONTH_SNAPSHOT = (
 FIVE_YEAR_SNAPSHOT = (
     ROOT / "data" / "snapshots" / "fred-dgs5-2026-07-20_2026-07-23.json"
 )
+SEVEN_YEAR_SNAPSHOT = (
+    ROOT / "data" / "snapshots" / "fred-dgs7-2026-07-20_2026-07-23.json"
+)
 THIRTY_YEAR_SNAPSHOT = (
     ROOT / "data" / "snapshots" / "fred-dgs30-2026-07-20_2026-07-23.json"
 )
@@ -38,6 +41,9 @@ class StaticBITest(unittest.TestCase):
 
     def five_year_snapshot(self):
         return json.loads(FIVE_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
+
+    def seven_year_snapshot(self):
+        return json.loads(SEVEN_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
 
     def thirty_year_snapshot(self):
         return json.loads(THIRTY_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
@@ -115,6 +121,24 @@ class StaticBITest(unittest.TestCase):
             "The Treasury curve between DGS5 and DGS10 steepened over the selected window.",
         )
 
+    def test_7s10s_brief_rejects_steepening_hypothesis(self):
+        result = compare_curve(
+            self.snapshot(), self.seven_year_snapshot(), "2026-07-20", "2026-07-23"
+        )
+        self.assertEqual(result["decision"], "REJECT")
+        self.assertEqual(result["curve_shape"], "FLATTENED")
+        self.assertAlmostEqual(result["start_spread_bp"], 15.0)
+        self.assertAlmostEqual(result["end_spread_bp"], 13.0)
+        self.assertAlmostEqual(result["spread_change_bp"], -2.0)
+        self.assertAlmostEqual(result["long_move_bp"], 11.0)
+        self.assertAlmostEqual(result["short_move_bp"], 13.0)
+        self.assertEqual(result["long_series_id"], "DGS10")
+        self.assertEqual(result["short_series_id"], "DGS7")
+        self.assertEqual(
+            result["hypothesis"],
+            "The Treasury curve between DGS7 and DGS10 steepened over the selected window.",
+        )
+
     def test_10s30s_brief_rejects_steepening_hypothesis(self):
         result = compare_curve(
             self.thirty_year_snapshot(), self.snapshot(), "2026-07-20", "2026-07-23"
@@ -141,6 +165,7 @@ class StaticBITest(unittest.TestCase):
             "DGS2": self.short_snapshot(),
             "DGS3MO": self.three_month_snapshot(),
             "DGS5": self.five_year_snapshot(),
+            "DGS7": self.seven_year_snapshot(),
             "DGS30": self.thirty_year_snapshot(),
         }
         for decision in ledger["hypotheses"]:
