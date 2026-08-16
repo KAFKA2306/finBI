@@ -50,6 +50,21 @@
         "https://fred.stlouisfed.org/series/DGS30",
         "https://fred.stlouisfed.org/series/DGS10"
       ]
+    },
+    {
+      "id": "5s10s-steepening",
+      "hypothesis": "The 5s10s Treasury curve steepened over the selected window.",
+      "long_series_id": "DGS10",
+      "short_series_id": "DGS5",
+      "start_spread_bp": 27.0,
+      "end_spread_bp": 25.0,
+      "spread_change_bp": -2.0,
+      "curve_shape": "FLATTENED",
+      "decision": "REJECT",
+      "source_urls": [
+        "https://fred.stlouisfed.org/series/DGS10",
+        "https://fred.stlouisfed.org/series/DGS5"
+      ]
     }
   ],
   "interpretation_boundary": "These decisions classify yield-curve shape over the fixed verified snapshot window only. They are not forecasts, recession calls, or investment advice."
