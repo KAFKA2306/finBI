@@ -24,7 +24,7 @@ jobs:
           version: "0.11.32"
 
       - name: Run fast quality gates
-        run: bash scripts/check.sh
+        run: uvx --from prek==0.4.11 prek run --all-files
 
       - name: Build public root
         run: |
