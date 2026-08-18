@@ -1,5 +1,6 @@
 import os
 import time
+from urllib.parse import parse_qs, urlparse
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -28,6 +29,12 @@ def click_chart_date(driver, date, timeout=30):
         return True
 
     WebDriverWait(driver, timeout).until(_click)
+
+
+def assert_period_query(driver, expected_start, expected_end):
+    query = parse_qs(urlparse(driver.current_url).query)
+    assert query.get("start") == [expected_start], query
+    assert query.get("end") == [expected_end], query
 
 
 def run_viewport(width, height):
@@ -69,9 +76,6 @@ def run_viewport(width, height):
         assert "2年は+16.0 bp" in curve_detail, curve_detail
         assert "REJECT" in curve_detail, curve_detail
 
-        # The first chart pick re-renders the SVG and enters the explicit
-        # two-point selection state. Re-resolve the second point after that
-        # re-render instead of retaining a stale Selenium element.
         click_chart_date(driver, "2026-07-20")
         wait_text(driver, "#status", lambda value: "次に終了日" in value)
         click_chart_date(driver, "2026-07-23")
@@ -94,6 +98,25 @@ def run_viewport(width, height):
         end_value = driver.find_element(By.CSS_SELECTOR, "#end").get_attribute("value")
         assert start_value == "2026-07-20", start_value
         assert end_value == "2026-07-23", end_value
+        assert_period_query(driver, "2026-07-20", "2026-07-23")
+
+        shared_url = f"{URL}?start=2026-07-21&end=2026-07-22"
+        driver.get(shared_url)
+        wait_text(driver, "#status", lambda value: "比較完了" in value)
+        wait_text(
+            driver,
+            "#curve-brief-status",
+            lambda value: "2026-07-21 → 2026-07-22" in value,
+        )
+        restored_start = driver.find_element(By.CSS_SELECTOR, "#start").get_attribute(
+            "value"
+        )
+        restored_end = driver.find_element(By.CSS_SELECTOR, "#end").get_attribute(
+            "value"
+        )
+        assert restored_start == "2026-07-21", restored_start
+        assert restored_end == "2026-07-22", restored_end
+        assert_period_query(driver, "2026-07-21", "2026-07-22")
 
         overflow = driver.execute_script(
             "return document.documentElement.scrollWidth > document.documentElement.clientWidth;"
