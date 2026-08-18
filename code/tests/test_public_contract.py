@@ -62,6 +62,15 @@ class PublicContractTest(unittest.TestCase):
         self.assertIn('chartPickPhase = "end"', app)
         self.assertIn('class: "chart-selected-label dynamic"', app)
 
+    def test_comparison_period_is_shareable_and_restorable_from_url(self):
+        html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+        self.assertIn('requested.get("start")', html)
+        self.assertIn('requested.get("end")', html)
+        self.assertIn('url.searchParams.set("start", start.value)', html)
+        self.assertIn('url.searchParams.set("end", end.value)', html)
+        self.assertIn('window.history.replaceState(null, "", url)', html)
+        self.assertIn("requestedStart < requestedEnd", html)
+
     def test_quick_picks_show_dates_and_bp_is_explained(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
