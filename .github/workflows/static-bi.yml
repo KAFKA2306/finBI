@@ -28,10 +28,9 @@ jobs:
 
       - name: Build public root
         run: |
-          mkdir -p site/data/snapshots site/data/decisions site/code
+          mkdir -p site/data/snapshots site/code
           cp web/index.html web/app.js web/worker.mjs web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
-          cp data/decisions/treasury-curves-2026-07-20_2026-07-23.json site/data/decisions/
           cp code/static_bi.py site/code/
 
       - name: Smoke-test public routes
@@ -48,7 +47,6 @@ jobs:
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs5-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs7-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs30-2026-07-20_2026-07-23.json >/dev/null
-          curl --fail --silent http://127.0.0.1:8123/data/decisions/treasury-curves-2026-07-20_2026-07-23.json | grep -q '7s10s-steepening'
           curl --fail --silent http://127.0.0.1:8123/code/static_bi.py >/dev/null
 
       - name: Remove generated residue
@@ -94,10 +92,9 @@ jobs:
       - name: Build Pages artifact
         if: steps.pages.outputs.enabled == 'true'
         run: |
-          mkdir -p site/data/snapshots site/data/decisions site/code
+          mkdir -p site/data/snapshots site/code
           cp web/index.html web/app.js web/worker.mjs web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
-          cp data/decisions/treasury-curves-2026-07-20_2026-07-23.json site/data/decisions/
           cp code/static_bi.py site/code/
 
       - name: Configure Pages

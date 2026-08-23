@@ -21,9 +21,6 @@ SEVEN_YEAR_SNAPSHOT = (
 THIRTY_YEAR_SNAPSHOT = (
     ROOT / "data" / "snapshots" / "fred-dgs30-2026-07-20_2026-07-23.json"
 )
-DECISION_LEDGER = (
-    ROOT / "data" / "decisions" / "treasury-curves-2026-07-20_2026-07-23.json"
-)
 AVAILABILITY_FIXTURE = (
     ROOT / "code" / "tests" / "fixtures" / "fred-dgs10-availability-2026-07-24.json"
 )
@@ -47,9 +44,6 @@ class StaticBITest(unittest.TestCase):
 
     def thirty_year_snapshot(self):
         return json.loads(THIRTY_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
-
-    def decision_ledger(self):
-        return json.loads(DECISION_LEDGER.read_text(encoding="utf-8"))
 
     def availability_fixture(self):
         return json.loads(AVAILABILITY_FIXTURE.read_text(encoding="utf-8"))
@@ -156,36 +150,6 @@ class StaticBITest(unittest.TestCase):
             result["hypothesis"],
             "The Treasury curve between DGS10 and DGS30 steepened over the selected window.",
         )
-
-    def test_decision_ledger_recomputes_from_verified_snapshots(self):
-        ledger = self.decision_ledger()
-        self.assertEqual(ledger["schema_version"], "finbi.decision-ledger.v1")
-        snapshots = {
-            "DGS10": self.snapshot(),
-            "DGS2": self.short_snapshot(),
-            "DGS3MO": self.three_month_snapshot(),
-            "DGS5": self.five_year_snapshot(),
-            "DGS7": self.seven_year_snapshot(),
-            "DGS30": self.thirty_year_snapshot(),
-        }
-        for decision in ledger["hypotheses"]:
-            result = compare_curve(
-                snapshots[decision["long_series_id"]],
-                snapshots[decision["short_series_id"]],
-                ledger["window"]["start_date"],
-                ledger["window"]["end_date"],
-            )
-            for key in (
-                "long_series_id",
-                "short_series_id",
-                "start_spread_bp",
-                "end_spread_bp",
-                "spread_change_bp",
-                "curve_shape",
-                "decision",
-            ):
-                self.assertEqual(result[key], decision[key])
-            self.assertEqual(result["sources"], decision["source_urls"])
 
     def test_curve_requires_distinct_series(self):
         with self.assertRaisesRegex(ValueError, "distinct series"):

@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CODE_DIR = ROOT / "code"
+DATA_DIR = ROOT / "data"
 WEB_DIR = ROOT / "web"
 
 
@@ -17,6 +18,9 @@ class StaticBoundaryTests(unittest.TestCase):
     def test_public_ui_surface_is_four_files(self) -> None:
         files = sorted(path.name for path in WEB_DIR.iterdir() if path.is_file())
         self.assertEqual(files, ["app.js", "index.html", "styles.css", "worker.mjs"])
+
+    def test_derived_decisions_are_not_stored(self) -> None:
+        self.assertFalse((DATA_DIR / "decisions").exists())
 
     def test_no_personal_path_pickle_or_legacy_runtime(self) -> None:
         source = "\n".join(

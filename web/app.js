@@ -2,6 +2,7 @@ const SNAPSHOT_URL = "./data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json";
 const SHORT_SNAPSHOT_URL = "./data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json";
 const worker = new Worker("./worker.mjs", { type: "module" });
 const SVG_NS = "http://www.w3.org/2000/svg";
+const requested = new URLSearchParams(window.location.search);
 
 const start = document.querySelector("#start");
 const end = document.querySelector("#end");
@@ -59,6 +60,33 @@ function signed(value) {
 
 function selectedPointLabel(row, role) {
   return `${role} ${formatDate(row.date)} · ${formatNumber(row.value)}%`;
+}
+
+function restoreSelection(dates) {
+  const requestedStart = requested.get("start");
+  const requestedEnd = requested.get("end");
+  const available = new Set(dates);
+  if (
+    requestedStart &&
+    requestedEnd &&
+    available.has(requestedStart) &&
+    available.has(requestedEnd) &&
+    requestedStart < requestedEnd
+  ) {
+    start.value = requestedStart;
+    end.value = requestedEnd;
+    return;
+  }
+  start.value = dates[0];
+  end.value = dates.at(-1);
+}
+
+function syncUrl() {
+  if (!start.value || !end.value || start.value >= end.value) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("start", start.value);
+  url.searchParams.set("end", end.value);
+  window.history.replaceState(null, "", url);
 }
 
 function chooseChartPoint(date) {
@@ -222,6 +250,7 @@ worker.addEventListener("message", (event) => {
   curveBriefHeadline.textContent = `${brief.start_spread_bp.toFixed(1)} bp → ${brief.end_spread_bp.toFixed(1)} bp · ${shape}`;
   curveBriefDetail.textContent = `10年は${signed(brief.long_move_bp)} bp、2年は${signed(brief.short_move_bp)} bp。2s10sスプレッドは${signed(brief.spread_change_bp)} bp変化したため、「この期間にスティープ化した」という仮説は${brief.decision}です。`;
   curveBriefStatus.textContent = `${brief.start_date} → ${brief.end_date} · ${brief.unit} · verified snapshots`;
+  syncUrl();
 });
 
 worker.addEventListener("error", (event) => {
@@ -265,8 +294,7 @@ async function init() {
     }
   }
 
-  start.value = dates[0];
-  end.value = dates.at(-1);
+  restoreSelection(dates);
   seriesName.textContent = `${snapshot.source.series_id} · 米国10年国債利回り`;
   windowLabel.textContent = `${snapshot.observation_start} → ${snapshot.observation_end}`;
   sourceLink.href = snapshot.source.source_url;
