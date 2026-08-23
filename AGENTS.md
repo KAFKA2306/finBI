@@ -2,42 +2,38 @@
 
 ## Mission
 
-Own point-in-time market-observation comparison views for this repository. Present versioned market observations in a way that preserves source/as-of semantics and helps compare instruments or periods without becoming a duplicate primary-source warehouse.
+Own point-in-time market-observation comparison views for this repository. Present versioned observations with source/as-of semantics so users can compare instruments or periods without turning finBI into a second primary-source warehouse.
 
 ## Canonical authority
 
-- Consume versioned observations from their owning canonical source/provider/repository when possible; do not create a second authority merely for presentation.
-- Preserve instrument identity, timestamp/as-of, market session/field, unit/currency, source/provenance and point-in-time semantics required by the current view.
+- Consume versioned observations from their owning source/provider/repository when possible; do not create a second authority merely for presentation.
+- Preserve instrument identity, timestamp/as-of, market session/field, unit/currency, source/provenance and point-in-time semantics required by the view.
 - Keep observed values, deterministic derived comparisons and interpretation distinct.
+
+## Simplification
+
+- Keep current executable mechanisms on the current surface; keep future work in Issues or target design.
+- One responsibility should have one canonical entry point, data authority and implementation path.
+- Remove dead code, stale docs/config, duplicate wrappers, completed scaffolding and repository-local compatibility once evidence shows they are no longer required.
+- Prefer source data plus deterministic derivation over storing a second maintained copy of derived results.
+- Test deletion hypotheses; restore anything that direct evidence shows is still required.
+- Preserve migration/data-safety controls until their completion criteria are actually satisfied.
+- Put machine-decidable rules in tests/CI instead of prose when practical.
 
 ## Autonomous execution
 
-1. Inspect current `main`, README, open Issues/PRs, canonical inputs, view artifacts, workflows/tests and deployed public surface.
-2. Continue one canonical workline before adding another data store, chart layer, branch or Issue.
-3. Prefer correction of point-in-time/source semantics, a working comparison user flow, production read-back, or deletion/consolidation of duplicate views/data paths.
+1. Inspect current `main`, README, open Issues/PRs, canonical inputs, view artifacts, workflows/tests and the deployed public surface when release evidence is in scope.
+2. Continue one canonical workline before adding another data store, chart layer or Issue.
+3. Prefer correction of point-in-time/source semantics, a working comparison flow, production read-back, or deletion/consolidation of duplicate views/data paths.
 4. Use source data by reference/version/hash where practical rather than copying the same fact into another maintained dataset.
 5. Run focused deterministic/UI checks and verify the exact reviewed revision before merge.
 6. Stop at the fixed point; do not add charts or metrics that do not change a user decision/comparison task.
 
-## Branch lifecycle
-
-- Aside from the default branch and unavoidable platform-managed/protected branches, a persistent branch is permitted only while it is the head branch of a currently open PR.
-- Creating a work branch creates an obligation to open or reuse its canonical PR immediately; do not use branches as backlog, continuation state, backup, archive, or evidence storage.
-- After a PR is merged or closed, delete its head branch after verifying PR/main state. A branch with no open PR is an orphan and must be deleted.
-- Before and after work, compare repository branches with open PR heads. Do not report cleanup/fixed point while an orphan task branch remains.
-- If the available tool cannot delete a branch, record that as a tooling blocker and do not claim cleanup complete. Never create another orphan branch as a workaround.
-
 ## Merge and release are separate
 
-### PR merge conditions
+A PR may merge when the repository-local view/data contract is correct on the exact head revision: point-in-time/source semantics are preserved, relevant deterministic/UI tests pass, generated output is reproducible when affected, and no unresolved correctness blocker remains.
 
-A PR may merge when the repository-local view/data contract is correct on the exact head revision: point-in-time/source semantics are preserved, relevant deterministic/UI tests pass, generated output is reproducible when affected, and no unresolved review or correctness blocker remains.
-
-A production URL, field analytics, deployment completion, fresh market observation after merge, or actual user traffic is **not** a merge condition unless the PR specifically changes the release mechanism and pre-merge validation of that mechanism is part of the bounded contract.
-
-### Product release conditions
-
-Release is a separate post-merge decision. Treat a public market view as released only after the merged `main` revision and the actual production surface are read back and verified, including deployment identity and the material user path when in scope. Field analytics or user outcomes are evidence of operation/adoption, not proof required for ordinary code merge.
+Release is a separate post-merge decision. Treat a public view as released only after the merged `main` revision and actual production surface are read back and verified when release is in scope. Field analytics or user outcomes are evidence of operation/adoption, not ordinary merge prerequisites.
 
 A merged PR does not prove production release. A production blocker does not retroactively invalidate a correctly merged repository change. Report merge and release independently.
 
@@ -51,4 +47,4 @@ A merged PR does not prove production release. A production blocker does not ret
 
 ## Completion report
 
-Report user/data outcome Before -> After, owning source/canonical view, Issue/PR/commit/check evidence, then report `merged` and `released` separately with direct evidence for each. Include branch cleanup state, production evidence only for the release side, duplicate authority/manual work removed, and remaining blocker.
+Report user/data outcome Before -> After, owning source/canonical view, Issue/PR/commit/check evidence, `merged` and `released` separately, duplicate authority/manual work removed, and remaining blockers.
