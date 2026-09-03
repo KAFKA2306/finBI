@@ -44,6 +44,7 @@ name = "browser asset contract"
 language = "system"
 entry = """
 node --check web/app.js
+node --check web/question-router.js
 node --check web/worker.mjs
 test -s web/styles.css
 grep -q 'prefers-reduced-motion' web/styles.css
