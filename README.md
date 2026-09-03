@@ -4,123 +4,122 @@ https://kafka2306.github.io/finBI/
 
 [![Static Python BI](https://github.com/KAFKA2306/finBI/actions/workflows/static-bi.yml/badge.svg)](https://github.com/KAFKA2306/finBI/actions/workflows/static-bi.yml)
 
-**finBI is a Financial Decision Workbench.**
+**finBI is financial BI.**
 
-金融チャートを集めるのではなく、繰り返し出てくる質問を、同じデータ・同じ計算・同じ監査規則で再実行できるようにします。
+目的はIssue管理や分析エージェント化ではありません。金融・投資で繰り返し出てくる論点を、**同じデータ・同じ計算・同じ比較軸で見える化し、判断しやすくするBI**です。
+
+金融系GitHub Issuesは、finBIが「何を見せられるべきか」を決める要求源として使います。Issue番号・タスク状態・完了条件そのものをfinBIの正本にはしません。
 
 ```text
-question
+canonical data
   ↓
-required data
-  ↓
-observed facts
-  ↓
-deterministic calculation
+validated metrics
   ↓
 comparison / scenario
   ↓
-decision implication
+chart / table / KPI
+  ↓
+decision-supporting BI view
   ↓
 source / as-of / revision
 ```
 
-現在の公開Pagesで実稼働しているのは、保存済み米国債snapshotを使った `Rates Desk` の2点比較です。これはfinBI全体では**最初の1レシピ**です。
+現在の公開Pagesで実稼働しているのは、保存済み米国債snapshotを使った `Rates Desk` の2点比較です。これはfinBI全体では最初のBI viewです。
 
-## What questions should finBI answer?
+## What should finBI make visible?
 
 ### Portfolio / allocation
 
-- 今のポートフォリオはどうか
-- 何を買う、何を売る、何%追加する
-- リスク寄与・集中・重複はどうか
-- 効率的フロンティアはどう変わるか
-- 同じリターンでリスクだけ下げられるか
-- 口座をまたいだ資産配分をどう直すか
+- 現在の資産配分、通貨配分、口座横断配分
+- risk contribution、集中、重複
+- 効率的フロンティア
+- minimum variance / same-return min-vol / max Sharpe
+- 何%追加・削減した場合のbefore / after
 
 ### FX / Rates / Bonds
 
-- USD/JPY 3倍は本当に効率が良いか
-- swap、日米金利差、実効レバレッジはどうか
-- 固定USD建玉と3倍リセットはどう違うか
-- SBI・楽天・銀行・FX業者をどう比較するか
-- 国債・債券・MMF・定期預金と株をどう比べるか
-- 政策金利、実質金利、イールドカーブは何を意味するか
+- USD/JPY spot、swap、carry、実効レバレッジ
+- fixed-notional / constant leverage / leveraged productの差
+- margin、loss-cut headroom、stress
+- SBI・楽天・銀行・FX業者の比較
+- 政策金利、実質金利、イールドカーブ
+- JGB / UST / MMF / MRF / 定期預金との比較
 
-### Valuation / Macro / Events
+### Valuation / Fundamentals
 
-- PERや益利回りは投資判断に使えるか
-- EPS CAGR・実需成長と現在価格は整合しているか
-- AI、半導体、クラウド需要をどの資産で取るか
-- M2・流動性・CPI/PCE・雇用・PMIからレジームをどう読むか
-- ニュースは本当か、何が改定されたか
-- そのニュースで今のポートフォリオを変えるべきか
+- PER、earnings yield、EPS / FCF growth
+- Revenue / EPS/share / FCF/share CAGR
+- growth × terminal multipleのIRR scenario
+- Mag7 / Top10 / semis / AI infrastructure比較
+- revision history
+
+### Macro / Liquidity / Events
+
+- CPI / PCE / jobs / PMI / money supply / liquidity
+- 前回、1週、1か月、前年差
+- market / portfolio exposureとの関係
+- observed fact / forecast / interpretationの分離
 
 ### Backtest / Risk
 
-- CAGR、Vol、Sharpe、Max DDはどうか
-- 開始時点を変えると結論は変わるか
-- 有利な期間だけ切り取っていないか
-- proxyと実際に約定できる戦略は一致しているか
+- CAGR、Vol、Sharpe、Sortino、Max DD、CVaR
+- rolling period、start-date sensitivity、regime差
+- transaction cost、carry、funding、turnover
+- proxyとexecutable strategyの区別
 
 ### Products / Tax / Cashflow
 
-- ETF・投信・預金・証券会社・銀行のどれを使うか
-- 信託報酬・金利・税・為替・流動性を入れるとどうか
-- 予定納税・ふるさと納税上限はいくらか
-- 給与、副業、事業所得、青色申告、NISA/iDeCoをどう組み合わせるか
-- 法人化や投資税務をどう比較するか
+- ETF・投信・預金・証券会社・銀行の横比較
+- fee、金利、税、為替、流動性
+- 予定納税、ふるさと納税、NISA/iDeCo、副業cashflowのシナリオ表
 
 ### Audit
 
-- この数字はいつ時点か
-- 一次情報は何か
-- verified / proxy / estimate / assumption のどれか
-- 過去の回答から何が変わったか
-- 改定履歴を含めて信じてよいか
+- source
+- observation date / as-of
+- retrieved_at
+- vintage / revision
+- verified / proxy / estimate / assumption
+- stale / unavailable
 
-## Product surfaces
+## BI surfaces
 
-finBIは次のDeskへ収束させます。
-
-| Surface | Role |
+| Surface | BI role |
 |---|---|
-| Command Center | 総資産、主要リスク、未解決の意思決定 |
+| Overview | 総資産、市場、主要リスク、重要KPI |
 | Portfolio | 保有、配分、重複、risk contribution、rebalance |
-| Frontier Lab | efficient frontier、制約、what-if配分 |
-| FX Desk | USDJPY、swap、carry、leverage、margin、stress |
-| Rates Desk | policy rates、yield curve、real yields、bond alternatives |
-| Valuation | PER、earnings yield、EPS growth、factor comparison |
+| Frontier | efficient frontier、制約、what-if配分 |
+| FX | USDJPY、swap、carry、leverage、margin、stress |
+| Rates | policy rates、yield curve、real yields、bond alternatives |
+| Valuation | PER、earnings yield、EPS/FCF growth、IRR scenario |
 | Macro | inflation、liquidity、growth、regime |
-| Event Lens | news → affected assets → portfolio impact → action/no-action |
+| Events | event前後の市場・fundamental変化とexposure |
 | Products | broker、bank、ETF、fund、deposit比較 |
 | Tax & Cashflow | 税、NISA/iDeCo、ふるさと納税、副業cashflow |
-| Backtest Lab | strategy、rolling window、regime、stress |
-| Ask / Recipes | 質問を正準分析レシピへroute |
+| Backtest | strategy、rolling window、regime、stress |
 | Audit | source、as-of、vintage、assumption、revision |
 
-対応質問の正準定義は [`data/questions/catalog.v1.json`](data/questions/catalog.v1.json) が所有します。**新しいchartを増やすだけでは機能追加とみなしません。質問レシピが増えて初めてcapabilityが増えます。**
+`data/questions/catalog.v1.json` は、過去に繰り返し出た金融質問を **どのBI surface / metricで解けるようにすべきか整理する内部カタログ**です。UIやdata authorityより上位の「Issue Solver」にはしません。
 
 ## Architecture
 
-finBIは表示と意思決定のsemantic layerです。一次データのwarehouseを複製しません。
+finBIは表示・集計・比較のBI layerです。一次データのwarehouse、Issue tracker、研究実行基盤を複製しません。
 
 ```text
-investor2      portfolio analytics / optimization
-kakeibo        household cashflow
-econalert      macro events
-auto-invest    strategy experiments
-broker / bank / official / market providers
-             ↓
-finBI adapters / versioned observation contracts
-             ↓
-question recipe registry
-             ↓
-calculation / comparison / scenario
-             ↓
-Financial Decision Workbench
+investor2 / CrewTrade / econalert / auto-invest / official providers
+                         ↓
+              canonical outputs / snapshots
+                         ↓
+                  finBI adapters
+                         ↓
+             deterministic BI metrics
+                         ↓
+             charts / tables / scenarios
+                         ↓
+                       finBI
 ```
 
-既存のpoint-in-time snapshot検証、source/as-of/unit、fail-closeは維持します。
+Issueで必要になった分析は、可能な限り既存ownerの正準出力をfinBIで可視化します。計算authorityをfinBIへ重複移植しません。
 
 ## Public / private boundary
 
@@ -128,12 +127,12 @@ Financial Decision Workbench
 
 そのため、**口座番号、個人の取引明細、生の残高、税務書類、credential、個人識別情報はcommitしません。**
 
-- Public Pages: verified public dataまたはsynthetic/sample data
+- Public Pages: verified public dataまたは公開可能なsample data
 - Private analysis: localまたはconnected private source
-- 両者で共有するもの: schema、計算レシピ、view contract
+- 両者で共有するもの: schema、計算規則、view contract
 - 共有しないもの: private raw data
 
-## First live recipe: Rates Desk / two-point comparison
+## First live BI view: Rates / two-point comparison
 
 現在の公開UIは保存済みDGS10/DGS2 snapshotを使い、次を行います。
 
