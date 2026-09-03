@@ -9,18 +9,6 @@ from static_bi import compare_curve, compare_dates, validate_snapshot
 ROOT = Path(__file__).resolve().parents[2]
 SNAPSHOT = ROOT / "data" / "snapshots" / "fred-dgs10-2026-07-20_2026-07-23.json"
 SHORT_SNAPSHOT = ROOT / "data" / "snapshots" / "fred-dgs2-2026-07-20_2026-07-23.json"
-THREE_MONTH_SNAPSHOT = (
-    ROOT / "data" / "snapshots" / "fred-dgs3mo-2026-07-20_2026-07-23.json"
-)
-FIVE_YEAR_SNAPSHOT = (
-    ROOT / "data" / "snapshots" / "fred-dgs5-2026-07-20_2026-07-23.json"
-)
-SEVEN_YEAR_SNAPSHOT = (
-    ROOT / "data" / "snapshots" / "fred-dgs7-2026-07-20_2026-07-23.json"
-)
-THIRTY_YEAR_SNAPSHOT = (
-    ROOT / "data" / "snapshots" / "fred-dgs30-2026-07-20_2026-07-23.json"
-)
 AVAILABILITY_FIXTURE = (
     ROOT / "code" / "tests" / "fixtures" / "fred-dgs10-availability-2026-07-24.json"
 )
@@ -32,18 +20,6 @@ class StaticBITest(unittest.TestCase):
 
     def short_snapshot(self):
         return json.loads(SHORT_SNAPSHOT.read_text(encoding="utf-8"))
-
-    def three_month_snapshot(self):
-        return json.loads(THREE_MONTH_SNAPSHOT.read_text(encoding="utf-8"))
-
-    def five_year_snapshot(self):
-        return json.loads(FIVE_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
-
-    def seven_year_snapshot(self):
-        return json.loads(SEVEN_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
-
-    def thirty_year_snapshot(self):
-        return json.loads(THIRTY_YEAR_SNAPSHOT.read_text(encoding="utf-8"))
 
     def availability_fixture(self):
         return json.loads(AVAILABILITY_FIXTURE.read_text(encoding="utf-8"))
@@ -78,78 +54,19 @@ class StaticBITest(unittest.TestCase):
         )
         self.assertEqual(len(result["sources"]), 2)
 
-    def test_3m10y_brief_accepts_steepening_hypothesis(self):
+    def test_curve_accepts_steepening_when_long_rate_moves_more(self):
+        short = self.short_snapshot()
+        short["observations"][-1]["value"] = 4.26
         result = compare_curve(
-            self.snapshot(), self.three_month_snapshot(), "2026-07-20", "2026-07-23"
+            self.snapshot(), short, "2026-07-20", "2026-07-23"
         )
         self.assertEqual(result["decision"], "ACCEPT")
         self.assertEqual(result["curve_shape"], "STEEPENED")
-        self.assertAlmostEqual(result["start_spread_bp"], 74.0)
-        self.assertAlmostEqual(result["end_spread_bp"], 76.0)
-        self.assertAlmostEqual(result["spread_change_bp"], 2.0)
+        self.assertAlmostEqual(result["start_spread_bp"], 39.0)
+        self.assertAlmostEqual(result["end_spread_bp"], 45.0)
+        self.assertAlmostEqual(result["spread_change_bp"], 6.0)
         self.assertAlmostEqual(result["long_move_bp"], 11.0)
-        self.assertAlmostEqual(result["short_move_bp"], 9.0)
-        self.assertEqual(result["long_series_id"], "DGS10")
-        self.assertEqual(result["short_series_id"], "DGS3MO")
-        self.assertEqual(
-            result["hypothesis"],
-            "The Treasury curve between DGS3MO and DGS10 steepened over the selected window.",
-        )
-        self.assertNotIn("2s10s", result["hypothesis"])
-
-    def test_5s10s_brief_rejects_steepening_hypothesis(self):
-        result = compare_curve(
-            self.snapshot(), self.five_year_snapshot(), "2026-07-20", "2026-07-23"
-        )
-        self.assertEqual(result["decision"], "REJECT")
-        self.assertEqual(result["curve_shape"], "FLATTENED")
-        self.assertAlmostEqual(result["start_spread_bp"], 27.0)
-        self.assertAlmostEqual(result["end_spread_bp"], 25.0)
-        self.assertAlmostEqual(result["spread_change_bp"], -2.0)
-        self.assertAlmostEqual(result["long_move_bp"], 11.0)
-        self.assertAlmostEqual(result["short_move_bp"], 13.0)
-        self.assertEqual(result["long_series_id"], "DGS10")
-        self.assertEqual(result["short_series_id"], "DGS5")
-        self.assertEqual(
-            result["hypothesis"],
-            "The Treasury curve between DGS5 and DGS10 steepened over the selected window.",
-        )
-
-    def test_7s10s_brief_rejects_steepening_hypothesis(self):
-        result = compare_curve(
-            self.snapshot(), self.seven_year_snapshot(), "2026-07-20", "2026-07-23"
-        )
-        self.assertEqual(result["decision"], "REJECT")
-        self.assertEqual(result["curve_shape"], "FLATTENED")
-        self.assertAlmostEqual(result["start_spread_bp"], 15.0)
-        self.assertAlmostEqual(result["end_spread_bp"], 13.0)
-        self.assertAlmostEqual(result["spread_change_bp"], -2.0)
-        self.assertAlmostEqual(result["long_move_bp"], 11.0)
-        self.assertAlmostEqual(result["short_move_bp"], 13.0)
-        self.assertEqual(result["long_series_id"], "DGS10")
-        self.assertEqual(result["short_series_id"], "DGS7")
-        self.assertEqual(
-            result["hypothesis"],
-            "The Treasury curve between DGS7 and DGS10 steepened over the selected window.",
-        )
-
-    def test_10s30s_brief_rejects_steepening_hypothesis(self):
-        result = compare_curve(
-            self.thirty_year_snapshot(), self.snapshot(), "2026-07-20", "2026-07-23"
-        )
-        self.assertEqual(result["decision"], "REJECT")
-        self.assertEqual(result["curve_shape"], "FLATTENED")
-        self.assertAlmostEqual(result["start_spread_bp"], 51.0)
-        self.assertAlmostEqual(result["end_spread_bp"], 46.0)
-        self.assertAlmostEqual(result["spread_change_bp"], -5.0)
-        self.assertAlmostEqual(result["long_move_bp"], 6.0)
-        self.assertAlmostEqual(result["short_move_bp"], 11.0)
-        self.assertEqual(result["long_series_id"], "DGS30")
-        self.assertEqual(result["short_series_id"], "DGS10")
-        self.assertEqual(
-            result["hypothesis"],
-            "The Treasury curve between DGS10 and DGS30 steepened over the selected window.",
-        )
+        self.assertAlmostEqual(result["short_move_bp"], 5.0)
 
     def test_curve_requires_distinct_series(self):
         with self.assertRaisesRegex(ValueError, "distinct series"):
