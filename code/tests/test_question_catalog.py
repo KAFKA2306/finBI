@@ -36,22 +36,22 @@ REQUIRED_DESKS = {
 }
 
 
-class QuestionCatalogTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
-        cls.recipes = cls.catalog["recipes"]
+def load_catalog():
+    return json.loads(CATALOG.read_text(encoding="utf-8"))
 
+
+class QuestionCatalogTest(unittest.TestCase):
     def test_catalog_has_stable_schema_and_unique_ids(self):
-        self.assertEqual(
-            self.catalog["schema_version"], "finbi.question-catalog.v1"
-        )
-        ids = [recipe["question_id"] for recipe in self.recipes]
+        catalog = load_catalog()
+        recipes = catalog["recipes"]
+        self.assertEqual(catalog["schema_version"], "finbi.question-catalog.v1")
+        ids = [recipe["question_id"] for recipe in recipes]
         self.assertEqual(len(ids), len(set(ids)))
         self.assertGreaterEqual(len(ids), 10)
 
     def test_every_recipe_declares_decision_and_provenance_contract(self):
-        for recipe in self.recipes:
+        recipes = load_catalog()["recipes"]
+        for recipe in recipes:
             self.assertTrue(REQUIRED_RECIPE_FIELDS <= recipe.keys(), recipe)
             for field in (
                 "required_inputs",
@@ -74,17 +74,23 @@ class QuestionCatalogTest(unittest.TestCase):
                 self.assertTrue(recipe[field].strip())
 
     def test_catalog_covers_core_financial_desks(self):
-        desks = {recipe["desk"] for recipe in self.recipes}
+        recipes = load_catalog()["recipes"]
+        desks = {recipe["desk"] for recipe in recipes}
         self.assertTrue(REQUIRED_DESKS <= desks)
 
     def test_rates_two_point_comparison_is_a_recipe_not_the_product_mission(self):
-        rates = [r for r in self.recipes if r["question_id"] == "rates.bonds"]
+        catalog = load_catalog()
+        rates = [
+            recipe
+            for recipe in catalog["recipes"]
+            if recipe["question_id"] == "rates.bonds"
+        ]
         self.assertEqual(len(rates), 1)
         self.assertIn("2s10s", rates[0]["comparison_or_scenario"])
-        self.assertNotIn("two-date Treasury comparison", self.catalog["mission"])
+        self.assertNotIn("two-date Treasury comparison", catalog["mission"])
 
     def test_public_private_boundary_forbids_committing_private_raw_data(self):
-        boundary = self.catalog["public_private_boundary"]
+        boundary = load_catalog()["public_private_boundary"]
         self.assertIs(boundary["public_repository"], True)
         private_rule = boundary["private_inputs"].casefold()
         for phrase in (
