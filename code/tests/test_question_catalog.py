@@ -109,9 +109,7 @@ class QuestionCatalogTest(unittest.TestCase):
             self.assertIn(phrase, private_rule)
 
     def test_router_terms_only_reference_registered_recipes(self):
-        catalog_ids = {
-            recipe["question_id"] for recipe in load_catalog()["recipes"]
-        }
+        catalog_ids = {recipe["question_id"] for recipe in load_catalog()["recipes"]}
         router = load_router()
         self.assertEqual(router["schema_version"], "finbi.question-router.v1")
         routed_ids = set()
