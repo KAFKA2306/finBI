@@ -1,5 +1,4 @@
 const CATALOG_URL = "./data/questions/catalog.v1.json";
-const ROUTER_URL = "./data/questions/router.v1.json";
 const LIVE_VIEWS = new Map([
   ["rates.bonds", { href: "#rates-desk", label: "Rates viewを開く" }],
   ["fx.carry_leverage", { href: "#fx-desk", label: "FX viewを開く" }],
@@ -125,21 +124,13 @@ function addExample(label) {
 
 async function initQuestionRouter() {
   try {
-    const [catalogResponse, routerResponse] = await Promise.all([
-      fetch(CATALOG_URL),
-      fetch(ROUTER_URL),
-    ]);
-    if (!catalogResponse.ok || !routerResponse.ok) {
-      throw new Error("BI catalog fetch failed");
-    }
-    const [catalog, router] = await Promise.all([
-      catalogResponse.json(),
-      routerResponse.json(),
-    ]);
+    const response = await fetch(CATALOG_URL);
+    if (!response.ok) throw new Error("BI catalog fetch failed");
+    const catalog = await response.json();
     recipesById = new Map(
       catalog.recipes.map((recipe) => [recipe.question_id, recipe]),
     );
-    routes = router.routes;
+    routes = catalog.routes;
     results.textContent = `${recipesById.size}個のBI要件を読み込みました。金融の論点を入力してください。`;
   } catch (error) {
     results.textContent = `BIカタログを読み込めません: ${error.message}`;
