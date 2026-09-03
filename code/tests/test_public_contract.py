@@ -82,8 +82,8 @@ class PublicContractTest(unittest.TestCase):
         )
 
         self.assertIn('matchMedia("(prefers-color-scheme: dark)")', app)
-        self.assertIn('document.documentElement.dataset.theme = theme', app)
-        self.assertIn('document.documentElement.style.colorScheme = theme', app)
+        self.assertIn("document.documentElement.dataset.theme = theme", app)
+        self.assertIn("document.documentElement.style.colorScheme = theme", app)
         self.assertIn('systemTheme.addEventListener("change", syncSystemTheme)', app)
         self.assertNotRegex(app, r"#[0-9A-Fa-f]{3,8}")
         self.assertIn('[data-theme="dark"]', tokens)
