@@ -5,6 +5,9 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+CANONICAL_FX_URL = (
+    "https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json"
+)
 
 
 class PublicContractTest(unittest.TestCase):
@@ -72,19 +75,17 @@ class PublicContractTest(unittest.TestCase):
         self.assertIn("fred-dgs10-2026-07-20_2026-07-23.json", app)
         self.assertIn("fred-dgs2-2026-07-20_2026-07-23.json", app)
 
-    def test_fx_view_consumes_investor2_contract_read_only(self):
+    def test_fx_view_consumes_investor2_contract_without_local_copy(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         fx = (ROOT / "web" / "fx.js").read_text(encoding="utf-8")
-        snapshot_path = ROOT / "data" / "snapshots" / "investor2-fx-overlay.json"
-        overlay = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        duplicated = ROOT / "data" / "snapshots" / "investor2-fx-overlay.json"
 
         self.assertIn('id="fx-desk"', html)
         self.assertIn('id="fx-overlay-status"', html)
         self.assertIn('id="fx-reason"', html)
-        self.assertIn("investor2-fx-overlay.json", fx)
-        self.assertEqual(overlay["schema_version"], "investor2.fx-overlay.v1")
-        self.assertEqual(overlay["status"], "UNVERIFIED")
-        self.assertEqual(set(overlay), {"schema_version", "status", "reason"})
+        self.assertIn(CANONICAL_FX_URL, fx)
+        self.assertIn('fetch(FX_OVERLAY_URL, { cache: "no-store" })', fx)
+        self.assertFalse(duplicated.exists())
         self.assertIn(
             "KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md", html
         )
