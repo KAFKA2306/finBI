@@ -24,7 +24,7 @@ decision-supporting BI view
 source / as-of / revision
 ```
 
-現在の公開Pagesで実稼働しているのは、保存済み米国債snapshotを使った `Rates Desk` の2点比較です。これはfinBI全体では最初のBI viewです。
+現在の公開Pagesでは、**FX** と **Rates** の2つのBI viewが実稼働しています。その他のSurfaceは、正準データまたは正準analytics outputが接続されるまで `PLANNED` とし、仮の数値を表示しません。
 
 ## What should finBI make visible?
 
@@ -84,20 +84,20 @@ source / as-of / revision
 
 ## BI surfaces
 
-| Surface | BI role |
-|---|---|
-| Overview | 総資産、市場、主要リスク、重要KPI |
-| Portfolio | 保有、配分、重複、risk contribution、rebalance |
-| Frontier | efficient frontier、制約、what-if配分 |
-| FX | USDJPY、swap、carry、leverage、margin、stress |
-| Rates | policy rates、yield curve、real yields、bond alternatives |
-| Valuation | PER、earnings yield、EPS/FCF growth、IRR scenario |
-| Macro | inflation、liquidity、growth、regime |
-| Events | event前後の市場・fundamental変化とexposure |
-| Products | broker、bank、ETF、fund、deposit比較 |
-| Tax & Cashflow | 税、NISA/iDeCo、ふるさと納税、副業cashflow |
-| Backtest | strategy、rolling window、regime、stress |
-| Audit | source、as-of、vintage、assumption、revision |
+| Surface | State | BI role |
+|---|---|---|
+| FX | **LIVE** | USDJPY、SBI swap、3x carry、scenario、margin reference、source audit |
+| Rates | **LIVE** | policy rates、Treasury yield curve、point-in-time comparison |
+| Overview | PLANNED | 総資産、市場、主要リスク、重要KPI |
+| Portfolio | PLANNED | 保有、配分、重複、risk contribution、rebalance |
+| Frontier | PLANNED | efficient frontier、制約、what-if配分 |
+| Valuation | PLANNED | PER、earnings yield、EPS/FCF growth、IRR scenario |
+| Macro | PLANNED | inflation、liquidity、growth、regime |
+| Events | PLANNED | event前後の市場・fundamental変化とexposure |
+| Products | PLANNED | broker、bank、ETF、fund、deposit比較 |
+| Tax & Cashflow | PLANNED | 税、NISA/iDeCo、ふるさと納税、副業cashflow |
+| Backtest | PLANNED | strategy、rolling window、regime、stress |
+| Audit | PLANNED | source、as-of、vintage、assumption、revisionの横断表示 |
 
 `data/questions/catalog.v1.json` は、過去に繰り返し出た金融質問を **どのBI surface / metricで解けるようにすべきか整理する内部カタログ**です。UIやdata authorityより上位の「Issue Solver」にはしません。
 
@@ -132,9 +132,40 @@ Issueで必要になった分析は、可能な限り既存ownerの正準出力�
 - 両者で共有するもの: schema、計算規則、view contract
 - 共有しないもの: private raw data
 
-## First live BI view: Rates / two-point comparison
+この制約のため、個人ポートフォリオや口座横断Frontierをpublic snapshotへコピーしません。`investor2` 等の正準analytics outputまたはprivate/local inputをread-onlyで接続できるまでは `PLANNED` とします。
 
-現在の公開UIは保存済みDGS10/DGS2 snapshotを使い、次を行います。
+## Live BI view: FX / USDJPY 3x
+
+`data/snapshots/usdjpy-sbi-2026-09-03.json` に、公開確認できた情報をpoint-in-time snapshotとして固定しています。
+
+- USD/JPY: Reutersの2026-09-03市場観測
+- SBI FX current raw swap: 2026-09-03適用分
+- SBI FX normalized scenario reference: 2026-09-02適用分 117円/日/1万USD
+- SBI 3x必要保証金reference
+- SBI 3x loss-cut reference
+- Fed target midpoint
+- BOJ overnight-call guideline
+
+重要な境界として、2026-09-03のSBI buy swap `468円 / 1万USD` は **付与日数を検証できていないraw observation** です。これを1日分とはみなしません。
+
+1年scenarioは別に、2026-09-02の `117円/日/1万USD` が365日変わらないと明示的に仮定して計算します。したがってこれは将来swap予測ではありません。
+
+現在のsnapshot contractでは、1万USD・初期3倍・fixed initial notionalとして次をPythonで決定論的に導出します。
+
+- initial notional / equity
+- annualized scenario swap
+- carry on initial equity
+- carryを相殺するbreak-even FX move
+- Fed midpoint - BOJ policy-rate gap
+- USDJPY -20%〜+10%の1年scenario table
+
+spread、slippage、tax、transaction cost、途中のmargin-call / liquidation pathは含めません。特にpolicy-rate gapをbroker swapへ代用しません。
+
+金融計算は `code/static_bi.py` が所有し、`web/fx.js` はPythonから返された結果の描画だけを行います。
+
+## Live BI view: Rates / two-point comparison
+
+保存済みDGS10/DGS2 snapshotを使い、次を行います。
 
 1. 保存済み時系列を見る
 2. 開始日・終了日を選ぶ
@@ -144,11 +175,11 @@ Issueで必要になった分析は、可能な限り既存ownerの正準出力�
 
 比較期間はURLの`start` / `end`で復元できます。現在値の速報ではありません。
 
-### Current data authority
+### Snapshot authority
 
-`data/snapshots/` のversioned snapshotは、series ID、単位、観測期間、取得時刻、source/provenance、availability evidenceを保持します。
+`data/snapshots/` のversioned snapshotは、対象viewに必要なsource、観測時点、取得時刻、availability、assumptionを保持します。
 
-観測値から得られる差分、bp、direction、yield-curve shapeは保存済みの別ledgerを持たず、`code/static_bi.py` が決定論的に導出します。
+Treasury観測値から得られる差分、bp、direction、yield-curve shapeは保存済みの別ledgerを持たず、`code/static_bi.py` が決定論的に導出します。
 
 availabilityを一次情報で証明できないsnapshot、取得時刻より後に利用可能になった観測、provenance欠落、観測順序破損はfail-closeします。
 
@@ -161,6 +192,8 @@ availabilityを一次情報で証明できないsnapshot、取得時刻より後
 - backtestはwindowとstart-date/regime sensitivityを確認する
 - 現在の価格・金利・swap・商品条件・税制・ニュースはcurrent sourceで再確認する
 - stale/cached値をliveと呼ばない
+- missing holdingを0として扱わない
+- policy-rate gapをactual broker swapへsilent代用しない
 - provenance矛盾はfail-closeする
 
 ## Verification
@@ -171,7 +204,7 @@ fresh cloneでPython 3.12、Node.js、uvが利用可能ならfast gateは1コマ
 uvx --from prek==0.4.11 prek run --all-files
 ```
 
-`prek.toml` がRuff format/lint、Pyrefly、offline unittest、browser syntax/accessibility contractを所有します。GitHub Actionsは同じgateに加え、Pages artifact build、HTTP route smoke、clean checkoutを検証します。
+`prek.toml` がRuff format/lint、Pyrefly、offline unittest、browser syntax/accessibility contractを所有します。GitHub Actionsは同じgateに加え、Pages artifact build、HTTP route smoke、clean checkout、公開Pagesのdesktop/mobile E2Eを検証します。
 
 ## Work state
 
