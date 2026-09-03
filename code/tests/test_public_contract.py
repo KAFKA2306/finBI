@@ -154,7 +154,9 @@ class PublicContractTest(unittest.TestCase):
         for item in lock["managedFiles"]:
             managed = ROOT / item["path"]
             self.assertTrue(managed.is_file())
-            self.assertEqual(hashlib.sha256(managed.read_bytes()).hexdigest(), item["sha256"])
+            self.assertEqual(
+                hashlib.sha256(managed.read_bytes()).hexdigest(), item["sha256"]
+            )
 
         tokens = (ROOT / "web" / ".kafka-design" / "kafka-tokens.css").read_text(
             encoding="utf-8"
