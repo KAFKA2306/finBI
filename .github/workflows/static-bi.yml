@@ -40,7 +40,7 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 1
-          curl --fail --silent http://127.0.0.1:8123/ | grep -q 'Financial Decision Workbench'
+          curl --fail --silent http://127.0.0.1:8123/ | grep -q 'Financial BI'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
           curl --fail --silent http://127.0.0.1:8123/styles.css >/dev/null
           curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
