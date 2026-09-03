@@ -116,7 +116,7 @@ class PublicContractTest(unittest.TestCase):
     def test_controls_do_not_override_44px_minimum(self):
         css = (ROOT / "web" / "styles.css").read_text(encoding="utf-8")
         compact = re.sub(r"\s+", "", css)
-        self.assertIn("button,select{min-height:44px}", compact)
+        self.assertRegex(compact, r"button,select\{min-height:44px;?\}")
         self.assertIn(".chip{min-height:44px", compact)
         self.assertNotIn(".chip{min-height:40px", compact)
 
