@@ -38,38 +38,28 @@ def assert_period_query(driver, expected_start, expected_end):
 
 
 def assert_fx_view(driver):
-    wait_text(
-        driver, "#fx-status", lambda value: "deterministic Python scenario" in value
+    wait_text(driver, "#fx-status", lambda value: "read-only investor2 output" in value)
+    assert (
+        driver.find_element(By.CSS_SELECTOR, "#fx-schema").text
+        == "investor2.fx-overlay.v1"
     )
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-spot").text == "156.17"
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-carry").text == "8.20%"
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-break-even").text == "-2.73%"
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-rate-gap").text == "2.625 pp"
+    assert (
+        driver.find_element(By.CSS_SELECTOR, "#fx-overlay-status").text == "UNVERIFIED"
+    )
+    assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text == "—"
+    assert driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text == "—"
 
-    swap_current = driver.find_element(By.CSS_SELECTOR, "#fx-swap-current").text
-    swap_reference = driver.find_element(By.CSS_SELECTOR, "#fx-swap-reference").text
-    assert "468円" in swap_current, swap_current
-    assert "117円/日" in swap_reference, swap_reference
+    reason = driver.find_element(By.CSS_SELECTOR, "#fx-reason").text
+    assert "canonical realized daily swap history" in reason, reason
+    assert "actual portfolio position snapshot" in reason, reason
 
-    scenario_text = driver.find_element(By.CSS_SELECTOR, "#fx-scenarios").text
-    assert "-5.0%" in scenario_text, scenario_text
-    assert "-6.80%" in scenario_text, scenario_text
-    assert "+10.0%" in scenario_text, scenario_text
-    assert "+38.20%" in scenario_text, scenario_text
-
-    assumptions = driver.find_element(By.CSS_SELECTOR, "#fx-assumptions").text
-    assert "constant 117 yen/day" in assumptions, assumptions
-    assert "not a liquidation-path backtest" in assumptions, assumptions
-
-    for selector, expected in (
-        ("#fx-source-spot", "reuters.com"),
-        ("#fx-source-swap", "sbisec.co.jp"),
-        ("#fx-source-margin", "sbisec.co.jp"),
-        ("#fx-source-fed", "federalreserve.gov"),
-        ("#fx-source-boj", "boj.or.jp"),
-    ):
-        href = driver.find_element(By.CSS_SELECTOR, selector).get_attribute("href")
-        assert href and expected in href, href
+    links = [
+        element.get_attribute("href")
+        for element in driver.find_elements(By.CSS_SELECTOR, "#fx-desk .source-row a")
+    ]
+    assert any("fx_overlay_contract.md" in href for href in links), links
+    assert any("/issues/251" in href for href in links), links
+    assert any("/issues/252" in href for href in links), links
 
 
 def run_viewport(width, height):

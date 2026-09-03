@@ -19,13 +19,6 @@ async function getRuntime() {
 self.onmessage = async (event) => {
   try {
     const pyodide = await getRuntime();
-    if (event.data.kind === "fx") {
-      pyodide.globals.set("fx_snapshot_json", JSON.stringify(event.data.snapshot));
-      const brief = pyodide.runPython("analyze_fx_snapshot_json(fx_snapshot_json)");
-      self.postMessage({ kind: "fx", brief: JSON.parse(brief) });
-      return;
-    }
-
     pyodide.globals.set("snapshot_json", JSON.stringify(event.data.snapshot));
     pyodide.globals.set("short_snapshot_json", JSON.stringify(event.data.shortSnapshot));
     pyodide.globals.set("start_date", event.data.startDate);
@@ -38,6 +31,6 @@ self.onmessage = async (event) => {
     );
     self.postMessage({ kind: "rates", result: JSON.parse(movement), brief: JSON.parse(brief) });
   } catch (error) {
-    self.postMessage({ error: String(error), kind: event.data.kind ?? "rates" });
+    self.postMessage({ error: String(error), kind: "rates" });
   }
 };

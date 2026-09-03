@@ -1,119 +1,123 @@
-const FX_SNAPSHOT_URL = "./data/snapshots/usdjpy-sbi-2026-09-03.json";
+const FX_OVERLAY_URL = "./data/snapshots/investor2-fx-overlay.json";
+const FX_OVERLAY_SCHEMA = "investor2.fx-overlay.v1";
 
 const fxStyles = document.createElement("link");
 fxStyles.rel = "stylesheet";
 fxStyles.href = "./fx.css";
 document.head.append(fxStyles);
 
-const worker = new Worker("./worker.mjs", { type: "module" });
 const status = document.querySelector("#fx-status");
-const scenarioBody = document.querySelector("#fx-scenarios");
-
-function number(value, digits = 2) {
-  return Number(value).toLocaleString("ja-JP", {
-    minimumFractionDigits: digits,
-    maximumFractionDigits: digits,
-  });
-}
-
-function signed(value, digits = 2, suffix = "") {
-  const numeric = Number(value);
-  const prefix = numeric > 0 ? "+" : "";
-  return `${prefix}${number(numeric, digits)}${suffix}`;
-}
+const percent = new Intl.NumberFormat("ja-JP", {
+  style: "percent",
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+const decimal = new Intl.NumberFormat("ja-JP", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 function setText(selector, value) {
   const element = document.querySelector(selector);
   if (element) element.textContent = value;
 }
 
-function setSource(selector, href) {
-  const link = document.querySelector(selector);
-  if (link) link.href = href;
+function optionalPercent(value) {
+  return Number.isFinite(value) ? percent.format(value) : "—";
 }
 
-function renderScenarios(rows) {
-  scenarioBody.replaceChildren();
-  for (const row of rows) {
-    const tr = document.createElement("tr");
-    const values = [
-      signed(row.spot_return_percent, 1, "%"),
-      number(row.ending_spot, 2),
-      signed(row.equity_return_percent, 2, "%"),
-      signed(row.pnl_yen, 0, "円"),
-    ];
-    for (const value of values) {
-      const td = document.createElement("td");
-      td.textContent = value;
-      tr.append(td);
-    }
-    scenarioBody.append(tr);
+function optionalDecimal(value) {
+  return Number.isFinite(value) ? decimal.format(value) : "—";
+}
+
+function clearCanonicalMetrics() {
+  for (const selector of [
+    "#fx-current-exposure",
+    "#fx-current-exposure-detail",
+    "#fx-incremental-exposure",
+    "#fx-incremental-exposure-detail",
+    "#fx-total-exposure",
+    "#fx-hedge-ratio",
+    "#fx-margin-requirement",
+    "#fx-liquidation-headroom",
+    "#fx-cagr",
+    "#fx-volatility",
+    "#fx-sharpe",
+    "#fx-max-drawdown",
+    "#fx-expected-shortfall",
+    "#fx-turnover",
+  ]) {
+    setText(selector, "—");
   }
 }
 
-function renderBrief(brief) {
-  setText("#fx-spot", number(brief.spot, 2));
-  setText("#fx-asof", `as of ${brief.as_of}`);
-  setText("#fx-carry", `${number(brief.carry_on_initial_equity_percent, 2)}%`);
-  setText("#fx-break-even", `${number(brief.break_even_spot_return_percent, 2)}%`);
-  setText("#fx-rate-gap", `${number(brief.policy_rate_gap_percentage_points, 3)} pp`);
-  setText("#fx-fed", `${number(brief.fed_target_midpoint_percent, 3)}%`);
-  setText("#fx-boj", `${number(brief.boj_policy_rate_percent, 3)}%`);
-  setText(
-    "#fx-swap-current",
-    `${number(brief.current_raw_buy_swap_yen_per_10000, 0)}円 / 1万USD`,
-  );
-  setText(
-    "#fx-swap-reference",
-    `${number(brief.scenario_daily_buy_swap_yen_per_10000, 0)}円/日 · ${brief.scenario_swap_reference_date}`,
-  );
-  setText("#fx-notional", `${number(brief.notional_yen, 0)}円`);
-  setText("#fx-equity", `${number(brief.initial_equity_yen, 0)}円`);
-  setText(
-    "#fx-margin-reference",
-    `${number(brief.broker_3x_required_margin_reference_yen, 0)}円 · ${brief.broker_margin_reference_date}`,
-  );
-  setText(
-    "#fx-loss-cut",
-    `${number(brief.initial_loss_cut_ratio_percent, 0)}% 初期設定`,
-  );
-  setText("#fx-annual-swap", `${number(brief.annualized_swap_yen, 0)}円/年`);
-
-  setSource("#fx-source-spot", brief.sources.spot);
-  setSource("#fx-source-swap", brief.sources.swap_current_raw);
-  setSource("#fx-source-margin", brief.sources.margin);
-  setSource("#fx-source-fed", brief.sources.fed);
-  setSource("#fx-source-boj", brief.sources.boj);
-  renderScenarios(brief.scenarios);
-
-  const assumptions = document.querySelector("#fx-assumptions");
-  assumptions.replaceChildren();
-  for (const item of brief.assumptions) {
-    const li = document.createElement("li");
-    li.textContent = item;
-    assumptions.append(li);
+function validateOverlay(result) {
+  if (!result || result.schema_version !== FX_OVERLAY_SCHEMA) {
+    throw new Error("unsupported canonical FX overlay schema");
   }
-
-  status.textContent = `verified snapshot + deterministic Python scenario · retrieved ${brief.retrieved_at}`;
+  if (!new Set(["VERIFIED", "TEST_ONLY", "UNVERIFIED"]).has(result.status)) {
+    throw new Error("unsupported canonical FX overlay status");
+  }
+  if (result.status === "UNVERIFIED" && !result.reason) {
+    throw new Error("UNVERIFIED canonical output requires a reason");
+  }
 }
 
-worker.addEventListener("message", (event) => {
-  if (event.data.kind !== "fx") return;
-  if (event.data.error) {
-    status.textContent = `FX BIを計算できません: ${event.data.error}`;
-    return;
+function renderVerified(result) {
+  const current = optionalPercent(result.currentUsdExposure);
+  const incremental = optionalPercent(result.recommendedIncrementalUsdExposure);
+  setText("#fx-current-exposure", current);
+  setText("#fx-current-exposure-detail", current);
+  setText("#fx-incremental-exposure", incremental);
+  setText("#fx-incremental-exposure-detail", incremental);
+  setText("#fx-total-exposure", optionalPercent(result.recommendedTotalUsdExposure));
+  setText("#fx-hedge-ratio", optionalDecimal(result.hedgeRatio));
+  setText("#fx-margin-requirement", optionalPercent(result.marginRequirementFraction));
+  setText(
+    "#fx-liquidation-headroom",
+    optionalPercent(result.liquidationHeadroomFraction),
+  );
+
+  const oos = result.oos ?? {};
+  setText("#fx-cagr", optionalPercent(oos.cagr));
+  setText("#fx-volatility", optionalPercent(oos.annualizedVolatility));
+  setText("#fx-sharpe", optionalDecimal(oos.sharpe));
+  setText("#fx-max-drawdown", optionalPercent(oos.maxDrawdown));
+  setText("#fx-expected-shortfall", optionalPercent(oos.expectedShortfall95));
+  setText("#fx-turnover", optionalDecimal(oos.turnover));
+  setText(
+    "#fx-reason",
+    result.status === "TEST_ONLY"
+      ? "Canonical calculation completed with test-fixture evidence. Production recommendation is not verified."
+      : "Canonical investor2 output is verified. finBI is displaying it without recalculation.",
+  );
+}
+
+function renderOverlay(result) {
+  validateOverlay(result);
+  setText("#fx-schema", result.schema_version);
+  setText("#fx-overlay-status", result.status);
+  clearCanonicalMetrics();
+
+  if (result.status === "UNVERIFIED") {
+    setText("#fx-reason", result.reason);
+  } else {
+    renderVerified(result);
   }
-  renderBrief(event.data.brief);
-});
+
+  status.textContent = `${result.status} · read-only investor2 output · finBI calculation authorityなし`;
+}
 
 async function initFx() {
   try {
-    const response = await fetch(FX_SNAPSHOT_URL);
-    if (!response.ok) throw new Error(`snapshot fetch failed: ${response.status}`);
-    const snapshot = await response.json();
-    worker.postMessage({ kind: "fx", snapshot });
+    const response = await fetch(FX_OVERLAY_URL);
+    if (!response.ok) throw new Error(`canonical output fetch failed: ${response.status}`);
+    renderOverlay(await response.json());
   } catch (error) {
-    status.textContent = `FX snapshotを読み込めません: ${error.message}`;
+    clearCanonicalMetrics();
+    setText("#fx-overlay-status", "UNVERIFIED");
+    setText("#fx-reason", `Canonical outputを読み込めません: ${error.message}`);
+    status.textContent = "UNVERIFIED · fail closed";
   }
 }
 

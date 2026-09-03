@@ -3,7 +3,7 @@
   "mission": "Map recurring financial questions to canonical data, calculations, scenarios, decisions, and provenance without duplicating primary-source authority.",
   "public_private_boundary": {
     "public_repository": true,
-    "public_pages": "verified public or synthetic/sample observations only",
+    "public_pages": "verified public data or publication-safe canonical output only",
     "private_inputs": "local or connected private sources only; never commit account numbers, private transaction exports, tax documents, credentials, or personal identifiers"
   },
   "recipes": [
@@ -70,17 +70,17 @@
     {
       "question_id": "fx.carry_leverage",
       "desk": "fx-desk",
-      "intent": "USDJPYの1x/2x/3x等、swap、金利差、固定建玉、ロスカットを評価する",
-      "required_inputs": ["USDJPY", "swap", "margin rules", "policy/overnight rates"],
-      "data_authority": ["broker", "central bank", "market provider"],
-      "as_of_policy": "current swap and margin terms timestamped separately from historical backtest",
-      "calculation": ["carry", "effective leverage", "margin buffer", "fixed-notional wealth", "constant-leverage factor"],
-      "comparison_or_scenario": ["FX move stress", "broker comparison", "fixed-notional vs reset leverage"],
-      "decision_output": ["position size band", "avoid", "macro-only allocation"],
-      "risk_output": ["FX sensitivity", "liquidation distance", "drawdown", "leverage drift"],
-      "provenance_output": ["broker rule date", "swap date", "rate sources", "backtest window"],
-      "freshness_requirement": "same-day/most-recent broker terms for execution",
-      "failure_mode": "REJECT when monthly-average data is presented as executable daily risk"
+      "intent": "現在ポートフォリオのUSD exposureとFX overlayの正準状態を確認する",
+      "required_inputs": ["investor2.fx-overlay.v1"],
+      "data_authority": ["KAFKA2306/investor2"],
+      "as_of_policy": "finBI must display canonical output status and provenance and must not synthesize missing portfolio or carry inputs",
+      "calculation": ["read-only canonical metric projection"],
+      "comparison_or_scenario": ["current vs recommended USD exposure", "canonical fixed-baseline results when supplied upstream"],
+      "decision_output": ["canonical VERIFIED/TEST_ONLY/UNVERIFIED status", "recommended incremental USD exposure when verified upstream"],
+      "risk_output": ["canonical OOS volatility", "max drawdown", "expected shortfall", "margin/liquidation metrics"],
+      "provenance_output": ["canonical schema/version", "upstream provenance", "status/reason"],
+      "freshness_requirement": "use the latest verified canonical investor2 output; otherwise UNVERIFIED",
+      "failure_mode": "UNVERIFIED without canonical FX overlay output; no finBI calculation fallback"
     },
     {
       "question_id": "rates.bonds",
