@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "designSha": "f39a0865cf0342f495bf49f547c7fdf112145d77",
+  "designSha": "6ef94b60a9fefcd7577ec25d2edd4bca06096314",
   "preset": "financial-dashboard",
-  "configHash": "3a135ec447b73a24c2722537803bcee23e6742678e577e31be3947542ea3ed7e",
-  "manifestHash": "a0690837cd442dba8d6af90e1ee5c46fb41c0df49c3795ae313661fffdc42836",
+  "configHash": "c55c5b5c29315f4202016250787c94bf45677ed780b6ba8127b4671f0a06a860",
+  "manifestHash": "097bc8f17893fbc00476858253099d31199b0d026317e7afe40e8f6aae46a770",
   "logoHash": null,
   "installedRegistryItems": [],
   "managedFiles": [
@@ -18,10 +18,18 @@
     {
       "path": "web/.kafka-design/kafka-components.css",
       "sha256": "6236943bda6adc5bbd82f6fee9f600b1cffd1d25bc515b64843b5b7f51fd0cde"
+    },
+    {
+      "path": "web/.kafka-design/portable-conformance.mjs",
+      "sha256": "5281b91caadee07e92b5876ad3547a6531229bb57107ba3bcff4be20ddc3e6d4"
+    },
+    {
+      "path": "web/.kafka-design/conformance-policy.mjs",
+      "sha256": "1622dce9e752aa5b1fc700d1fa894da5f08a957fb088dad7a59be26529a8b54a"
     }
   ],
   "integration": {
     "cssEntry": "web/design-tokens.css",
-    "blockHash": "a22ccfc87e7ebb134ccac8bd2b5f5978fa63039a7a5cc23e30e70f3524865201"
+    "blockHash": "17f3ce126f165b8f41c25f87a57a6fa1272796478cd4a150ec085cdc36dcdec7"
   }
 }
