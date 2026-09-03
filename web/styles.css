@@ -214,20 +214,20 @@ select {
 .chart-hint { margin: 0 0 var(--k-dimension-space2); }
 .chart-wrap { min-height: 300px; display: grid; align-items: center; }
 #chart { width: 100%; height: auto; overflow: visible; touch-action: manipulation; }
-.chart-grid { stroke: var(--k-color-border); stroke-width: 1; }
-.chart-line { fill: none; stroke: var(--k-color-primary); stroke-width: 2; stroke-linecap: square; stroke-linejoin: round; }
-.chart-area { fill: var(--k-color-accent); fill-opacity: 0.09; }
-.chart-dot { fill: var(--k-color-surface); stroke: var(--k-color-primary); stroke-width: 2; pointer-events: none; }
-.chart-dot.is-selected { fill: var(--k-color-accent); stroke: var(--k-color-primary); stroke-width: 2; }
-.chart-hit { fill: var(--k-color-surface); fill-opacity: 0; cursor: pointer; }
-.chart-hit:hover { fill: var(--k-color-primary); fill-opacity: 0.08; }
-.chart-label { fill: var(--k-color-muted-foreground); font-size: 12px; font-family: var(--k-font-family-mono); }
+.chart-grid { stroke:var(--k-color-border); stroke-width: 1; }
+.chart-line { fill:none; stroke:var(--k-color-primary); stroke-width: 2; stroke-linecap: square; stroke-linejoin: round; }
+.chart-area { fill:var(--k-color-accent); fill-opacity: 0.09; }
+.chart-dot { fill:var(--k-color-surface); stroke:var(--k-color-primary); stroke-width: 2; pointer-events: none; }
+.chart-dot.is-selected { fill:var(--k-color-accent); stroke:var(--k-color-primary); stroke-width: 2; }
+.chart-hit { fill:var(--k-color-surface); fill-opacity: 0; cursor: pointer; }
+.chart-hit:hover { fill:var(--k-color-primary); fill-opacity: 0.08; }
+.chart-label { fill:var(--k-color-muted-foreground); font-size: 12px; font-family: var(--k-font-family-mono); }
 .chart-selected-label {
-  fill: var(--k-color-foreground);
+  fill:var(--k-color-foreground);
   font-size: 12px;
   font-weight: 800;
   paint-order: stroke;
-  stroke: var(--k-color-surface);
+  stroke:var(--k-color-surface);
   stroke-width: 4px;
   stroke-linejoin: round;
 }
