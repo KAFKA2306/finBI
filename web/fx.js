@@ -1,5 +1,10 @@
 const FX_SNAPSHOT_URL = "./data/snapshots/usdjpy-sbi-2026-09-03.json";
 
+const fxStyles = document.createElement("link");
+fxStyles.rel = "stylesheet";
+fxStyles.href = "./fx.css";
+document.head.append(fxStyles);
+
 const worker = new Worker("./worker.mjs", { type: "module" });
 const status = document.querySelector("#fx-status");
 const scenarioBody = document.querySelector("#fx-scenarios");
