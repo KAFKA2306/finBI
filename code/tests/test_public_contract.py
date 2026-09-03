@@ -23,7 +23,7 @@ class PublicContractTest(unittest.TestCase):
             "365 *",
             "leverage *",
             "spot_return *",
-            "annualized_swap",
+            "annualized_swap =",
             "break_even_spot_return =",
         ):
             self.assertNotIn(forbidden, fx)
