@@ -38,7 +38,9 @@ def assert_period_query(driver, expected_start, expected_end):
 
 
 def assert_fx_view(driver):
-    wait_text(driver, "#fx-status", lambda value: "deterministic Python scenario" in value)
+    wait_text(
+        driver, "#fx-status", lambda value: "deterministic Python scenario" in value
+    )
     assert driver.find_element(By.CSS_SELECTOR, "#fx-spot").text == "156.17"
     assert driver.find_element(By.CSS_SELECTOR, "#fx-carry").text == "8.20%"
     assert driver.find_element(By.CSS_SELECTOR, "#fx-break-even").text == "-2.73%"
