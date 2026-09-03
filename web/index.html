@@ -24,6 +24,23 @@
         <h2 id="workbench-heading">何を知りたい？</h2>
         <p class="section-lead">新しいグラフではなく、新しい質問レシピを増やします。未接続Deskは数字を捏造せず、状態だけを表示します。</p>
       </div>
+
+      <section class="card ask-panel" aria-labelledby="ask-heading">
+        <div>
+          <p class="eyebrow">Question Router</p>
+          <h3 id="ask-heading">普段の言葉で質問する</h3>
+          <p class="section-lead">質問を正準レシピへrouteします。これは検索・分類であり、未接続データから答えを捏造する機能ではありません。</p>
+        </div>
+        <div class="ask-row">
+          <label for="question-query">金融の質問
+            <input id="question-query" type="search" placeholder="例: USDJPY 3倍は効率的？" autocomplete="off">
+          </label>
+          <button class="primary" id="question-route" type="button">分析レシピを探す</button>
+        </div>
+        <div class="chips" id="question-examples" aria-label="質問例"></div>
+        <div class="question-results" id="question-results" role="status" aria-live="polite">質問カタログを読み込み中…</div>
+      </section>
+
       <div class="desk-grid" aria-label="finBI desks">
         <a class="desk-card is-live" href="#rates-desk">
           <span class="desk-status">LIVE RECIPE</span>
@@ -165,9 +182,10 @@
       <summary>計算方法と実装を見る</summary>
       <p>bp（basis point）は金利差の単位で、1 bp = 0.01 percentage pointです。4.60%から4.69%への変化なら +0.09 percentage point = +9 bpです。</p>
       <p>公開画面は保存済みsnapshotだけを読みます。比較時はPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
-      <p>対応質問の正準カタログは <code>data/questions/catalog.v1.json</code> です。未接続Deskは将来の実データ接続まで値を表示しません。</p>
+      <p>対応質問の正準カタログは <code>data/questions/catalog.v1.json</code>、ルーティング語彙は <code>data/questions/router.v1.json</code> です。未接続Deskは将来の実データ接続まで値を表示しません。</p>
     </details>
   </main>
+  <script src="./question-router.js" defer></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
