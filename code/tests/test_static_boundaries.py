@@ -15,9 +15,18 @@ class StaticBoundaryTests(unittest.TestCase):
         modules = sorted(path.name for path in CODE_DIR.glob("*.py"))
         self.assertEqual(modules, ["static_bi.py"])
 
-    def test_public_ui_surface_is_four_files(self) -> None:
+    def test_public_ui_surface_is_explicit_and_small(self) -> None:
         files = sorted(path.name for path in WEB_DIR.iterdir() if path.is_file())
-        self.assertEqual(files, ["app.js", "index.html", "styles.css", "worker.mjs"])
+        self.assertEqual(
+            files,
+            [
+                "app.js",
+                "index.html",
+                "question-router.js",
+                "styles.css",
+                "worker.mjs",
+            ],
+        )
 
     def test_derived_decisions_are_not_stored(self) -> None:
         self.assertFalse((DATA_DIR / "decisions").exists())
@@ -28,6 +37,7 @@ class StaticBoundaryTests(unittest.TestCase):
             for path in [
                 CODE_DIR / "static_bi.py",
                 WEB_DIR / "app.js",
+                WEB_DIR / "question-router.js",
                 WEB_DIR / "worker.mjs",
             ]
         )
@@ -40,6 +50,18 @@ class StaticBoundaryTests(unittest.TestCase):
             "heroku",
         ):
             self.assertNotIn(forbidden, source.casefold())
+
+    def test_public_question_router_does_not_embed_private_financial_data(self) -> None:
+        router = (WEB_DIR / "question-router.js").read_text(encoding="utf-8")
+        for forbidden in (
+            "account_number",
+            "口座番号",
+            "tax_document",
+            "private transaction",
+            "api_key",
+            "secret",
+        ):
+            self.assertNotIn(forbidden, router.casefold())
 
 
 if __name__ == "__main__":
