@@ -104,7 +104,7 @@ jobs:
           ! curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q './data/snapshots/investor2-fx-overlay.json'
           curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/questions/catalog.v1.json | grep -q 'finbi.question-catalog.v1'
-          curl --fail --silent http://127.0.0.1:8123/data/questions/router.v1.json | grep -q 'finbi.question-router.v1'
+          ! curl --fail --silent http://127.0.0.1:8123/data/questions/router.v1.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs3mo-2026-07-20_2026-07-23.json >/dev/null
