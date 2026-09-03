@@ -92,6 +92,39 @@ def assert_system_theme(driver, theme, canvas, foreground, timeout=30):
     assert values == [theme, canvas, foreground, theme], values
 
 
+def assert_decision_first_layout(driver, width, height):
+    layout = driver.execute_script(
+        """
+        const rect = (selector) => {
+          const node = document.querySelector(selector);
+          const box = node.getBoundingClientRect();
+          return {top: box.top + window.scrollY, bottom: box.bottom + window.scrollY};
+        };
+        return {
+          fxStatus: rect('#fx-overlay-status'),
+          fxAction: rect('.fx-decision .primary-link'),
+          rates: rect('#rates-desk'),
+          chart: rect('#chart'),
+          utility: rect('.utility-drawer'),
+          viewport: window.innerHeight,
+        };
+        """
+    )
+
+    viewport = layout["viewport"]
+    assert layout["fxStatus"]["top"] < viewport, layout
+    assert layout["fxAction"]["bottom"] < viewport, layout
+
+    if width >= 900:
+        assert layout["rates"]["top"] < viewport, layout
+        assert layout["chart"]["top"] < viewport, layout
+    else:
+        assert layout["rates"]["top"] < viewport * 2, layout
+        assert layout["chart"]["top"] < viewport * 2, layout
+
+    assert layout["utility"]["top"] > layout["rates"]["top"], layout
+
+
 def click_chart_date(driver, date, timeout=30):
     selector = f"circle.chart-hit[data-date='{date}']"
 
@@ -169,6 +202,7 @@ def run_viewport(width, height, canonical):
         assert_system_theme(driver, "light", "#F7F5EF", "#17233F")
 
         assert_fx_view(driver, canonical)
+        assert_decision_first_layout(driver, width, height)
         wait_text(driver, "#status", lambda value: "比較完了" in value)
         wait_text(
             driver, "#curve-brief-status", lambda value: "verified snapshots" in value

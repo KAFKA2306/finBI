@@ -3,26 +3,3 @@
 @import ".kafka-design/kafka-globals.css";
 @import ".kafka-design/kafka-components.css";
 /* kafka-design:managed-end */
-
-.workbench-intro > .desk-grid {
-  order: 1;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.workbench-intro > .ask-panel {
-  order: 2;
-}
-
-.workbench-intro > .desk-grid > .desk-card:not(.is-live) {
-  display: none;
-}
-
-.workbench-intro > .desk-grid > .desk-card.is-live {
-  min-height: var(--k-dimension-touch-target);
-}
-
-@media (max-width: 560px) {
-  .workbench-intro > .desk-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}

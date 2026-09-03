@@ -9,23 +9,32 @@ class PrimaryReadingPathTest(unittest.TestCase):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
 
         self.assertNotIn("PLANNED", html)
-        self.assertEqual(html.count('class="desk-card is-live"'), 2)
+        self.assertIn('class="appnav"', html)
         self.assertIn('href="#fx-desk"', html)
         self.assertIn('href="#rates-desk"', html)
-        self.assertIn("未実装のsurfaceは主要導線に置きません", html)
+        self.assertNotIn('class="desk-card is-live"', html)
+        self.assertLess(
+            html.index('id="fx-desk"'), html.index('class="utility-drawer"')
+        )
+        self.assertLess(
+            html.index('id="rates-desk"'), html.index('class="utility-drawer"')
+        )
 
-    def test_fx_primary_metrics_follow_status_to_decision_to_identity(self):
+    def test_fx_primary_path_is_status_reason_measures_action_then_identity(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         markers = [
             'id="fx-overlay-status"',
+            'id="fx-reason"',
             'id="fx-current-exposure"',
             'id="fx-incremental-exposure"',
+            'id="fx-total-exposure"',
+            'class="primary-link"',
             'id="fx-schema"',
-            'id="fx-audit-heading"',
         ]
         positions = [html.index(marker) for marker in markers]
         self.assertEqual(positions, sorted(positions))
-        self.assertIn("状態と根拠を確認する", html)
+        self.assertIn("USD exposure overlay の正準状態", html)
+        self.assertIn("詳細と根拠", html)
 
 
 if __name__ == "__main__":

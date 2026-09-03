@@ -146,9 +146,11 @@ class PublicContractTest(unittest.TestCase):
     def test_controls_do_not_override_44px_minimum(self):
         css = (ROOT / "web" / "styles.css").read_text(encoding="utf-8")
         compact = re.sub(r"\s+", "", css)
-        self.assertRegex(compact, r"button,select\{min-height:44px;?\}")
-        self.assertIn(".chip{min-height:44px", compact)
-        self.assertNotIn(".chip{min-height:40px", compact)
+        self.assertIn(
+            "button,select,input{min-height:var(--k-dimension-touch-target);}", compact
+        )
+        self.assertIn(".chip{min-height:var(--k-dimension-touch-target)", compact)
+        self.assertNotIn("min-height:40px", compact)
 
     def test_public_css_consumes_locked_canonical_design(self):
         styles = (ROOT / "web" / "styles.css").read_text(encoding="utf-8")
@@ -165,7 +167,8 @@ class PublicContractTest(unittest.TestCase):
         self.assertEqual(lock["integration"]["cssEntry"], "web/design-tokens.css")
         self.assertEqual(entry.count("/* kafka-design:managed-start */"), 1)
         self.assertEqual(entry.count("/* kafka-design:managed-end */"), 1)
-        self.assertIn("desk-card:not(.is-live)", entry)
+        self.assertNotIn("desk-card", entry)
+        self.assertNotIn("workbench-intro", entry)
 
         for item in lock["managedFiles"]:
             managed = ROOT / item["path"]

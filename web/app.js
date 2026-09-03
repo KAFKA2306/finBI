@@ -144,16 +144,16 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
 
   for (let i = 0; i < 3; i += 1) {
     const yy = top + (plotHeight * i) / 2;
-    chart.append(el("line", { x1: left, x2: width - right, y1: yy, y2: yy, class: "chart-grid dynamic" }));
+    chart.append(el("line", { x1: left, x2: width - right, y1: yy, y2: yy, stroke: "currentColor", class: "chart-grid dynamic" }));
     const labelValue = high - ((high - low) * i) / 2;
-    chart.append(el("text", { x: 4, y: yy + 4, class: "chart-label dynamic" }, formatNumber(labelValue)));
+    chart.append(el("text", { x: 4, y: yy + 4, fill: "currentColor", class: "chart-label dynamic" }, formatNumber(labelValue)));
   }
 
   const points = rows.map((row, index) => [x(index), y(row.value)]);
   const linePath = points.map(([px, py], index) => `${index === 0 ? "M" : "L"} ${px} ${py}`).join(" ");
   const areaPath = `${linePath} L ${points.at(-1)[0]} ${height - bottom} L ${points[0][0]} ${height - bottom} Z`;
-  chart.append(el("path", { d: areaPath, class: "chart-area dynamic" }));
-  chart.append(el("path", { d: linePath, class: "chart-line dynamic" }));
+  chart.append(el("path", { d: areaPath, fill: "currentColor", class: "chart-area dynamic" }));
+  chart.append(el("path", { d: linePath, fill: "none", stroke: "currentColor", class: "chart-line dynamic" }));
 
   rows.forEach((row, index) => {
     const isStart = row.date === selectedStart;
@@ -164,6 +164,8 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
       cx,
       cy,
       r: selected ? 7 : 5,
+      fill: selected ? "var(--k-color-accent)" : "var(--k-color-surface)",
+      stroke: "var(--k-color-primary)",
       class: `chart-dot dynamic${selected ? " is-selected" : ""}`,
       "aria-hidden": "true",
     });
@@ -171,6 +173,7 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
       cx,
       cy,
       r: 18,
+      fill: "currentColor",
       class: "chart-hit dynamic",
       role: "button",
       "aria-label": `${row.date} ${formatNumber(row.value)}%。比較点として選択`,
@@ -188,13 +191,15 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
         x: labelX,
         y: labelY,
         "text-anchor": "middle",
+        fill: "currentColor",
+        stroke: "var(--k-color-surface)",
         class: "chart-selected-label dynamic",
       }, selectedPointLabel(row, role)));
     }
   });
 
-  chart.append(el("text", { x: left, y: height - 14, class: "chart-label dynamic" }, formatDate(rows[0].date)));
-  chart.append(el("text", { x: width - right, y: height - 14, "text-anchor": "end", class: "chart-label dynamic" }, formatDate(rows.at(-1).date)));
+  chart.append(el("text", { x: left, y: height - 14, fill: "currentColor", class: "chart-label dynamic" }, formatDate(rows[0].date)));
+  chart.append(el("text", { x: width - right, y: height - 14, "text-anchor": "end", fill: "currentColor", class: "chart-label dynamic" }, formatDate(rows.at(-1).date)));
   chartDesc.textContent = `${snapshot.source.series_name}。${rows[0].date}から${rows.at(-1).date}までの${rows.length}観測。選択日は${selectedStart}と${selectedEnd}です。`;
 }
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="正準FX outputと保存済み米国債snapshotを、状態・比較・根拠の順で確認するFinancial BI。">
+  <meta name="description" content="正準FX outputと保存済み米国債snapshotを、状態・判断・比較・根拠の順で確認するFinancial BI。">
   <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111712" media="(prefers-color-scheme: dark)">
   <title>finBI — Financial BI</title>
@@ -11,81 +11,144 @@
 </head>
 <body>
   <main class="shell">
-    <header class="hero">
-      <p class="eyebrow">finBI · Financial BI</p>
-      <h1>金融の論点を、<br>数字で比較する。</h1>
-      <p class="lead">いま使える正準viewだけを表示します。FXはinvestor2のUSD exposure output、Ratesは保存済み米国債snapshotを、状態・比較・根拠まで追跡できます。</p>
-      <p class="notice">公開版はverified public / publication-safe dataのみ · private account dataはcommitしません</p>
+    <header class="appbar">
+      <div class="brand">
+        <strong>finBI</strong>
+        <span>Financial BI</span>
+      </div>
+      <nav class="appnav" aria-label="Primary">
+        <a href="#fx-desk">FX</a>
+        <a href="#rates-desk">Rates</a>
+      </nav>
+      <span class="publication-state">PUBLIC · READ-ONLY</span>
     </header>
 
-    <section class="workbench-intro" aria-labelledby="workbench-heading">
-      <div>
-        <p class="eyebrow">BI Views</p>
-        <h2 id="workbench-heading">使えるviewから判断を始める</h2>
-        <p class="section-lead">未実装のsurfaceは主要導線に置きません。必要なKPI・比較・出典が揃ったviewだけをここから開けます。</p>
-      </div>
-
-      <section class="card ask-panel" aria-labelledby="ask-heading">
-        <div>
-          <p class="eyebrow">View Finder</p>
-          <h3 id="ask-heading">質問から見るべきBIを探す</h3>
-          <p class="section-lead">質問を既存のusable viewへ案内します。未接続データから答えを生成する機能ではありません。</p>
+    <section class="live-overview" aria-label="Live decision surfaces">
+      <article id="fx-desk" class="card decision-card fx-decision">
+        <div class="surface-header">
+          <div>
+            <p class="eyebrow">FX · Canonical</p>
+            <h1>USD exposure</h1>
+          </div>
+          <strong id="fx-overlay-status" class="state-value">—</strong>
         </div>
-        <div class="ask-row">
-          <label for="question-query">金融の論点
-            <input id="question-query" type="search" placeholder="例: USDJPY 3倍は効率的？" autocomplete="off">
+
+        <p class="surface-lead">USD exposure overlay の正準状態をそのまま表示します。finBIでは再計算しません。</p>
+        <p id="fx-reason" class="decision-reason">canonical outputを読み込み中…</p>
+
+        <div class="decision-kpis" aria-label="FX decision measures">
+          <div>
+            <span>Current USD</span>
+            <strong id="fx-current-exposure">—</strong>
+          </div>
+          <div>
+            <span>Add USD</span>
+            <strong id="fx-incremental-exposure">—</strong>
+          </div>
+          <div>
+            <span>Total USD</span>
+            <strong id="fx-total-exposure">—</strong>
+          </div>
+        </div>
+
+        <div class="surface-actions">
+          <a class="primary-link" href="#fx-details">詳細と根拠</a>
+          <a class="secondary-link" href="#rates-desk">Ratesを見る</a>
+        </div>
+
+        <div class="surface-footer">
+          <p class="status" id="fx-status" role="status">investor2 FX overlayを読み込み中…</p>
+          <p class="schema-line">Schema <strong id="fx-schema">—</strong></p>
+        </div>
+
+        <details class="source-drawer">
+          <summary>Source</summary>
+          <p class="source-row">
+            <a href="https://github.com/KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md" target="_blank" rel="noreferrer">FX overlay contract</a>
+            · <a href="https://github.com/KAFKA2306/investor2/issues/251" target="_blank" rel="noreferrer">swap evidence #251</a>
+            · <a href="https://github.com/KAFKA2306/investor2/issues/252" target="_blank" rel="noreferrer">portfolio overlay #252</a>
+          </p>
+        </details>
+      </article>
+
+      <section id="rates-desk" class="card decision-card rates-decision" aria-labelledby="rates-heading">
+        <div class="surface-header">
+          <div>
+            <p class="eyebrow">Rates · Live</p>
+            <h2 id="rates-heading">米国10年債 snapshot</h2>
+          </div>
+          <div class="kicker">
+            <strong id="series-name">データを読み込み中…</strong>
+            <span id="window-label"></span>
+          </div>
+        </div>
+
+        <p class="chart-hint" id="chart-hint">グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。</p>
+        <div class="chart-wrap">
+          <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc" aria-describedby="chart-hint">
+            <title id="chart-title">米国10年国債利回りの推移</title>
+            <desc id="chart-desc">保存済み期間の各観測値を線で結んだグラフです。</desc>
+          </svg>
+        </div>
+
+        <div class="big-answer" aria-live="polite">
+          <span class="value" id="headline">—</span>
+          <span class="story" id="story">開始日と終了日を選ぶと、差を計算します。</span>
+        </div>
+
+        <div class="inline-compare" aria-label="Rates comparison controls">
+          <label>開始日
+            <select id="start" aria-label="比較の開始日"></select>
           </label>
-          <button class="primary" id="question-route" type="button">見るべきBIを探す</button>
+          <label>終了日
+            <select id="end" aria-label="比較の終了日"></select>
+          </label>
+          <button class="primary" id="compare" type="button">比べる</button>
         </div>
-        <div class="chips" id="question-examples" aria-label="質問例"></div>
-        <div class="question-results" id="question-results" role="status" aria-live="polite">BIカタログを読み込み中…</div>
+        <p class="status" id="status" role="status">snapshotを読み込み中…</p>
       </section>
-
-      <div class="desk-grid" aria-label="finBI views">
-        <a class="desk-card is-live" href="#fx-desk">
-          <span class="desk-status">CANONICAL VIEW</span>
-          <strong>FX</strong>
-          <small>investor2 USD exposure overlay · read-only</small>
-        </a>
-        <a class="desk-card is-live" href="#rates-desk">
-          <span class="desk-status">LIVE VIEW</span>
-          <strong>Rates</strong>
-          <small>米国債snapshot・yield curve・2点比較</small>
-        </a>
-      </div>
     </section>
 
-    <section id="fx-desk" class="desk-section" aria-labelledby="fx-heading">
+    <section class="support-grid" aria-label="Comparison and evidence">
+      <article class="card curve-card" aria-labelledby="curve-brief-heading">
+        <p class="eyebrow">Comparison Brief · 2s10s</p>
+        <h2 id="curve-brief-heading">2年と10年を、同じ期間で比べる</h2>
+        <div class="big-answer" aria-live="polite">
+          <span class="value" id="curve-brief-headline">—</span>
+          <span class="story" id="curve-brief-detail">同じ開始日・終了日で2年債と10年債を比較します。</span>
+        </div>
+        <p class="status" id="curve-brief-status" role="status">2s10s snapshotを読み込み中…</p>
+        <p class="source-row">
+          出典:
+          <a id="curve-long-source" href="#" target="_blank" rel="noreferrer">FRED DGS10</a>
+          · <a id="curve-short-source" href="#" target="_blank" rel="noreferrer">FRED DGS2</a>
+        </p>
+      </article>
+
+      <aside class="card rates-evidence" aria-labelledby="trust-heading">
+        <div class="evidence-heading">
+          <div>
+            <p class="eyebrow">Evidence</p>
+            <h2 id="trust-heading">この数字はどこから？</h2>
+          </div>
+          <a id="source-link" href="#" target="_blank" rel="noreferrer">DGS10一次情報</a>
+        </div>
+        <dl class="meta" id="metadata"></dl>
+        <div class="quick-picks">
+          <p>比較プリセット</p>
+          <div class="chips" id="quick-picks"></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="fx-details" class="detail-section" aria-labelledby="fx-details-heading">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">FX · Canonical View</p>
-          <h2 id="fx-heading">USD exposure overlay の正準状態を見る</h2>
+          <p class="eyebrow">FX · Details</p>
+          <h2 id="fx-details-heading">必要なときだけ詳細を見る</h2>
         </div>
-        <p class="section-lead">finBIは <code>investor2.fx-overlay.v1</code> をread-only表示します。金融計算を再実装せず、入力不足は <strong>UNVERIFIED</strong> のまま見せます。</p>
+        <p class="section-lead">primary decisionの後に、exposure / margin / OOS risk-returnを確認します。</p>
       </div>
-
-      <section class="kpi-grid" aria-label="FX overlay canonical status">
-        <article class="card kpi-card">
-          <span class="kpi-label">Canonical status</span>
-          <strong id="fx-overlay-status">—</strong>
-          <small>VERIFIED / TEST_ONLY / UNVERIFIED</small>
-        </article>
-        <article class="card kpi-card">
-          <span class="kpi-label">Current USD exposure</span>
-          <strong id="fx-current-exposure">—</strong>
-          <small>canonical outputのみ</small>
-        </article>
-        <article class="card kpi-card">
-          <span class="kpi-label">Recommended incremental USD</span>
-          <strong id="fx-incremental-exposure">—</strong>
-          <small>canonical outputのみ</small>
-        </article>
-        <article class="card kpi-card">
-          <span class="kpi-label">Canonical schema</span>
-          <strong id="fx-schema">—</strong>
-          <small>KAFKA2306/investor2</small>
-        </article>
-      </section>
 
       <section class="dashboard fx-dashboard" aria-label="investor2 FX overlay details">
         <article class="card fx-card">
@@ -94,7 +157,6 @@
           <dl class="metric-list">
             <div><dt>current USD exposure</dt><dd id="fx-current-exposure-detail">—</dd></div>
             <div><dt>recommended incremental USD</dt><dd id="fx-incremental-exposure-detail">—</dd></div>
-            <div><dt>recommended total USD</dt><dd id="fx-total-exposure">—</dd></div>
             <div><dt>hedge ratio</dt><dd id="fx-hedge-ratio">—</dd></div>
             <div><dt>margin requirement</dt><dd id="fx-margin-requirement">—</dd></div>
             <div><dt>liquidation headroom</dt><dd id="fx-liquidation-headroom">—</dd></div>
@@ -114,106 +176,34 @@
           </dl>
         </article>
       </section>
-
-      <section class="card fx-card fx-audit" aria-labelledby="fx-audit-heading">
-        <p class="eyebrow">Evidence</p>
-        <h3 id="fx-audit-heading">状態と根拠を確認する</h3>
-        <p id="fx-reason" class="section-lead">canonical outputを読み込み中…</p>
-        <p class="status" id="fx-status" role="status">investor2 FX overlayを読み込み中…</p>
-        <p class="source-row">
-          正準:
-          <a href="https://github.com/KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md" target="_blank" rel="noreferrer">FX overlay contract</a>
-          · <a href="https://github.com/KAFKA2306/investor2/issues/251" target="_blank" rel="noreferrer">realized swap evidence #251</a>
-          · <a href="https://github.com/KAFKA2306/investor2/issues/252" target="_blank" rel="noreferrer">portfolio overlay #252</a>
-        </p>
-      </section>
     </section>
 
-    <section id="rates-desk" class="desk-section" aria-labelledby="rates-heading">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Rates · Live View 01</p>
-          <h2 id="rates-heading">保存済み米国債snapshotを比較する</h2>
+    <details class="utility-drawer">
+      <summary>View Finder / 実装情報</summary>
+      <section class="utility-content">
+        <section class="ask-panel" aria-labelledby="ask-heading">
+          <div>
+            <p class="eyebrow">View Finder</p>
+            <h3 id="ask-heading">質問から既存BIを探す</h3>
+            <p class="section-lead">未接続データから答えを生成する機能ではありません。</p>
+          </div>
+          <div class="ask-row">
+            <label for="question-query">金融の論点
+              <input id="question-query" type="search" placeholder="例: USDJPY 3倍は効率的？" autocomplete="off">
+            </label>
+            <button class="primary" id="question-route" type="button">見るべきBIを探す</button>
+          </div>
+          <div class="chips" id="question-examples" aria-label="質問例"></div>
+          <div class="question-results" id="question-results" role="status" aria-live="polite">BIカタログを読み込み中…</div>
+        </section>
+        <div class="implementation-note">
+          <p>Rates比較はPyodide Web Workerがrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。1 bp = 0.01 percentage pointです。</p>
+          <p>FXは <code>investor2.fx-overlay.v1</code> のread-only表示で、finBIにportfolio / carry / leverage / stress計算を持ちません。</p>
         </div>
-        <p class="section-lead">現在値の速報ではなく、point-in-time provenanceを確認できる保存済み観測を扱います。</p>
-      </div>
-
-      <section class="dashboard" aria-label="米国10年国債利回りの比較">
-        <article class="card chart-card">
-          <div class="kicker">
-            <strong id="series-name">データを読み込み中…</strong>
-            <span id="window-label"></span>
-          </div>
-
-          <p class="chart-hint" id="chart-hint">グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。</p>
-          <div class="chart-wrap">
-            <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc" aria-describedby="chart-hint">
-              <title id="chart-title">米国10年国債利回りの推移</title>
-              <desc id="chart-desc">保存済み期間の各観測値を線で結んだグラフです。</desc>
-            </svg>
-          </div>
-
-          <div class="big-answer" aria-live="polite">
-            <span class="value" id="headline">—</span>
-            <span class="story" id="story">開始日と終了日を選ぶと、差を計算します。</span>
-          </div>
-        </article>
-
-        <aside class="card side-card">
-          <section class="controls" aria-labelledby="compare-heading">
-            <div>
-              <p class="eyebrow">Compare</p>
-              <h2 id="compare-heading">どこから、どこまで？</h2>
-            </div>
-            <div class="control-grid">
-              <label>開始日
-                <select id="start" aria-label="比較の開始日"></select>
-              </label>
-              <label>終了日
-                <select id="end" aria-label="比較の終了日"></select>
-              </label>
-            </div>
-            <button class="primary" id="compare" type="button">比べる</button>
-            <p class="status" id="status" role="status">snapshotを読み込み中…</p>
-          </section>
-
-          <section class="quick-picks" aria-labelledby="quick-heading">
-            <p id="quick-heading">すぐ試す</p>
-            <div class="chips" id="quick-picks"></div>
-          </section>
-
-          <section class="trust" aria-labelledby="trust-heading">
-            <h2 id="trust-heading">この数字はどこから？</h2>
-            <dl class="meta" id="metadata"></dl>
-            <a id="source-link" href="#" target="_blank" rel="noreferrer">DGS10一次情報を開く</a>
-          </section>
-        </aside>
       </section>
-
-      <section class="card curve-card" aria-labelledby="curve-brief-heading">
-        <p class="eyebrow">Comparison Brief · 2s10s</p>
-        <h2 id="curve-brief-heading">2年と10年を、同じ期間で比べる</h2>
-        <div class="big-answer" aria-live="polite">
-          <span class="value" id="curve-brief-headline">—</span>
-          <span class="story" id="curve-brief-detail">同じ開始日・終了日で2年債と10年債を比較します。</span>
-        </div>
-        <p class="status" id="curve-brief-status" role="status">2s10s snapshotを読み込み中…</p>
-        <p>
-          出典:
-          <a id="curve-long-source" href="#" target="_blank" rel="noreferrer">FRED DGS10</a>
-          ·
-          <a id="curve-short-source" href="#" target="_blank" rel="noreferrer">FRED DGS2</a>
-        </p>
-      </section>
-    </section>
-
-    <details class="explain">
-      <summary>計算方法と実装を見る</summary>
-      <p>bp（basis point）は金利差の単位で、1 bp = 0.01 percentage pointです。4.60%から4.69%への変化なら +0.09 percentage point = +9 bpです。</p>
-      <p>Rates比較はPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。FXは <code>investor2.fx-overlay.v1</code> のread-only表示で、finBIにportfolio / carry / leverage / stress計算を持ちません。</p>
-      <p>対応質問のカタログは <code>data/questions/catalog.v1.json</code>、ルーティング語彙は <code>data/questions/router.v1.json</code> です。これは既存BI viewを探す補助navigationであり、Issue Solverではありません。</p>
     </details>
   </main>
+
   <script src="./question-router.js" defer></script>
   <script type="module" src="./fx.js"></script>
   <script type="module" src="./app.js"></script>
