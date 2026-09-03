@@ -9,15 +9,10 @@ const examples = document.querySelector("#question-examples");
 let recipesById = new Map();
 let routes = [];
 
-function normalize(value) {
-  return String(value)
-    .casefold?.() ?? String(value).toLowerCase();
-}
-
 function normalized(value) {
-  return normalize(value)
-    .replace(/[\s　/_・,，。?？!！:：()（）+-]/g, "")
-    .toLowerCase();
+  return String(value)
+    .toLowerCase()
+    .replace(/[\s　/_・,，。?？!！:：()（）+-]/g, "");
 }
 
 function scoreRoute(query, route) {
@@ -47,7 +42,7 @@ function createResult(recipe, rank) {
 
   const badge = document.createElement("span");
   badge.className = "route-badge";
-  badge.textContent = recipe.question_id === "rates.bonds" ? "LIVE" : "CATALOGED";
+  badge.textContent = recipe.question_id === "rates.bonds" ? "LIVE" : "PLANNED";
 
   const desk = document.createElement("span");
   desk.className = "route-desk";
@@ -58,22 +53,22 @@ function createResult(recipe, rank) {
   title.textContent = `${rank}. ${recipe.intent}`;
 
   const needs = document.createElement("p");
-  needs.textContent = `必要データ: ${recipe.required_inputs.join(" / ")}`;
+  needs.textContent = `見るべきデータ: ${recipe.required_inputs.join(" / ")}`;
 
   const output = document.createElement("p");
-  output.textContent = `判断: ${recipe.decision_output.join(" / ")} · Failure: ${recipe.failure_mode}`;
+  output.textContent = `BI指標: ${recipe.calculation.join(" / ")} · Risk: ${recipe.risk_output.join(" / ")}`;
 
   article.append(top, title, needs, output);
 
   if (recipe.question_id === "rates.bonds") {
     const link = document.createElement("a");
     link.href = "#rates-desk";
-    link.textContent = "現在動いているRates recipeを開く";
+    link.textContent = "現在動いているRates viewを開く";
     article.append(link);
   } else {
     const state = document.createElement("span");
     state.className = "route-state";
-    state.textContent = "data adapter未接続 — 値は表示しません";
+    state.textContent = "BI viewは未接続 — 数値は表示しません";
     article.append(state);
   }
   return article;
@@ -81,13 +76,13 @@ function createResult(recipe, rank) {
 
 function routeQuestion() {
   if (!recipesById.size || !routes.length) {
-    results.textContent = "質問カタログをまだ読み込めていません。";
+    results.textContent = "BIカタログをまだ読み込めていません。";
     return;
   }
 
   const query = input.value.trim();
   if (!query) {
-    results.textContent = "金融の質問を入力してください。";
+    results.textContent = "金融の論点を入力してください。";
     return;
   }
 
@@ -100,7 +95,7 @@ function routeQuestion() {
   results.replaceChildren();
   if (!ranked.length) {
     const message = document.createElement("p");
-    message.textContent = "まだ正準レシピにrouteできません。新しい質問レシピ候補です。";
+    message.textContent = "対応するBI viewがまだありません。BI要件候補として扱います。";
     results.append(message);
     return;
   }
@@ -130,7 +125,7 @@ async function initQuestionRouter() {
       fetch(ROUTER_URL),
     ]);
     if (!catalogResponse.ok || !routerResponse.ok) {
-      throw new Error("question catalog fetch failed");
+      throw new Error("BI catalog fetch failed");
     }
     const [catalog, router] = await Promise.all([
       catalogResponse.json(),
@@ -140,9 +135,9 @@ async function initQuestionRouter() {
       catalog.recipes.map((recipe) => [recipe.question_id, recipe]),
     );
     routes = router.routes;
-    results.textContent = `${recipesById.size}個の正準レシピを読み込みました。質問を入力してください。`;
+    results.textContent = `${recipesById.size}個のBI要件を読み込みました。金融の論点を入力してください。`;
   } catch (error) {
-    results.textContent = `質問カタログを読み込めません: ${error.message}`;
+    results.textContent = `BIカタログを読み込めません: ${error.message}`;
   }
 }
 
