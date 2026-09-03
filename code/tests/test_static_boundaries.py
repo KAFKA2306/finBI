@@ -21,6 +21,7 @@ class StaticBoundaryTests(unittest.TestCase):
             files,
             [
                 "app.js",
+                "design-tokens.css",
                 "fx.css",
                 "fx.js",
                 "index.html",

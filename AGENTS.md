@@ -31,6 +31,19 @@ Canonical surfaces may cover:
 
 A new chart is useful only when it exposes a registered financial metric, comparison, scenario, or audit state. Do not add Issue-management UI.
 
+## Visual authority
+
+`KAFKA2306/design` is the canonical visual authority for KAFKA2306 product UI. finBI must not create a competing palette, spacing scale, radius system, typography scale, shadow system, table density, or generic product-component grammar.
+
+Because `KAFKA2306/design` is private while finBI and its Pages are public, production must not depend on fetching the private repository at runtime or during public CI. `web/design-tokens.css` is a public-safe, versioned snapshot of canonical design tokens and must record the exact design commit and canonical blob it came from.
+
+- Use `--k-*` tokens from `web/design-tokens.css` for visual values.
+- Keep finBI-specific CSS limited to financial layout, chart semantics, responsive composition, and view-specific presentation.
+- Prefer dense decision surfaces, 30px data rows, compact hierarchy, square 2px surfaces, and zero decorative shadow as defined upstream.
+- Do not migrate finBI to React/TypeScript merely to consume the design system. Framework choice and visual authority are separate concerns.
+- When refreshing the snapshot, copy values from the canonical design source and update provenance in the same change.
+- CI must prove the public artifact contains both the token snapshot and the finBI stylesheet that consumes it.
+
 ## Question catalog
 
 `data/questions/catalog.v1.json` is an internal BI-requirements catalog derived from recurring financial questions. It helps map a question to the data, metrics, comparison axes, risk outputs, and provenance that finBI should make visible.
