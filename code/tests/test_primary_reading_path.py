@@ -13,8 +13,12 @@ class PrimaryReadingPathTest(unittest.TestCase):
         self.assertIn('href="#fx-desk"', html)
         self.assertIn('href="#rates-desk"', html)
         self.assertNotIn('class="desk-card is-live"', html)
-        self.assertLess(html.index('id="fx-desk"'), html.index('class="utility-drawer"'))
-        self.assertLess(html.index('id="rates-desk"'), html.index('class="utility-drawer"'))
+        self.assertLess(
+            html.index('id="fx-desk"'), html.index('class="utility-drawer"')
+        )
+        self.assertLess(
+            html.index('id="rates-desk"'), html.index('class="utility-drawer"')
+        )
 
     def test_fx_primary_path_is_status_reason_measures_action_then_identity(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
