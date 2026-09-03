@@ -62,7 +62,9 @@ def assert_fx_view(driver, canonical):
     wait_text(
         driver,
         "#fx-status",
-        lambda value: expected_status in value and "read-only investor2 output" in value,
+        lambda value: (
+            expected_status in value and "read-only investor2 output" in value
+        ),
     )
     assert (
         driver.find_element(By.CSS_SELECTOR, "#fx-schema").text
@@ -75,11 +77,18 @@ def assert_fx_view(driver, canonical):
 
     if expected_status == "UNVERIFIED":
         assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text == "—"
-        assert driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text == "—"
-        assert driver.find_element(By.CSS_SELECTOR, "#fx-reason").text == canonical["reason"]
+        assert (
+            driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text == "—"
+        )
+        assert (
+            driver.find_element(By.CSS_SELECTOR, "#fx-reason").text
+            == canonical["reason"]
+        )
     else:
         assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text != "—"
-        assert driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text != "—"
+        assert (
+            driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text != "—"
+        )
 
     links = [
         element.get_attribute("href")
