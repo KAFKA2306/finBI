@@ -47,6 +47,35 @@ jobs:
           assert entry.count("/* kafka-design:managed-end */") == 1
           PY
 
+      - name: Verify canonical investor2 FX artifact
+        env:
+          FX_OVERLAY_URL: https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            "${FX_OVERLAY_URL}?smoke=${GITHUB_SHA}" \
+            -o /tmp/investor2-fx-overlay.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          artifact = json.loads(Path("/tmp/investor2-fx-overlay.json").read_text())
+          assert artifact["schema_version"] == "investor2.fx-overlay.v1"
+          assert artifact["status"] in {"VERIFIED", "TEST_ONLY", "UNVERIFIED"}
+          if artifact["status"] == "UNVERIFIED":
+              assert set(artifact) == {"schema_version", "status", "reason"}
+              assert artifact["reason"].strip()
+          else:
+              required = {
+                  "currentUsdExposure",
+                  "recommendedIncrementalUsdExposure",
+                  "recommendedTotalUsdExposure",
+                  "oos",
+                  "baselines",
+              }
+              assert required <= artifact.keys()
+          PY
+
       - name: Build public root
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code site/.kafka-design
@@ -71,12 +100,11 @@ jobs:
           curl --fail --silent http://127.0.0.1:8123/.kafka-design/kafka-tokens.css | grep -q -- '--k-color-canvas'
           curl --fail --silent http://127.0.0.1:8123/.kafka-design/kafka-components.css | grep -q 'k-dashboard-decision'
           curl --fail --silent http://127.0.0.1:8123/fx.css | grep -q -- '--k-dimension-table-row'
-          curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'investor2-fx-overlay.json'
+          curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json'
+          ! curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q './data/snapshots/investor2-fx-overlay.json'
           curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/questions/catalog.v1.json | grep -q 'finbi.question-catalog.v1'
           curl --fail --silent http://127.0.0.1:8123/data/questions/router.v1.json | grep -q 'finbi.question-router.v1'
-          curl --fail --silent http://127.0.0.1:8123/data/snapshots/investor2-fx-overlay.json | grep -q 'investor2.fx-overlay.v1'
-          curl --fail --silent http://127.0.0.1:8123/data/snapshots/investor2-fx-overlay.json | grep -q 'UNVERIFIED'
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs3mo-2026-07-20_2026-07-23.json >/dev/null
