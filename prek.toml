@@ -44,9 +44,11 @@ name = "browser asset contract"
 language = "system"
 entry = """
 node --check web/app.js
+node --check web/fx.js
 node --check web/question-router.js
 node --check web/worker.mjs
 test -s web/styles.css
+test -s web/fx.css
 grep -q 'prefers-reduced-motion' web/styles.css
 grep -q 'aria-live=\"polite\"' web/index.html
 grep -q 'role=\"status\"' web/index.html
