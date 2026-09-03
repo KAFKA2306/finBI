@@ -42,6 +42,11 @@
       </section>
 
       <div class="desk-grid" aria-label="finBI views">
+        <a class="desk-card is-live" href="#fx-desk">
+          <span class="desk-status">LIVE VIEW</span>
+          <strong>FX</strong>
+          <small>USDJPY・SBI swap・carry・3x・stress</small>
+        </a>
         <a class="desk-card is-live" href="#rates-desk">
           <span class="desk-status">LIVE VIEW</span>
           <strong>Rates</strong>
@@ -56,11 +61,6 @@
           <span class="desk-status">PLANNED</span>
           <strong>Frontier</strong>
           <small>efficient frontier・what-if配分・CVaR</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>FX</strong>
-          <small>USDJPY・swap・carry・leverage・stress</small>
         </div>
         <div class="desk-card">
           <span class="desk-status">PLANNED</span>
@@ -100,13 +100,101 @@
       </div>
     </section>
 
+    <section id="fx-desk" class="desk-section" aria-labelledby="fx-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">FX · Live View 01</p>
+          <h2 id="fx-heading">USD/JPY 3倍を、carryと為替リスクに分ける</h2>
+        </div>
+        <p class="section-lead">SBI FXの公開情報とReutersの市場観測を保存済みsnapshotとして固定し、3倍fixed-initial-notionalの1年シナリオをPythonで計算します。現在のraw swapを付与日数未確認のまま1日分へ割り戻すことはしません。</p>
+      </div>
+
+      <section class="kpi-grid" aria-label="USDJPY 3倍主要KPI">
+        <article class="card kpi-card">
+          <span class="kpi-label">USD/JPY</span>
+          <strong id="fx-spot">—</strong>
+          <small id="fx-asof">snapshot読込中</small>
+        </article>
+        <article class="card kpi-card">
+          <span class="kpi-label">3x carry / initial equity</span>
+          <strong id="fx-carry">—</strong>
+          <small>117円/日を365日一定と仮定</small>
+        </article>
+        <article class="card kpi-card">
+          <span class="kpi-label">1年break-even FX move</span>
+          <strong id="fx-break-even">—</strong>
+          <small>carryを為替損で相殺する円高率</small>
+        </article>
+        <article class="card kpi-card">
+          <span class="kpi-label">Fed midpoint − BOJ</span>
+          <strong id="fx-rate-gap">—</strong>
+          <small>policy-rate gap proxy · broker swapではない</small>
+        </article>
+      </section>
+
+      <section class="dashboard fx-dashboard" aria-label="USDJPY SBI FX 3倍詳細">
+        <article class="card fx-card">
+          <p class="eyebrow">SBI FX · Carry / Margin</p>
+          <h3>観測値とシナリオ仮定を分離</h3>
+          <dl class="metric-list">
+            <div><dt>9/3 raw buy swap</dt><dd id="fx-swap-current">—</dd></div>
+            <div><dt>scenario swap reference</dt><dd id="fx-swap-reference">—</dd></div>
+            <div><dt>1万USD notional</dt><dd id="fx-notional">—</dd></div>
+            <div><dt>理論3x initial equity</dt><dd id="fx-equity">—</dd></div>
+            <div><dt>SBI 3x必要保証金 reference</dt><dd id="fx-margin-reference">—</dd></div>
+            <div><dt>SBI 3x loss-cut</dt><dd id="fx-loss-cut">—</dd></div>
+            <div><dt>scenario annual swap</dt><dd id="fx-annual-swap">—</dd></div>
+            <div><dt>Fed midpoint</dt><dd id="fx-fed">—</dd></div>
+            <div><dt>BOJ guideline</dt><dd id="fx-boj">—</dd></div>
+          </dl>
+          <p class="status" id="fx-status" role="status">FX snapshotを読み込み中…</p>
+        </article>
+
+        <article class="card fx-card">
+          <p class="eyebrow">1Y Scenario · 3x</p>
+          <h3>円高がcarryをどこまで削るか</h3>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">USDJPY変化</th>
+                  <th scope="col">期末USDJPY</th>
+                  <th scope="col">自己資本return</th>
+                  <th scope="col">損益/1万USD</th>
+                </tr>
+              </thead>
+              <tbody id="fx-scenarios">
+                <tr><td colspan="4">Python計算を読み込み中…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="card fx-card fx-audit" aria-labelledby="fx-audit-heading">
+        <p class="eyebrow">Audit</p>
+        <h3 id="fx-audit-heading">このFX viewで言っていること / 言っていないこと</h3>
+        <ul id="fx-assumptions" class="assumption-list">
+          <li>scenario contractを読み込み中…</li>
+        </ul>
+        <p class="source-row">
+          出典:
+          <a id="fx-source-spot" href="#" target="_blank" rel="noreferrer">Reuters USDJPY</a>
+          · <a id="fx-source-swap" href="#" target="_blank" rel="noreferrer">SBI swap</a>
+          · <a id="fx-source-margin" href="#" target="_blank" rel="noreferrer">SBI margin</a>
+          · <a id="fx-source-fed" href="#" target="_blank" rel="noreferrer">Federal Reserve</a>
+          · <a id="fx-source-boj" href="#" target="_blank" rel="noreferrer">Bank of Japan</a>
+        </p>
+      </section>
+    </section>
+
     <section id="rates-desk" class="desk-section" aria-labelledby="rates-heading">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Rates · Live View 01</p>
           <h2 id="rates-heading">保存済み米国債snapshotを比較する</h2>
         </div>
-        <p class="section-lead">現在の公開runtimeで実稼働している最初のBI viewです。現在値の速報ではなく、point-in-time provenanceを確認できる保存済み観測を扱います。</p>
+        <p class="section-lead">現在値の速報ではなく、point-in-time provenanceを確認できる保存済み観測を扱います。</p>
       </div>
 
       <section class="dashboard" aria-label="米国10年国債利回りの比較">
@@ -181,11 +269,12 @@
     <details class="explain">
       <summary>計算方法と実装を見る</summary>
       <p>bp（basis point）は金利差の単位で、1 bp = 0.01 percentage pointです。4.60%から4.69%への変化なら +0.09 percentage point = +9 bpです。</p>
-      <p>公開画面は保存済みsnapshotだけを読みます。比較時はPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
+      <p>公開画面は保存済みsnapshotだけを読みます。比較・FXシナリオはPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻・仮定を画面に残します。</p>
       <p>対応質問のカタログは <code>data/questions/catalog.v1.json</code>、ルーティング語彙は <code>data/questions/router.v1.json</code> です。これは既存BI viewを探す補助navigationであり、Issue Solverではありません。</p>
     </details>
   </main>
   <script src="./question-router.js" defer></script>
+  <script type="module" src="./fx.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
