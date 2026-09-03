@@ -1,3 +1,14 @@
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+function syncSystemTheme({ matches } = systemTheme) {
+  const theme = matches ? "dark" : "light";
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+}
+
+syncSystemTheme(systemTheme);
+systemTheme.addEventListener("change", syncSystemTheme);
+
 const SNAPSHOT_URL = "./data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json";
 const SHORT_SNAPSHOT_URL = "./data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json";
 const worker = new Worker("./worker.mjs", { type: "module" });
