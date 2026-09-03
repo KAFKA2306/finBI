@@ -31,9 +31,11 @@ function optionalDecimal(value) {
 }
 
 function clearCanonicalMetrics() {
-  for (const selector of (
+  for (const selector of [
     "#fx-current-exposure",
+    "#fx-current-exposure-detail",
     "#fx-incremental-exposure",
+    "#fx-incremental-exposure-detail",
     "#fx-total-exposure",
     "#fx-hedge-ratio",
     "#fx-margin-requirement",
@@ -43,8 +45,8 @@ function clearCanonicalMetrics() {
     "#fx-sharpe",
     "#fx-max-drawdown",
     "#fx-expected-shortfall",
-    "#fx-turnover"
-  )) {
+    "#fx-turnover",
+  ]) {
     setText(selector, "—");
   }
 }
@@ -62,11 +64,12 @@ function validateOverlay(result) {
 }
 
 function renderVerified(result) {
-  setText("#fx-current-exposure", optionalPercent(result.currentUsdExposure));
-  setText(
-    "#fx-incremental-exposure",
-    optionalPercent(result.recommendedIncrementalUsdExposure),
-  );
+  const current = optionalPercent(result.currentUsdExposure);
+  const incremental = optionalPercent(result.recommendedIncrementalUsdExposure);
+  setText("#fx-current-exposure", current);
+  setText("#fx-current-exposure-detail", current);
+  setText("#fx-incremental-exposure", incremental);
+  setText("#fx-incremental-exposure-detail", incremental);
   setText("#fx-total-exposure", optionalPercent(result.recommendedTotalUsdExposure));
   setText("#fx-hedge-ratio", optionalDecimal(result.hedgeRatio));
   setText("#fx-margin-requirement", optionalPercent(result.marginRequirementFraction));
