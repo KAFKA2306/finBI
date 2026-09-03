@@ -31,6 +31,18 @@ class StaticBoundaryTests(unittest.TestCase):
             ],
         )
 
+    def test_public_rates_data_matches_live_view(self) -> None:
+        snapshots = sorted(
+            path.name for path in (DATA_DIR / "snapshots").glob("*.json")
+        )
+        self.assertEqual(
+            snapshots,
+            [
+                "fred-dgs10-2026-07-20_2026-07-23.json",
+                "fred-dgs2-2026-07-20_2026-07-23.json",
+            ],
+        )
+
     def test_derived_decisions_are_not_stored(self) -> None:
         self.assertFalse((DATA_DIR / "decisions").exists())
 
