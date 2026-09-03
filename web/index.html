@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="金融のデータ・指標・比較・シナリオを一つの画面で確認するFinancial BI。">
+  <meta name="description" content="正準FX outputと保存済み米国債snapshotを、状態・比較・根拠の順で確認するFinancial BI。">
   <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111712" media="(prefers-color-scheme: dark)">
   <title>finBI — Financial BI</title>
@@ -14,22 +14,22 @@
     <header class="hero">
       <p class="eyebrow">finBI · Financial BI</p>
       <h1>金融の論点を、<br>数字で比較する。</h1>
-      <p class="lead">ポートフォリオ、FX、金利、債券、バリュエーション、マクロ、商品比較、税・キャッシュフロー、バックテストを、正準データから同じ比較軸で見える化します。</p>
+      <p class="lead">いま使える正準viewだけを表示します。FXはinvestor2のUSD exposure output、Ratesは保存済み米国債snapshotを、状態・比較・根拠まで追跡できます。</p>
       <p class="notice">公開版はverified public / publication-safe dataのみ · private account dataはcommitしません</p>
     </header>
 
     <section class="workbench-intro" aria-labelledby="workbench-heading">
       <div>
         <p class="eyebrow">BI Views</p>
-        <h2 id="workbench-heading">見るべき数字へすぐ移動する</h2>
-        <p class="section-lead">金融Issueで必要になる分析をBI viewへ落とし込みます。Issue管理や自動解決は行わず、必要なKPI・比較・シナリオ・出典を見える化します。</p>
+        <h2 id="workbench-heading">使えるviewから判断を始める</h2>
+        <p class="section-lead">未実装のsurfaceは主要導線に置きません。必要なKPI・比較・出典が揃ったviewだけをここから開けます。</p>
       </div>
 
       <section class="card ask-panel" aria-labelledby="ask-heading">
         <div>
           <p class="eyebrow">View Finder</p>
           <h3 id="ask-heading">質問から見るべきBIを探す</h3>
-          <p class="section-lead">過去の金融質問を、既存のBI surfaceへ案内します。未接続データから答えを生成する機能ではありません。</p>
+          <p class="section-lead">質問を既存のusable viewへ案内します。未接続データから答えを生成する機能ではありません。</p>
         </div>
         <div class="ask-row">
           <label for="question-query">金融の論点
@@ -50,53 +50,8 @@
         <a class="desk-card is-live" href="#rates-desk">
           <span class="desk-status">LIVE VIEW</span>
           <strong>Rates</strong>
-          <small>政策金利・国債・yield curve・2点比較</small>
+          <small>米国債snapshot・yield curve・2点比較</small>
         </a>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Portfolio</strong>
-          <small>保有・通貨配分・重複・risk contribution</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Frontier</strong>
-          <small>efficient frontier・what-if配分・CVaR</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Valuation</strong>
-          <small>PER・earnings yield・growth・IRR</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Macro</strong>
-          <small>inflation・liquidity・growth・regime</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Events</strong>
-          <small>event前後の市場・fundamental変化</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Products</strong>
-          <small>broker・bank・ETF・fund・deposit比較</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Tax & Cashflow</strong>
-          <small>予定納税・ふるさと納税・NISA/iDeCo</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Backtest</strong>
-          <small>CAGR・Vol・Sharpe・DD・CVaR・regime</small>
-        </div>
-        <div class="desk-card">
-          <span class="desk-status">PLANNED</span>
-          <strong>Audit</strong>
-          <small>source・as-of・vintage・revision</small>
-        </div>
       </div>
     </section>
 
@@ -106,15 +61,10 @@
           <p class="eyebrow">FX · Canonical View</p>
           <h2 id="fx-heading">USD exposure overlay の正準状態を見る</h2>
         </div>
-        <p class="section-lead">finBIは <code>investor2.fx-overlay.v1</code> のpublication-safe outputをread-only表示します。carry、leverage、break-even、stress、PnL、最適USD exposureをfinBIでは再計算しません。正準入力が不足するときは <strong>UNVERIFIED</strong> のまま表示します。</p>
+        <p class="section-lead">finBIは <code>investor2.fx-overlay.v1</code> をread-only表示します。金融計算を再実装せず、入力不足は <strong>UNVERIFIED</strong> のまま見せます。</p>
       </div>
 
       <section class="kpi-grid" aria-label="FX overlay canonical status">
-        <article class="card kpi-card">
-          <span class="kpi-label">Canonical schema</span>
-          <strong id="fx-schema">—</strong>
-          <small>KAFKA2306/investor2</small>
-        </article>
         <article class="card kpi-card">
           <span class="kpi-label">Canonical status</span>
           <strong id="fx-overlay-status">—</strong>
@@ -129,6 +79,11 @@
           <span class="kpi-label">Recommended incremental USD</span>
           <strong id="fx-incremental-exposure">—</strong>
           <small>canonical outputのみ</small>
+        </article>
+        <article class="card kpi-card">
+          <span class="kpi-label">Canonical schema</span>
+          <strong id="fx-schema">—</strong>
+          <small>KAFKA2306/investor2</small>
         </article>
       </section>
 
@@ -161,8 +116,8 @@
       </section>
 
       <section class="card fx-card fx-audit" aria-labelledby="fx-audit-heading">
-        <p class="eyebrow">Audit</p>
-        <h3 id="fx-audit-heading">数値が無いときは、無いまま見せる</h3>
+        <p class="eyebrow">Evidence</p>
+        <h3 id="fx-audit-heading">状態と根拠を確認する</h3>
         <p id="fx-reason" class="section-lead">canonical outputを読み込み中…</p>
         <p class="status" id="fx-status" role="status">investor2 FX overlayを読み込み中…</p>
         <p class="source-row">
