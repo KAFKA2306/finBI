@@ -42,9 +42,7 @@ class FxBiTest(unittest.TestCase):
 
     def test_scenarios_do_not_hide_fx_downside(self):
         brief = analyze_fx_snapshot(load_snapshot())
-        by_spot_return = {
-            row["spot_return_percent"]: row for row in brief["scenarios"]
-        }
+        by_spot_return = {row["spot_return_percent"]: row for row in brief["scenarios"]}
         self.assertAlmostEqual(
             by_spot_return[-5.0]["equity_return_percent"], -6.7964, places=4
         )
