@@ -41,24 +41,26 @@ jobs:
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 1
           curl --fail --silent http://127.0.0.1:8123/ | grep -q 'Financial BI'
-          curl --fail --silent http://127.0.0.1:8123/ | grep -q 'USD/JPY 3倍'
+          curl --fail --silent http://127.0.0.1:8123/ | grep -q 'USD exposure overlay'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
           curl --fail --silent http://127.0.0.1:8123/styles.css | grep -q 'design-tokens.css'
           curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'KAFKA2306/design@1f2ca82cf70fec89cee30cefa72d8448fca38846'
           curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q -- '--k-color-canvas'
           curl --fail --silent http://127.0.0.1:8123/fx.css | grep -q -- '--k-dimension-table-row'
-          curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'usdjpy-sbi-2026-09-03.json'
+          curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'investor2-fx-overlay.json'
           curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/questions/catalog.v1.json | grep -q 'finbi.question-catalog.v1'
           curl --fail --silent http://127.0.0.1:8123/data/questions/router.v1.json | grep -q 'finbi.question-router.v1'
-          curl --fail --silent http://127.0.0.1:8123/data/snapshots/usdjpy-sbi-2026-09-03.json | grep -q 'finbi.fx-snapshot.v1'
+          curl --fail --silent http://127.0.0.1:8123/data/snapshots/investor2-fx-overlay.json | grep -q 'investor2.fx-overlay.v1'
+          curl --fail --silent http://127.0.0.1:8123/data/snapshots/investor2-fx-overlay.json | grep -q 'UNVERIFIED'
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs3mo-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs5-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs7-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs30-2026-07-20_2026-07-23.json >/dev/null
-          curl --fail --silent http://127.0.0.1:8123/code/static_bi.py | grep -q 'analyze_fx_snapshot_json'
+          curl --fail --silent http://127.0.0.1:8123/code/static_bi.py | grep -q 'compare_curve_json'
+          ! curl --fail --silent http://127.0.0.1:8123/code/static_bi.py | grep -q 'analyze_fx_snapshot'
 
       - name: Remove generated residue
         run: |
