@@ -1,3 +1,4 @@
+import json
 import re
 import unittest
 from pathlib import Path
@@ -19,18 +20,17 @@ class PublicContractTest(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, app)
         for forbidden in (
-            "* 365",
-            "365 *",
             "leverage *",
-            "spot_return *",
-            "annualized_swap =",
-            "break_even_spot_return =",
+            "spot_return",
+            "annualized_swap",
+            "break_even",
+            "pnl_yen",
+            "policy_rate_gap",
         ):
             self.assertNotIn(forbidden, fx)
         self.assertGreaterEqual(app.count("out.basis_points"), 2)
         self.assertIn("out.direction", app)
-        self.assertIn("brief.carry_on_initial_equity_percent", fx)
-        self.assertIn("brief.break_even_spot_return_percent", fx)
+        self.assertIn('FX_OVERLAY_SCHEMA = "investor2.fx-overlay.v1"', fx)
 
     def test_public_ui_has_no_live_financial_provider_fetch(self):
         browser_files = "\n".join(
@@ -46,16 +46,18 @@ class PublicContractTest(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, browser_files)
 
-    def test_worker_is_module_pyodide_and_python_core_is_same_origin(self):
+    def test_worker_is_rates_only_and_python_core_is_same_origin(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
         fx = (ROOT / "web" / "fx.js").read_text(encoding="utf-8")
         worker = (ROOT / "web" / "worker.mjs").read_text(encoding="utf-8")
+        core = (ROOT / "code" / "static_bi.py").read_text(encoding="utf-8")
         self.assertIn('new Worker("./worker.mjs", { type: "module" })', app)
-        self.assertIn('new Worker("./worker.mjs", { type: "module" })', fx)
+        self.assertNotIn("new Worker", fx)
         self.assertIn('fetch("./code/static_bi.py")', worker)
         self.assertIn("compare_curve_json", worker)
-        self.assertIn("analyze_fx_snapshot_json", worker)
+        self.assertNotIn("analyze_fx_snapshot", worker)
+        self.assertNotIn("analyze_fx_snapshot", core)
         self.assertIn('role="status"', html)
 
     def test_curve_brief_uses_same_date_controls_and_two_sources(self):
@@ -69,16 +71,25 @@ class PublicContractTest(unittest.TestCase):
         self.assertIn("fred-dgs10-2026-07-20_2026-07-23.json", app)
         self.assertIn("fred-dgs2-2026-07-20_2026-07-23.json", app)
 
-    def test_fx_view_uses_saved_snapshot_and_exposes_audit_state(self):
+    def test_fx_view_consumes_investor2_contract_read_only(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         fx = (ROOT / "web" / "fx.js").read_text(encoding="utf-8")
+        snapshot_path = ROOT / "data" / "snapshots" / "investor2-fx-overlay.json"
+        overlay = json.loads(snapshot_path.read_text(encoding="utf-8"))
+
         self.assertIn('id="fx-desk"', html)
-        self.assertIn('id="fx-scenarios"', html)
-        self.assertIn('id="fx-assumptions"', html)
-        self.assertIn("usdjpy-sbi-2026-09-03.json", fx)
-        self.assertIn('worker.postMessage({ kind: "fx", snapshot })', fx)
-        self.assertIn("raw swap", html)
-        self.assertIn("付与日数未確認", html)
+        self.assertIn('id="fx-overlay-status"', html)
+        self.assertIn('id="fx-reason"', html)
+        self.assertIn("investor2-fx-overlay.json", fx)
+        self.assertEqual(overlay["schema_version"], "investor2.fx-overlay.v1")
+        self.assertEqual(overlay["status"], "UNVERIFIED")
+        self.assertEqual(set(overlay), {"schema_version", "status", "reason"})
+        self.assertIn("KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md", html)
+        self.assertIn("KAFKA2306/investor2/issues/251", html)
+        self.assertIn("KAFKA2306/investor2/issues/252", html)
+        self.assertNotIn("usdjpy-sbi-2026-09-03.json", fx)
+        self.assertNotIn("1Y Scenario · 3x", html)
+        self.assertNotIn("raw swap", html)
 
     def test_chart_points_are_directly_selectable_without_removing_selects(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
