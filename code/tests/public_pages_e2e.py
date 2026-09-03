@@ -37,6 +37,36 @@ def wait_text(driver, selector, predicate, timeout=90):
     return WebDriverWait(driver, timeout).until(_ready)
 
 
+def emulate_color_scheme(driver, value):
+    driver.execute_cdp_cmd(
+        "Emulation.setEmulatedMedia",
+        {"features": [{"name": "prefers-color-scheme", "value": value}]},
+    )
+
+
+def assert_system_theme(driver, theme, canvas, foreground, timeout=30):
+    def _ready(_driver):
+        return _driver.execute_script(
+            """
+            const root = document.documentElement;
+            const style = getComputedStyle(root);
+            return [
+              root.dataset.theme,
+              style.getPropertyValue('--k-color-canvas').trim(),
+              style.getPropertyValue('--k-color-foreground').trim(),
+              root.style.colorScheme,
+            ];
+            """
+        )
+
+    def _matches(_driver):
+        values = _ready(_driver)
+        return values if values[0] == theme else False
+
+    values = WebDriverWait(driver, timeout).until(_matches)
+    assert values == [theme, canvas, foreground, theme], values
+
+
 def click_chart_date(driver, date, timeout=30):
     selector = f"circle.chart-hit[data-date='{date}']"
 
@@ -107,7 +137,12 @@ def run_viewport(width, height, canonical):
     options.add_argument(f"--window-size={width},{height}")
     driver = webdriver.Chrome(options=options)
     try:
+        emulate_color_scheme(driver, "dark")
         driver.get(URL)
+        assert_system_theme(driver, "dark", "#0B0F17", "#F1F5F9")
+        emulate_color_scheme(driver, "light")
+        assert_system_theme(driver, "light", "#F7F5EF", "#17233F")
+
         assert_fx_view(driver, canonical)
         wait_text(driver, "#status", lambda value: "比較完了" in value)
         wait_text(
@@ -165,6 +200,7 @@ def run_viewport(width, height, canonical):
 
         shared_url = f"{URL}?start=2026-07-21&end=2026-07-22"
         driver.get(shared_url)
+        assert_system_theme(driver, "light", "#F7F5EF", "#17233F")
         assert_fx_view(driver, canonical)
         wait_text(driver, "#status", lambda value: "比較完了" in value)
         wait_text(

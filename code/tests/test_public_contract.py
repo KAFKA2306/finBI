@@ -75,6 +75,21 @@ class PublicContractTest(unittest.TestCase):
         self.assertIn("fred-dgs10-2026-07-20_2026-07-23.json", app)
         self.assertIn("fred-dgs2-2026-07-20_2026-07-23.json", app)
 
+    def test_theme_follows_system_color_scheme_without_second_palette(self):
+        app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+        tokens = (ROOT / "web" / ".kafka-design" / "kafka-tokens.css").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn('matchMedia("(prefers-color-scheme: dark)")', app)
+        self.assertIn("document.documentElement.dataset.theme = theme", app)
+        self.assertIn("document.documentElement.style.colorScheme = theme", app)
+        self.assertIn('systemTheme.addEventListener("change", syncSystemTheme)', app)
+        self.assertNotRegex(app, r"#[0-9A-Fa-f]{3,8}")
+        self.assertIn('[data-theme="dark"]', tokens)
+        self.assertIn("--k-color-canvas: #F7F5EF", tokens)
+        self.assertIn("--k-color-canvas: #0B0F17", tokens)
+
     def test_fx_view_consumes_investor2_contract_without_local_copy(self):
         html = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
         fx = (ROOT / "web" / "fx.js").read_text(encoding="utf-8")
