@@ -94,9 +94,24 @@ class QuestionCatalogTest(unittest.TestCase):
         self.assertIn("2s10s", rates[0]["comparison_or_scenario"])
         self.assertNotIn("two-date Treasury comparison", catalog["mission"])
 
+    def test_fx_recipe_has_one_canonical_calculation_authority(self):
+        fx = next(
+            recipe
+            for recipe in load_catalog()["recipes"]
+            if recipe["question_id"] == "fx.carry_leverage"
+        )
+        self.assertEqual(fx["required_inputs"], ["investor2.fx-overlay.v1"])
+        self.assertEqual(fx["data_authority"], ["KAFKA2306/investor2"])
+        self.assertEqual(fx["calculation"], ["read-only canonical metric projection"])
+        self.assertIn("no finBI calculation fallback", fx["failure_mode"])
+
     def test_public_private_boundary_forbids_committing_private_raw_data(self):
         boundary = load_catalog()["public_private_boundary"]
         self.assertIs(boundary["public_repository"], True)
+        self.assertEqual(
+            boundary["public_pages"],
+            "verified public data or publication-safe canonical output only",
+        )
         private_rule = boundary["private_inputs"].casefold()
         for phrase in (
             "never commit",
