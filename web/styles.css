@@ -555,7 +555,7 @@ input {
 }
 
 .chip {
-  min-height: var(--k-dimension-control-height);
+  min-height: var(--k-dimension-touch-target);
   border: 1px solid var(--line);
   border-radius: var(--k-dimension-radius);
   background: var(--surface);
