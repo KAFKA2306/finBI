@@ -59,9 +59,11 @@ def assert_system_theme(driver, theme, canvas, foreground, timeout=30):
             """
         )
 
-    values = WebDriverWait(driver, timeout).until(
-        lambda current: (result := _ready(current)) if result[0] == theme else False
-    )
+    def _matches(_driver):
+        values = _ready(_driver)
+        return values if values[0] == theme else False
+
+    values = WebDriverWait(driver, timeout).until(_matches)
     assert values == [theme, canvas, foreground, theme], values
 
 
