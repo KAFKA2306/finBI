@@ -84,7 +84,9 @@ class PublicContractTest(unittest.TestCase):
         self.assertEqual(overlay["schema_version"], "investor2.fx-overlay.v1")
         self.assertEqual(overlay["status"], "UNVERIFIED")
         self.assertEqual(set(overlay), {"schema_version", "status", "reason"})
-        self.assertIn("KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md", html)
+        self.assertIn(
+            "KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md", html
+        )
         self.assertIn("KAFKA2306/investor2/issues/251", html)
         self.assertIn("KAFKA2306/investor2/issues/252", html)
         self.assertNotIn("usdjpy-sbi-2026-09-03.json", fx)
