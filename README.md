@@ -17,7 +17,7 @@ canonical data / analytics
 
 | View | State | Authority |
 |---|---|---|
-| FX | **CANONICAL / UNVERIFIED** | `KAFKA2306/investor2` の `investor2.fx-overlay.v1` をread-only表示。finBIではcarry / leverage / break-even / stress / PnLを再計算しない |
+| FX | **CANONICAL / UNVERIFIED** | `KAFKA2306/investor2` の公開 `investor2.fx-overlay.v1` artifactを直接read-only表示。finBIではcarry / leverage / break-even / stress / PnLを再計算しない |
 | Rates | **LIVE** | 保存済みTreasury snapshotを `code/static_bi.py` で比較 |
 | Portfolio | PLANNED | private/canonical position output待ち |
 | Frontier | PLANNED | investor2 canonical frontier output待ち |
@@ -27,10 +27,13 @@ PLANNED viewにsynthetic/fixture値を本番結果として表示しません。
 
 ## FX authority
 
+正準artifact:
+https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json
+
 正準仕様:
 https://github.com/KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md
 
-正準計算ownerは `KAFKA2306/investor2` です。finBIの `data/snapshots/investor2-fx-overlay.json` は同じ `investor2.fx-overlay.v1` schemaのpublication-safe projectionだけを持ち、数値を再計算しません。
+正準計算ownerは `KAFKA2306/investor2` です。finBIは上記production artifactをブラウザから直接読み、同じ結果のsnapshotをrepository内へ複製しません。
 
 現在は、実際のportfolio position snapshotと十分なrealized daily swap historyが正準入力として未整備のため `UNVERIFIED` です。数値が無い場合は0やproxyへfallbackせず、無いまま表示します。
 
@@ -56,7 +59,7 @@ snapshotのsource、observed range、retrieved_at、availabilityが不足・矛�
 
 ## Visual authority
 
-`KAFKA2306/design` がKAFKA2306 product UIの正準visual authorityです。finBIはReact依存を追加せず、公開可能なversioned token snapshot `web/design-tokens.css` を利用します。
+`KAFKA2306/design` がKAFKA2306 product UIの正準visual authorityです。finBIはReact依存を追加せず、locked design assetsを利用します。
 
 ## Verification
 
@@ -64,7 +67,7 @@ snapshotのsource、observed range、retrieved_at、availabilityが不足・矛�
 uvx --from prek==0.4.11 prek run --all-files
 ```
 
-GitHub Actionsはfast quality gate、Pages artifact、HTTP smoke、clean checkout、production Pagesのdesktop/mobile E2Eを検証します。CI成功だけでrelease成功とは扱いません。
+GitHub Actionsはfast quality gate、canonical investor2 artifact、Pages artifact、HTTP smoke、clean checkout、production Pagesのdesktop/mobile E2Eを検証します。CI成功だけでrelease成功とは扱いません。
 
 ## Work state
 
