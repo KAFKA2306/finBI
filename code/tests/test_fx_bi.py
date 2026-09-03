@@ -1,7 +1,9 @@
 import json
+import sys
 import unittest
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from static_bi import analyze_fx_snapshot, validate_fx_snapshot
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,7 +35,9 @@ class FxBiTest(unittest.TestCase):
         self.assertAlmostEqual(
             brief["carry_on_initial_equity_percent"], 8.2036, places=4
         )
-        self.assertAlmostEqual(brief["break_even_spot_return_percent"], -2.7345, places=4)
+        self.assertAlmostEqual(
+            brief["break_even_spot_return_percent"], -2.7345, places=4
+        )
         self.assertEqual(brief["policy_rate_gap_percentage_points"], 2.625)
 
     def test_scenarios_do_not_hide_fx_downside(self):
