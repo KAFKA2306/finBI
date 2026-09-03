@@ -3,93 +3,169 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="検証済み金融snapshotを、Pythonで比較しながら直感的に読めるfinBI。">
+  <meta name="description" content="金融の質問を、データ・計算・比較・意思決定・出典へつなぐFinancial Decision Workbench。">
   <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111712" media="(prefers-color-scheme: dark)">
-  <title>finBI — 金利の動きを、触って読む</title>
+  <title>finBI — Financial Decision Workbench</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <main class="shell">
     <header class="hero">
-      <p class="eyebrow">finBI · verified snapshot</p>
-      <h1>金利の動きを、<br>触って読む。</h1>
-      <p class="lead">難しいダッシュボードではなく、2つの日付を選ぶだけ。保存済みの公的データを比較します。</p>
-      <p class="notice">現在値ではありません · live market dataではありません · 投資助言ではありません</p>
+      <p class="eyebrow">finBI · Financial Decision Workbench</p>
+      <h1>金融の質問を、<br>意思決定までつなぐ。</h1>
+      <p class="lead">ポートフォリオ、FX、金利、債券、バリュエーション、マクロ、商品比較、税・キャッシュフロー、バックテストを、同じ「質問 → データ → 計算 → 比較 → 判断 → 出典」の流れで扱います。</p>
+      <p class="notice">公開版はverified public / sample dataのみ · private account dataはcommitしません</p>
     </header>
 
-    <section class="dashboard" aria-label="米国10年国債利回りの比較">
-      <article class="card chart-card">
-        <div class="kicker">
-          <strong id="series-name">データを読み込み中…</strong>
-          <span id="window-label"></span>
+    <section class="workbench-intro" aria-labelledby="workbench-heading">
+      <div>
+        <p class="eyebrow">Ask / Recipes</p>
+        <h2 id="workbench-heading">何を知りたい？</h2>
+        <p class="section-lead">新しいグラフではなく、新しい質問レシピを増やします。未接続Deskは数字を捏造せず、状態だけを表示します。</p>
+      </div>
+      <div class="desk-grid" aria-label="finBI desks">
+        <a class="desk-card is-live" href="#rates-desk">
+          <span class="desk-status">LIVE RECIPE</span>
+          <strong>Rates Desk</strong>
+          <small>政策金利・国債・yield curve・2点比較</small>
+        </a>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Portfolio</strong>
+          <small>保有・重複・risk contribution・rebalance</small>
         </div>
-
-        <p class="chart-hint" id="chart-hint">グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。</p>
-        <div class="chart-wrap">
-          <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc" aria-describedby="chart-hint">
-            <title id="chart-title">米国10年国債利回りの推移</title>
-            <desc id="chart-desc">保存済み期間の各観測値を線で結んだグラフです。</desc>
-          </svg>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Frontier Lab</strong>
+          <small>efficient frontier・what-if配分</small>
         </div>
-
-        <div class="big-answer" aria-live="polite">
-          <span class="value" id="headline">—</span>
-          <span class="story" id="story">開始日と終了日を選ぶと、差を計算します。</span>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>FX Desk</strong>
+          <small>USDJPY・swap・carry・leverage・stress</small>
         </div>
-      </article>
-
-      <aside class="card side-card">
-        <section class="controls" aria-labelledby="compare-heading">
-          <div>
-            <p class="eyebrow">Compare</p>
-            <h2 id="compare-heading">どこから、どこまで？</h2>
-          </div>
-          <div class="control-grid">
-            <label>開始日
-              <select id="start" aria-label="比較の開始日"></select>
-            </label>
-            <label>終了日
-              <select id="end" aria-label="比較の終了日"></select>
-            </label>
-          </div>
-          <button class="primary" id="compare" type="button">比べる</button>
-          <p class="status" id="status" role="status">snapshotを読み込み中…</p>
-        </section>
-
-        <section class="quick-picks" aria-labelledby="quick-heading">
-          <p id="quick-heading">すぐ試す</p>
-          <div class="chips" id="quick-picks"></div>
-        </section>
-
-        <section class="trust" aria-labelledby="trust-heading">
-          <h2 id="trust-heading">この数字はどこから？</h2>
-          <dl class="meta" id="metadata"></dl>
-          <a id="source-link" href="#" target="_blank" rel="noreferrer">DGS10一次情報を開く</a>
-        </section>
-      </aside>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Valuation</strong>
+          <small>PER・earnings yield・EPS CAGR</small>
+        </div>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Macro</strong>
+          <small>inflation・liquidity・growth・regime</small>
+        </div>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Event Lens</strong>
+          <small>news → exposure → portfolio impact</small>
+        </div>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Products</strong>
+          <small>broker・bank・ETF・fund・deposit比較</small>
+        </div>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Tax & Cashflow</strong>
+          <small>予定納税・ふるさと納税・NISA/iDeCo</small>
+        </div>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Backtest Lab</strong>
+          <small>CAGR・Vol・Sharpe・DD・regime</small>
+        </div>
+        <div class="desk-card">
+          <span class="desk-status">CATALOGED</span>
+          <strong>Audit</strong>
+          <small>source・as-of・vintage・revision</small>
+        </div>
+      </div>
     </section>
 
-    <section class="card" aria-labelledby="curve-brief-heading">
-      <p class="eyebrow">Comparison Brief · 2s10s</p>
-      <h2 id="curve-brief-heading">2年と10年を、同じ期間で比べる</h2>
-      <div class="big-answer" aria-live="polite">
-        <span class="value" id="curve-brief-headline">—</span>
-        <span class="story" id="curve-brief-detail">同じ開始日・終了日で2年債と10年債を比較します。</span>
+    <section id="rates-desk" class="desk-section" aria-labelledby="rates-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Rates Desk · Recipe 01</p>
+          <h2 id="rates-heading">保存済み米国債snapshotを比較する</h2>
+        </div>
+        <p class="section-lead">現在の公開runtimeで実稼働している最初のレシピです。現在値の速報ではなく、point-in-time provenanceを確認できる保存済み観測を扱います。</p>
       </div>
-      <p class="status" id="curve-brief-status" role="status">2s10s snapshotを読み込み中…</p>
-      <p>
-        出典:
-        <a id="curve-long-source" href="#" target="_blank" rel="noreferrer">FRED DGS10</a>
-        ·
-        <a id="curve-short-source" href="#" target="_blank" rel="noreferrer">FRED DGS2</a>
-      </p>
+
+      <section class="dashboard" aria-label="米国10年国債利回りの比較">
+        <article class="card chart-card">
+          <div class="kicker">
+            <strong id="series-name">データを読み込み中…</strong>
+            <span id="window-label"></span>
+          </div>
+
+          <p class="chart-hint" id="chart-hint">グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。</p>
+          <div class="chart-wrap">
+            <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc" aria-describedby="chart-hint">
+              <title id="chart-title">米国10年国債利回りの推移</title>
+              <desc id="chart-desc">保存済み期間の各観測値を線で結んだグラフです。</desc>
+            </svg>
+          </div>
+
+          <div class="big-answer" aria-live="polite">
+            <span class="value" id="headline">—</span>
+            <span class="story" id="story">開始日と終了日を選ぶと、差を計算します。</span>
+          </div>
+        </article>
+
+        <aside class="card side-card">
+          <section class="controls" aria-labelledby="compare-heading">
+            <div>
+              <p class="eyebrow">Compare</p>
+              <h2 id="compare-heading">どこから、どこまで？</h2>
+            </div>
+            <div class="control-grid">
+              <label>開始日
+                <select id="start" aria-label="比較の開始日"></select>
+              </label>
+              <label>終了日
+                <select id="end" aria-label="比較の終了日"></select>
+              </label>
+            </div>
+            <button class="primary" id="compare" type="button">比べる</button>
+            <p class="status" id="status" role="status">snapshotを読み込み中…</p>
+          </section>
+
+          <section class="quick-picks" aria-labelledby="quick-heading">
+            <p id="quick-heading">すぐ試す</p>
+            <div class="chips" id="quick-picks"></div>
+          </section>
+
+          <section class="trust" aria-labelledby="trust-heading">
+            <h2 id="trust-heading">この数字はどこから？</h2>
+            <dl class="meta" id="metadata"></dl>
+            <a id="source-link" href="#" target="_blank" rel="noreferrer">DGS10一次情報を開く</a>
+          </section>
+        </aside>
+      </section>
+
+      <section class="card curve-card" aria-labelledby="curve-brief-heading">
+        <p class="eyebrow">Comparison Brief · 2s10s</p>
+        <h2 id="curve-brief-heading">2年と10年を、同じ期間で比べる</h2>
+        <div class="big-answer" aria-live="polite">
+          <span class="value" id="curve-brief-headline">—</span>
+          <span class="story" id="curve-brief-detail">同じ開始日・終了日で2年債と10年債を比較します。</span>
+        </div>
+        <p class="status" id="curve-brief-status" role="status">2s10s snapshotを読み込み中…</p>
+        <p>
+          出典:
+          <a id="curve-long-source" href="#" target="_blank" rel="noreferrer">FRED DGS10</a>
+          ·
+          <a id="curve-short-source" href="#" target="_blank" rel="noreferrer">FRED DGS2</a>
+        </p>
+      </section>
     </section>
 
     <details class="explain">
       <summary>計算方法と実装を見る</summary>
       <p>bp（basis point）は金利差の単位で、1 bp = 0.01 percentage pointです。4.60%から4.69%への変化なら +0.09 percentage point = +9 bpです。</p>
-      <p>画面は保存済みsnapshotだけを読みます。比較時はPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
+      <p>公開画面は保存済みsnapshotだけを読みます。比較時はPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
+      <p>対応質問の正準カタログは <code>data/questions/catalog.v1.json</code> です。未接続Deskは将来の実データ接続まで値を表示しません。</p>
     </details>
   </main>
   <script type="module" src="./app.js"></script>
