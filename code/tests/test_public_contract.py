@@ -159,7 +159,7 @@ class PublicContractTest(unittest.TestCase):
 
         self.assertIn('@import url("./design-tokens.css")', styles)
         self.assertEqual(
-            config["designSha"], "6ef94b60a9fefcd7577ec25d2edd4bca06096314"
+            config["designSha"], "f2d5c85e196c0f92239de0607c8fce6bf1b20433"
         )
         self.assertEqual(lock["designSha"], config["designSha"])
         self.assertEqual(lock["integration"]["cssEntry"], "web/design-tokens.css")
