@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "data" / "questions" / "catalog.v1.json"
+ROUTER = ROOT / "data" / "questions" / "router.v1.json"
 
 REQUIRED_RECIPE_FIELDS = {
     "question_id",
@@ -38,6 +39,10 @@ REQUIRED_DESKS = {
 
 def load_catalog():
     return json.loads(CATALOG.read_text(encoding="utf-8"))
+
+
+def load_router():
+    return json.loads(ROUTER.read_text(encoding="utf-8"))
 
 
 class QuestionCatalogTest(unittest.TestCase):
@@ -102,6 +107,21 @@ class QuestionCatalogTest(unittest.TestCase):
             "personal identifiers",
         ):
             self.assertIn(phrase, private_rule)
+
+    def test_router_terms_only_reference_registered_recipes(self):
+        catalog_ids = {
+            recipe["question_id"] for recipe in load_catalog()["recipes"]
+        }
+        router = load_router()
+        self.assertEqual(router["schema_version"], "finbi.question-router.v1")
+        routed_ids = set()
+        for route in router["routes"]:
+            self.assertIn(route["question_id"], catalog_ids)
+            self.assertIsInstance(route["terms"], list)
+            self.assertTrue(route["terms"])
+            self.assertEqual(len(route["terms"]), len(set(route["terms"])))
+            routed_ids.add(route["question_id"])
+        self.assertEqual(routed_ids, catalog_ids)
 
 
 if __name__ == "__main__":
