@@ -29,7 +29,7 @@ jobs:
       - name: Build public root
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code
-          cp web/index.html web/app.js web/question-router.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
@@ -41,18 +41,22 @@ jobs:
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 1
           curl --fail --silent http://127.0.0.1:8123/ | grep -q 'Financial BI'
+          curl --fail --silent http://127.0.0.1:8123/ | grep -q 'USD/JPY 3倍'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
           curl --fail --silent http://127.0.0.1:8123/styles.css >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/fx.css >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'usdjpy-sbi-2026-09-03.json'
           curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/questions/catalog.v1.json | grep -q 'finbi.question-catalog.v1'
           curl --fail --silent http://127.0.0.1:8123/data/questions/router.v1.json | grep -q 'finbi.question-router.v1'
+          curl --fail --silent http://127.0.0.1:8123/data/snapshots/usdjpy-sbi-2026-09-03.json | grep -q 'finbi.fx-snapshot.v1'
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs3mo-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs5-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs7-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs30-2026-07-20_2026-07-23.json >/dev/null
-          curl --fail --silent http://127.0.0.1:8123/code/static_bi.py >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/code/static_bi.py | grep -q 'analyze_fx_snapshot_json'
 
       - name: Remove generated residue
         run: |
@@ -98,7 +102,7 @@ jobs:
         if: steps.pages.outputs.enabled == 'true'
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code
-          cp web/index.html web/app.js web/question-router.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
