@@ -17,7 +17,7 @@ canonical data / analytics
 
 | View | State | Authority |
 |---|---|---|
-| FX | **CANONICAL / UNVERIFIED** | `KAFKA2306/investor2` の公開 `investor2.fx-overlay.v1` artifactを直接read-only表示。finBIではcarry / leverage / break-even / stress / PnLを再計算しない |
+| FX | **CANONICAL** | `KAFKA2306/investor2` の公開 `investor2.fx-overlay.v1` artifactを直接read-only表示。statusは上流artifactに追従し、finBIではcarry / leverage / break-even / stress / PnLを再計算しない |
 | Rates | **LIVE** | 保存済みTreasury snapshotを `code/static_bi.py` で比較 |
 | Portfolio | PLANNED | private/canonical position output待ち |
 | Frontier | PLANNED | investor2 canonical frontier output待ち |
@@ -33,9 +33,9 @@ https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json
 正準仕様:
 https://github.com/KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md
 
-正準計算ownerは `KAFKA2306/investor2` です。finBIは上記production artifactをブラウザから直接読み、同じ結果のsnapshotをrepository内へ複製しません。
+正準計算ownerは `KAFKA2306/investor2` です。finBIは上記production artifactをブラウザから直接読み、同じ結果のsnapshotをrepository内へ複製しません。`VERIFIED` / `TEST_ONLY` / `UNVERIFIED` のstatusも上流artifactをそのまま表示します。
 
-現在は、実際のportfolio position snapshotと十分なrealized daily swap historyが正準入力として未整備のため `UNVERIFIED` です。数値が無い場合は0やproxyへfallbackせず、無いまま表示します。
+正準入力が不足して上流が `UNVERIFIED` を返す場合、finBIは0やproxyへfallbackせず、理由と欠損状態をそのまま表示します。
 
 関連:
 - https://github.com/KAFKA2306/investor2/issues/251
@@ -67,7 +67,7 @@ snapshotのsource、observed range、retrieved_at、availabilityが不足・矛�
 uvx --from prek==0.4.11 prek run --all-files
 ```
 
-GitHub Actionsはfast quality gate、canonical investor2 artifact、Pages artifact、HTTP smoke、clean checkout、production Pagesのdesktop/mobile E2Eを検証します。CI成功だけでrelease成功とは扱いません。
+GitHub Actionsはfast quality gate、canonical investor2 production artifact、Pages artifact、HTTP smoke、clean checkout、production Pagesのdesktop/mobile E2Eを検証します。E2Eは上流FX artifactの実statusとfinBI表示が一致することも確認します。CI成功だけでrelease成功とは扱いません。
 
 ## Work state
 
