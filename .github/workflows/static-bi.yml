@@ -28,9 +28,10 @@ jobs:
 
       - name: Build public root
         run: |
-          mkdir -p site/data/snapshots site/code
-          cp web/index.html web/app.js web/worker.mjs web/styles.css site/
+          mkdir -p site/data/snapshots site/data/questions site/code
+          cp web/index.html web/app.js web/question-router.js web/worker.mjs web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
+          cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
 
       - name: Smoke-test public routes
@@ -39,8 +40,12 @@ jobs:
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           sleep 1
+          curl --fail --silent http://127.0.0.1:8123/ | grep -q 'Financial Decision Workbench'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
           curl --fail --silent http://127.0.0.1:8123/styles.css >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/data/questions/catalog.v1.json | grep -q 'finbi.question-catalog.v1'
+          curl --fail --silent http://127.0.0.1:8123/data/questions/router.v1.json | grep -q 'finbi.question-router.v1'
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/snapshots/fred-dgs3mo-2026-07-20_2026-07-23.json >/dev/null
@@ -92,9 +97,10 @@ jobs:
       - name: Build Pages artifact
         if: steps.pages.outputs.enabled == 'true'
         run: |
-          mkdir -p site/data/snapshots site/code
-          cp web/index.html web/app.js web/worker.mjs web/styles.css site/
+          mkdir -p site/data/snapshots site/data/questions site/code
+          cp web/index.html web/app.js web/question-router.js web/worker.mjs web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
+          cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
 
       - name: Configure Pages
