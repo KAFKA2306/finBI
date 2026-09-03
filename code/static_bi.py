@@ -247,7 +247,10 @@ def validate_fx_snapshot(snapshot: dict[str, Any]) -> None:
         raise ValueError("swap observations are incomplete")
     _require_number(raw.get("buy_yen_per_10000"), "current raw buy swap")
     _require_number(reference.get("buy_yen_per_10000_per_day"), "daily buy swap")
-    if raw.get("award_days") is not None or raw.get("normalized_daily_yen_per_10000") is not None:
+    if (
+        raw.get("award_days") is not None
+        or raw.get("normalized_daily_yen_per_10000") is not None
+    ):
         raise ValueError("unverified current raw swap must remain unnormalized")
     _require_https(raw.get("source_url"), "current raw swap source")
     _require_https(reference.get("source_url"), "normalized swap source")
@@ -292,7 +295,9 @@ def validate_fx_snapshot(snapshot: dict[str, Any]) -> None:
     if not isinstance(contract, dict):
         raise ValueError("missing FX scenario contract")
     _require_number(contract.get("leverage"), "scenario leverage", positive=True)
-    _require_number(contract.get("usd_notional"), "scenario USD notional", positive=True)
+    _require_number(
+        contract.get("usd_notional"), "scenario USD notional", positive=True
+    )
     horizon = contract.get("horizon_days")
     if not isinstance(horizon, int) or isinstance(horizon, bool) or horizon <= 0:
         raise ValueError("scenario horizon_days must be a positive integer")
