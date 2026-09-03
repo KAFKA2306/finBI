@@ -1,35 +1,17 @@
 {
   "schemaVersion": 1,
-  "designSha": "6ef94b60a9fefcd7577ec25d2edd4bca06096314",
+  "designSha": "f2d5c85e196c0f92239de0607c8fce6bf1b20433",
   "preset": "financial-dashboard",
-  "configHash": "c55c5b5c29315f4202016250787c94bf45677ed780b6ba8127b4671f0a06a860",
+  "configHash": "2354084acdaa2ed9ec2282570e663473a10bb66bab3c9a8b7228f1dc9a1a077c",
   "manifestHash": "097bc8f17893fbc00476858253099d31199b0d026317e7afe40e8f6aae46a770",
   "logoHash": null,
   "installedRegistryItems": [],
   "managedFiles": [
-    {
-      "path": "web/.kafka-design/kafka-tokens.css",
-      "sha256": "897ef1dfb22bf1a9671ad96075104af78eca6d5e02427135cd7d0b6d647af6d8"
-    },
-    {
-      "path": "web/.kafka-design/kafka-globals.css",
-      "sha256": "2304371a0c507131844c2fbaa8e9725dedc72ba3165226ba6f2d1862812256bc"
-    },
-    {
-      "path": "web/.kafka-design/kafka-components.css",
-      "sha256": "6236943bda6adc5bbd82f6fee9f600b1cffd1d25bc515b64843b5b7f51fd0cde"
-    },
-    {
-      "path": "web/.kafka-design/portable-conformance.mjs",
-      "sha256": "5281b91caadee07e92b5876ad3547a6531229bb57107ba3bcff4be20ddc3e6d4"
-    },
-    {
-      "path": "web/.kafka-design/conformance-policy.mjs",
-      "sha256": "1622dce9e752aa5b1fc700d1fa894da5f08a957fb088dad7a59be26529a8b54a"
-    }
+    {"path": "web/.kafka-design/kafka-tokens.css", "sha256": "897ef1dfb22bf1a9671ad96075104af78eca6d5e02427135cd7d0b6d647af6d8"},
+    {"path": "web/.kafka-design/kafka-globals.css", "sha256": "2304371a0c507131844c2fbaa8e9725dedc72ba3165226ba6f2d1862812256bc"},
+    {"path": "web/.kafka-design/kafka-components.css", "sha256": "6236943bda6adc5bbd82f6fee9f600b1cffd1d25bc515b64843b5b7f51fd0cde"},
+    {"path": "web/.kafka-design/portable-conformance.mjs", "sha256": "5281b91caadee07e92b5876ad3547a6531229bb57107ba3bcff4be20ddc3e6d4"},
+    {"path": "web/.kafka-design/conformance-policy.mjs", "sha256": "1622dce9e752aa5b1fc700d1fa894da5f08a957fb088dad7a59be26529a8b54a"}
   ],
-  "integration": {
-    "cssEntry": "web/design-tokens.css",
-    "blockHash": "17f3ce126f165b8f41c25f87a57a6fa1272796478cd4a150ec085cdc36dcdec7"
-  }
+  "integration": {"cssEntry": "web/design-tokens.css", "blockHash": "17f3ce126f165b8f41c25f87a57a6fa1272796478cd4a150ec085cdc36dcdec7"}
 }
