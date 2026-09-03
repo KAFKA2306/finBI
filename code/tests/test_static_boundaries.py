@@ -21,6 +21,8 @@ class StaticBoundaryTests(unittest.TestCase):
             files,
             [
                 "app.js",
+                "fx.css",
+                "fx.js",
                 "index.html",
                 "question-router.js",
                 "styles.css",
@@ -37,6 +39,7 @@ class StaticBoundaryTests(unittest.TestCase):
             for path in [
                 CODE_DIR / "static_bi.py",
                 WEB_DIR / "app.js",
+                WEB_DIR / "fx.js",
                 WEB_DIR / "question-router.js",
                 WEB_DIR / "worker.mjs",
             ]
@@ -51,8 +54,11 @@ class StaticBoundaryTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, source.casefold())
 
-    def test_public_question_router_does_not_embed_private_financial_data(self) -> None:
-        router = (WEB_DIR / "question-router.js").read_text(encoding="utf-8")
+    def test_public_modules_do_not_embed_private_financial_data(self) -> None:
+        source = "\n".join(
+            (WEB_DIR / name).read_text(encoding="utf-8")
+            for name in ("question-router.js", "fx.js")
+        )
         for forbidden in (
             "account_number",
             "口座番号",
@@ -61,7 +67,7 @@ class StaticBoundaryTests(unittest.TestCase):
             "api_key",
             "secret",
         ):
-            self.assertNotIn(forbidden, router.casefold())
+            self.assertNotIn(forbidden, source.casefold())
 
 
 if __name__ == "__main__":
