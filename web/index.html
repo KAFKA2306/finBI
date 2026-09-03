@@ -3,97 +3,97 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="金融の質問を、データ・計算・比較・意思決定・出典へつなぐFinancial Decision Workbench。">
+  <meta name="description" content="金融のデータ・指標・比較・シナリオを一つの画面で確認するFinancial BI。">
   <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111712" media="(prefers-color-scheme: dark)">
-  <title>finBI — Financial Decision Workbench</title>
+  <title>finBI — Financial BI</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
   <main class="shell">
     <header class="hero">
-      <p class="eyebrow">finBI · Financial Decision Workbench</p>
-      <h1>金融の質問を、<br>意思決定までつなぐ。</h1>
-      <p class="lead">ポートフォリオ、FX、金利、債券、バリュエーション、マクロ、商品比較、税・キャッシュフロー、バックテストを、同じ「質問 → データ → 計算 → 比較 → 判断 → 出典」の流れで扱います。</p>
-      <p class="notice">公開版はverified public / sample dataのみ · private account dataはcommitしません</p>
+      <p class="eyebrow">finBI · Financial BI</p>
+      <h1>金融の論点を、<br>数字で比較する。</h1>
+      <p class="lead">ポートフォリオ、FX、金利、債券、バリュエーション、マクロ、商品比較、税・キャッシュフロー、バックテストを、正準データから同じ比較軸で見える化します。</p>
+      <p class="notice">公開版はverified public / publication-safe dataのみ · private account dataはcommitしません</p>
     </header>
 
     <section class="workbench-intro" aria-labelledby="workbench-heading">
       <div>
-        <p class="eyebrow">Ask / Recipes</p>
-        <h2 id="workbench-heading">何を知りたい？</h2>
-        <p class="section-lead">新しいグラフではなく、新しい質問レシピを増やします。未接続Deskは数字を捏造せず、状態だけを表示します。</p>
+        <p class="eyebrow">BI Views</p>
+        <h2 id="workbench-heading">見るべき数字へすぐ移動する</h2>
+        <p class="section-lead">金融Issueで必要になる分析をBI viewへ落とし込みます。Issue管理や自動解決は行わず、必要なKPI・比較・シナリオ・出典を見える化します。</p>
       </div>
 
       <section class="card ask-panel" aria-labelledby="ask-heading">
         <div>
-          <p class="eyebrow">Question Router</p>
-          <h3 id="ask-heading">普段の言葉で質問する</h3>
-          <p class="section-lead">質問を正準レシピへrouteします。これは検索・分類であり、未接続データから答えを捏造する機能ではありません。</p>
+          <p class="eyebrow">View Finder</p>
+          <h3 id="ask-heading">質問から見るべきBIを探す</h3>
+          <p class="section-lead">過去の金融質問を、既存のBI surfaceへ案内します。未接続データから答えを生成する機能ではありません。</p>
         </div>
         <div class="ask-row">
-          <label for="question-query">金融の質問
+          <label for="question-query">金融の論点
             <input id="question-query" type="search" placeholder="例: USDJPY 3倍は効率的？" autocomplete="off">
           </label>
-          <button class="primary" id="question-route" type="button">分析レシピを探す</button>
+          <button class="primary" id="question-route" type="button">見るべきBIを探す</button>
         </div>
         <div class="chips" id="question-examples" aria-label="質問例"></div>
-        <div class="question-results" id="question-results" role="status" aria-live="polite">質問カタログを読み込み中…</div>
+        <div class="question-results" id="question-results" role="status" aria-live="polite">BIカタログを読み込み中…</div>
       </section>
 
-      <div class="desk-grid" aria-label="finBI desks">
+      <div class="desk-grid" aria-label="finBI views">
         <a class="desk-card is-live" href="#rates-desk">
-          <span class="desk-status">LIVE RECIPE</span>
-          <strong>Rates Desk</strong>
+          <span class="desk-status">LIVE VIEW</span>
+          <strong>Rates</strong>
           <small>政策金利・国債・yield curve・2点比較</small>
         </a>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
+          <span class="desk-status">PLANNED</span>
           <strong>Portfolio</strong>
-          <small>保有・重複・risk contribution・rebalance</small>
+          <small>保有・通貨配分・重複・risk contribution</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
-          <strong>Frontier Lab</strong>
-          <small>efficient frontier・what-if配分</small>
+          <span class="desk-status">PLANNED</span>
+          <strong>Frontier</strong>
+          <small>efficient frontier・what-if配分・CVaR</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
-          <strong>FX Desk</strong>
+          <span class="desk-status">PLANNED</span>
+          <strong>FX</strong>
           <small>USDJPY・swap・carry・leverage・stress</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
+          <span class="desk-status">PLANNED</span>
           <strong>Valuation</strong>
-          <small>PER・earnings yield・EPS CAGR</small>
+          <small>PER・earnings yield・growth・IRR</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
+          <span class="desk-status">PLANNED</span>
           <strong>Macro</strong>
           <small>inflation・liquidity・growth・regime</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
-          <strong>Event Lens</strong>
-          <small>news → exposure → portfolio impact</small>
+          <span class="desk-status">PLANNED</span>
+          <strong>Events</strong>
+          <small>event前後の市場・fundamental変化</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
+          <span class="desk-status">PLANNED</span>
           <strong>Products</strong>
           <small>broker・bank・ETF・fund・deposit比較</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
+          <span class="desk-status">PLANNED</span>
           <strong>Tax & Cashflow</strong>
           <small>予定納税・ふるさと納税・NISA/iDeCo</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
-          <strong>Backtest Lab</strong>
-          <small>CAGR・Vol・Sharpe・DD・regime</small>
+          <span class="desk-status">PLANNED</span>
+          <strong>Backtest</strong>
+          <small>CAGR・Vol・Sharpe・DD・CVaR・regime</small>
         </div>
         <div class="desk-card">
-          <span class="desk-status">CATALOGED</span>
+          <span class="desk-status">PLANNED</span>
           <strong>Audit</strong>
           <small>source・as-of・vintage・revision</small>
         </div>
@@ -103,10 +103,10 @@
     <section id="rates-desk" class="desk-section" aria-labelledby="rates-heading">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Rates Desk · Recipe 01</p>
+          <p class="eyebrow">Rates · Live View 01</p>
           <h2 id="rates-heading">保存済み米国債snapshotを比較する</h2>
         </div>
-        <p class="section-lead">現在の公開runtimeで実稼働している最初のレシピです。現在値の速報ではなく、point-in-time provenanceを確認できる保存済み観測を扱います。</p>
+        <p class="section-lead">現在の公開runtimeで実稼働している最初のBI viewです。現在値の速報ではなく、point-in-time provenanceを確認できる保存済み観測を扱います。</p>
       </div>
 
       <section class="dashboard" aria-label="米国10年国債利回りの比較">
@@ -182,7 +182,7 @@
       <summary>計算方法と実装を見る</summary>
       <p>bp（basis point）は金利差の単位で、1 bp = 0.01 percentage pointです。4.60%から4.69%への変化なら +0.09 percentage point = +9 bpです。</p>
       <p>公開画面は保存済みsnapshotだけを読みます。比較時はPyodide Web Workerがこのrepositoryの <code>code/static_bi.py</code> をブラウザ内で実行します。金融計算式をJavaScriptへ複製せず、出典・観測期間・取得時刻を画面に残します。</p>
-      <p>対応質問の正準カタログは <code>data/questions/catalog.v1.json</code>、ルーティング語彙は <code>data/questions/router.v1.json</code> です。未接続Deskは将来の実データ接続まで値を表示しません。</p>
+      <p>対応質問のカタログは <code>data/questions/catalog.v1.json</code>、ルーティング語彙は <code>data/questions/router.v1.json</code> です。これは既存BI viewを探す補助navigationであり、Issue Solverではありません。</p>
     </details>
   </main>
   <script src="./question-router.js" defer></script>
