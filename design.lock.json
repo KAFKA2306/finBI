@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "designSha": "f39a0865cf0342f495bf49f547c7fdf112145d77",
+  "preset": "financial-dashboard",
+  "configHash": "3a135ec447b73a24c2722537803bcee23e6742678e577e31be3947542ea3ed7e",
+  "manifestHash": "a0690837cd442dba8d6af90e1ee5c46fb41c0df49c3795ae313661fffdc42836",
+  "logoHash": null,
+  "installedRegistryItems": [],
+  "managedFiles": [
+    {
+      "path": "web/.kafka-design/kafka-tokens.css",
+      "sha256": "897ef1dfb22bf1a9671ad96075104af78eca6d5e02427135cd7d0b6d647af6d8"
+    },
+    {
+      "path": "web/.kafka-design/kafka-globals.css",
+      "sha256": "2304371a0c507131844c2fbaa8e9725dedc72ba3165226ba6f2d1862812256bc"
+    },
+    {
+      "path": "web/.kafka-design/kafka-components.css",
+      "sha256": "6236943bda6adc5bbd82f6fee9f600b1cffd1d25bc515b64843b5b7f51fd0cde"
+    }
+  ],
+  "integration": {
+    "cssEntry": "web/design-tokens.css",
+    "blockHash": "a22ccfc87e7ebb134ccac8bd2b5f5978fa63039a7a5cc23e30e70f3524865201"
+  }
+}
