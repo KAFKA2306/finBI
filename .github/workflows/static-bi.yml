@@ -26,10 +26,32 @@ jobs:
       - name: Run fast quality gates
         run: uvx --from prek==0.4.11 prek run --all-files
 
+      - name: Verify locked design assets
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path("design.config.json").read_text())
+          lock = json.loads(Path("design.lock.json").read_text())
+          expected_sha = "f39a0865cf0342f495bf49f547c7fdf112145d77"
+          assert config["designSha"] == lock["designSha"] == expected_sha
+          assert config["preset"] == lock["preset"] == "financial-dashboard"
+          assert config["cssEntry"] == lock["integration"]["cssEntry"]
+          for item in lock["managedFiles"]:
+              actual = hashlib.sha256(Path(item["path"]).read_bytes()).hexdigest()
+              assert actual == item["sha256"], f"design drift: {item['path']}"
+          entry = Path(lock["integration"]["cssEntry"]).read_text()
+          assert entry.count("/* kafka-design:managed-start */") == 1
+          assert entry.count("/* kafka-design:managed-end */") == 1
+          PY
+
       - name: Build public root
         run: |
-          mkdir -p site/data/snapshots site/data/questions site/code
+          mkdir -p site/data/snapshots site/data/questions site/code site/.kafka-design
           cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
+          cp web/.kafka-design/*.css site/.kafka-design/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
@@ -44,8 +66,10 @@ jobs:
           curl --fail --silent http://127.0.0.1:8123/ | grep -q 'USD exposure overlay'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
           curl --fail --silent http://127.0.0.1:8123/styles.css | grep -q 'design-tokens.css'
-          curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'KAFKA2306/design@1f2ca82cf70fec89cee30cefa72d8448fca38846'
-          curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q -- '--k-color-canvas'
+          curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'kafka-design:managed-start'
+          curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'desk-card:not(.is-live)'
+          curl --fail --silent http://127.0.0.1:8123/.kafka-design/kafka-tokens.css | grep -q -- '--k-color-canvas'
+          curl --fail --silent http://127.0.0.1:8123/.kafka-design/kafka-components.css | grep -q 'k-dashboard-decision'
           curl --fail --silent http://127.0.0.1:8123/fx.css | grep -q -- '--k-dimension-table-row'
           curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'investor2-fx-overlay.json'
           curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
@@ -105,8 +129,9 @@ jobs:
       - name: Build Pages artifact
         if: steps.pages.outputs.enabled == 'true'
         run: |
-          mkdir -p site/data/snapshots site/data/questions site/code
+          mkdir -p site/data/snapshots site/data/questions site/code site/.kafka-design
           cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
+          cp web/.kafka-design/*.css site/.kafka-design/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import re
 import unittest
@@ -133,14 +134,30 @@ class PublicContractTest(unittest.TestCase):
         self.assertIn(".chip{min-height:44px", compact)
         self.assertNotIn(".chip{min-height:40px", compact)
 
-    def test_public_css_consumes_versioned_canonical_design_snapshot(self):
+    def test_public_css_consumes_locked_canonical_design(self):
         styles = (ROOT / "web" / "styles.css").read_text(encoding="utf-8")
         fx = (ROOT / "web" / "fx.css").read_text(encoding="utf-8")
-        tokens = (ROOT / "web" / "design-tokens.css").read_text(encoding="utf-8")
+        entry = (ROOT / "web" / "design-tokens.css").read_text(encoding="utf-8")
+        config = json.loads((ROOT / "design.config.json").read_text(encoding="utf-8"))
+        lock = json.loads((ROOT / "design.lock.json").read_text(encoding="utf-8"))
+
         self.assertIn('@import url("./design-tokens.css")', styles)
-        self.assertIn(
-            "KAFKA2306/design@1f2ca82cf70fec89cee30cefa72d8448fca38846",
-            tokens,
+        self.assertEqual(
+            config["designSha"], "f39a0865cf0342f495bf49f547c7fdf112145d77"
+        )
+        self.assertEqual(lock["designSha"], config["designSha"])
+        self.assertEqual(lock["integration"]["cssEntry"], "web/design-tokens.css")
+        self.assertEqual(entry.count("/* kafka-design:managed-start */"), 1)
+        self.assertEqual(entry.count("/* kafka-design:managed-end */"), 1)
+        self.assertIn("desk-card:not(.is-live)", entry)
+
+        for item in lock["managedFiles"]:
+            managed = ROOT / item["path"]
+            self.assertTrue(managed.is_file())
+            self.assertEqual(hashlib.sha256(managed.read_bytes()).hexdigest(), item["sha256"])
+
+        tokens = (ROOT / "web" / ".kafka-design" / "kafka-tokens.css").read_text(
+            encoding="utf-8"
         )
         self.assertIn("--k-dimension-table-row: 30px", tokens)
         self.assertIn("--k-dimension-radius: 2px", tokens)
