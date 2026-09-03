@@ -61,6 +61,7 @@ jobs:
       - name: Build public root
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code site/.kafka-design
+          touch site/.nojekyll
           cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
           cp web/.kafka-design/*.css site/.kafka-design/
           cp data/snapshots/*.json site/data/snapshots/
@@ -69,6 +70,7 @@ jobs:
 
       - name: Smoke-test public routes
         run: |
+          test -f site/.nojekyll
           python -m http.server 8123 -d site >/tmp/finbi-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
@@ -136,6 +138,7 @@ jobs:
         if: steps.pages.outputs.enabled == 'true'
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code site/.kafka-design
+          touch site/.nojekyll
           cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
           cp web/.kafka-design/*.css site/.kafka-design/
           cp data/snapshots/*.json site/data/snapshots/

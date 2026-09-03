@@ -1,6 +1,7 @@
 import json
 import os
 import time
+from urllib.error import URLError
 from urllib.parse import parse_qs, urlparse
 from urllib.request import Request, urlopen
 
@@ -9,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 URL = os.environ.get("FINBI_PUBLIC_URL", "https://kafka2306.github.io/finBI/")
+PUBLIC_DESIGN_TOKENS_URL = f"{URL.rstrip('/')}/.kafka-design/kafka-tokens.css"
 CANONICAL_FX_URL = (
     "https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json"
 )
@@ -27,6 +29,28 @@ def fetch_canonical_fx():
         assert set(artifact) == {"schema_version", "status", "reason"}, artifact
         assert artifact["reason"].strip(), artifact
     return artifact
+
+
+def wait_public_design_tokens(timeout=90):
+    deadline = time.monotonic() + timeout
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            request = Request(
+                f"{PUBLIC_DESIGN_TOKENS_URL}?e2e={time.time_ns()}",
+                headers={"Cache-Control": "no-cache"},
+            )
+            with urlopen(request, timeout=20) as response:
+                css = response.read().decode("utf-8")
+            if "--k-color-canvas: #F7F5EF" in css and '[data-theme="dark"]' in css:
+                return css
+            last_error = AssertionError("canonical design token content is incomplete")
+        except (OSError, URLError) as error:
+            last_error = error
+        time.sleep(2)
+    raise AssertionError(
+        f"production design tokens are not readable at {PUBLIC_DESIGN_TOKENS_URL}: {last_error}"
+    )
 
 
 def wait_text(driver, selector, predicate, timeout=90):
@@ -228,6 +252,7 @@ def run_viewport(width, height, canonical):
 
 
 def main():
+    wait_public_design_tokens()
     canonical = fetch_canonical_fx()
     for width, height in ((1280, 900), (390, 844)):
         run_viewport(width, height, canonical)
