@@ -1,0 +1,90 @@
+{
+  "schema_version": "finbi.fx-snapshot.v1",
+  "pair": "USDJPY",
+  "base_currency": "USD",
+  "quote_currency": "JPY",
+  "retrieved_at": "2026-09-03T13:57:00Z",
+  "spot": {
+    "value": 156.17,
+    "observed_date": "2026-09-03",
+    "status": "VERIFIED_MARKET_QUOTE",
+    "source": {
+      "provider": "Reuters",
+      "source_organization": "Reuters",
+      "source_url": "https://www.reuters.com/world/asia-pacific/yen-spotlight-after-sudden-jump-2026-09-03/",
+      "note": "Reuters reported the dollar down 1.5% at 156.17 yen on 2026-09-03. This is a published market observation, not an executable SBI quote."
+    }
+  },
+  "broker": {
+    "name": "SBI Securities",
+    "product": "SBI FX",
+    "swap": {
+      "current_raw": {
+        "application_date": "2026-09-03",
+        "buy_yen_per_10000": 468,
+        "sell_yen_per_10000": -500,
+        "award_days": null,
+        "normalized_daily_yen_per_10000": null,
+        "status": "VERIFIED_RAW_UNNORMALIZED",
+        "source_url": "https://www.sbisec.co.jp/ETGate/?_ActionID=DefaultAID&_ControlID=WPLETmgR001Control&_DataStoreID=DSWPLETmgR001Control&_PageID=WPLETmgR001Mdtl20&burl=search_fx&cat1=fx&cat2=none&dir=info&file=fx_swap.html",
+        "note": "The official table shows 468 yen for the 2026-09-03 application date. Award-day count was not verified, so this value must not be silently treated as a one-day swap."
+      },
+      "normalized_reference": {
+        "application_date": "2026-09-02",
+        "buy_yen_per_10000_per_day": 117,
+        "sell_yen_per_10000_per_day": -125,
+        "status": "VERIFIED_ONE_APPLICATION_DAY_REFERENCE",
+        "source_url": "https://www.sbisec.co.jp/ETGate/WPLETmgR001Control?OutSide=on&burl=search_fx&cat1=fx&cat2=none&dir=info&file=fx_swap.html&getFlg=on&ldtag_cl=KoFS8m2_Qj23WGWLhdzBwwAA_oa",
+        "note": "Used only as a dated normalized reference for scenario calculations. Constant future swap is an explicit assumption, not an observation."
+      }
+    },
+    "margin_reference": {
+      "application_date": "2026-09-02",
+      "unit_usd": 10000,
+      "required_margin_yen": {
+        "1x": 1601980,
+        "3x": 528654,
+        "5x": 320396,
+        "10x": 160198,
+        "25x": 64080
+      },
+      "source_url": "https://www.sbisec.co.jp/ETGate/WPLETmgR001Control?OutSide=on&burl=search_fx&cat1=fx&cat2=none&dir=info&file=fx_hosyoukin.html&getFlg=on"
+    },
+    "loss_cut_reference": {
+      "course": "3x",
+      "initial_loss_cut_ratio_percent": 30.0,
+      "configurable_range_percent": [30.0, 90.0],
+      "source_url": "https://www.sbisec.co.jp/ETGate/WPLETmgR001Control?OutSide=on&burl=search_fx&cat1=fx&cat2=service&dir=service&file=fx_service_03.html&getFlg=on"
+    }
+  },
+  "policy_rates": {
+    "fed": {
+      "target_low_percent": 3.5,
+      "target_high_percent": 3.75,
+      "target_midpoint_percent": 3.625,
+      "effective_date": "2026-07-30",
+      "source_url": "https://www.federalreserve.gov/newsevents/pressreleases/monetary20260729a1.htm"
+    },
+    "boj": {
+      "uncollateralized_overnight_call_guideline_percent": 1.0,
+      "decision_date": "2026-06-16",
+      "source_url": "https://www.boj.or.jp/en/mopo/mpmsche_minu/minu_2026/g260616.pdf"
+    }
+  },
+  "scenario_contract": {
+    "leverage": 3.0,
+    "usd_notional": 10000,
+    "horizon_days": 365,
+    "spot_return_scenarios_percent": [-20.0, -10.0, -5.0, -2.5, 0.0, 5.0, 10.0],
+    "swap_reference": "broker.swap.normalized_reference.buy_yen_per_10000_per_day",
+    "assumptions": [
+      "fixed initial USD notional",
+      "constant 117 yen/day buy swap for the entire 365-day scenario",
+      "no compounding or position reset",
+      "before tax",
+      "spread, slippage and transaction costs excluded",
+      "spot 156.17 is a Reuters market observation, not an executable SBI quote",
+      "scenario is not a liquidation-path backtest"
+    ]
+  }
+}
