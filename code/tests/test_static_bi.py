@@ -57,9 +57,7 @@ class StaticBITest(unittest.TestCase):
     def test_curve_accepts_steepening_when_long_rate_moves_more(self):
         short = self.short_snapshot()
         short["observations"][-1]["value"] = 4.26
-        result = compare_curve(
-            self.snapshot(), short, "2026-07-20", "2026-07-23"
-        )
+        result = compare_curve(self.snapshot(), short, "2026-07-20", "2026-07-23")
         self.assertEqual(result["decision"], "ACCEPT")
         self.assertEqual(result["curve_shape"], "STEEPENED")
         self.assertAlmostEqual(result["start_spread_bp"], 39.0)
