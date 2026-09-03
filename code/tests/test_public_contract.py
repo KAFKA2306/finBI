@@ -116,9 +116,25 @@ class PublicContractTest(unittest.TestCase):
     def test_controls_do_not_override_44px_minimum(self):
         css = (ROOT / "web" / "styles.css").read_text(encoding="utf-8")
         compact = re.sub(r"\s+", "", css)
-        self.assertIn("button,select{min-height:44px}", compact)
+        self.assertRegex(compact, r"button,select\{min-height:44px;?\}")
         self.assertIn(".chip{min-height:44px", compact)
         self.assertNotIn(".chip{min-height:40px", compact)
+
+    def test_public_css_consumes_versioned_canonical_design_snapshot(self):
+        styles = (ROOT / "web" / "styles.css").read_text(encoding="utf-8")
+        fx = (ROOT / "web" / "fx.css").read_text(encoding="utf-8")
+        tokens = (ROOT / "web" / "design-tokens.css").read_text(encoding="utf-8")
+        self.assertIn('@import url("./design-tokens.css")', styles)
+        self.assertIn(
+            "KAFKA2306/design@1f2ca82cf70fec89cee30cefa72d8448fca38846",
+            tokens,
+        )
+        self.assertIn("--k-dimension-table-row: 30px", tokens)
+        self.assertIn("--k-dimension-radius: 2px", tokens)
+        self.assertIn("--k-number-shadow-opacity: 0", tokens)
+        self.assertIn("var(--k-dimension-table-row)", fx)
+        self.assertIn("var(--k-dimension-radius)", styles)
+        self.assertNotIn("box-shadow:0 18px 48px", re.sub(r"\s+", "", styles))
 
 
 if __name__ == "__main__":

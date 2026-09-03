@@ -29,7 +29,7 @@ jobs:
       - name: Build public root
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code
-          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
@@ -43,8 +43,10 @@ jobs:
           curl --fail --silent http://127.0.0.1:8123/ | grep -q 'Financial BI'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q 'USD/JPY 3倍'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
-          curl --fail --silent http://127.0.0.1:8123/styles.css >/dev/null
-          curl --fail --silent http://127.0.0.1:8123/fx.css >/dev/null
+          curl --fail --silent http://127.0.0.1:8123/styles.css | grep -q 'design-tokens.css'
+          curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'KAFKA2306/design@1f2ca82cf70fec89cee30cefa72d8448fca38846'
+          curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q -- '--k-color-canvas'
+          curl --fail --silent http://127.0.0.1:8123/fx.css | grep -q -- '--k-dimension-table-row'
           curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'usdjpy-sbi-2026-09-03.json'
           curl --fail --silent http://127.0.0.1:8123/question-router.js >/dev/null
           curl --fail --silent http://127.0.0.1:8123/data/questions/catalog.v1.json | grep -q 'finbi.question-catalog.v1'
@@ -102,7 +104,7 @@ jobs:
         if: steps.pages.outputs.enabled == 'true'
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code
-          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
