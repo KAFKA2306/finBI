@@ -364,55 +364,51 @@ h3 {
 }
 
 .chart-grid {
-  stroke: var(--k-color-border);
+  color: var(--k-color-border);
   stroke-width: 1;
 }
 
 .chart-line {
-  fill: none;
-  stroke: var(--k-color-primary);
+  color: var(--k-color-primary);
   stroke-width: 2;
   stroke-linecap: square;
   stroke-linejoin: round;
 }
 
 .chart-area {
-  fill: var(--k-color-accent);
-  fill-opacity: 0.09;
+  color: var(--k-color-accent);
+  opacity: 0.09;
 }
 
 .chart-dot {
-  fill: var(--k-color-surface);
-  stroke: var(--k-color-primary);
+  color: var(--k-color-primary);
   stroke-width: 2;
   pointer-events: none;
 }
 
 .chart-dot.is-selected {
-  fill: var(--k-color-accent);
-  stroke: var(--k-color-primary);
+  color: var(--k-color-accent);
 }
 
 .chart-hit {
-  fill: var(--k-color-surface);
-  fill-opacity: 0;
+  color: var(--k-color-surface);
+  opacity: 0;
   cursor: pointer;
 }
 
 .chart-hit:hover {
-  fill: var(--k-color-primary);
-  fill-opacity: 0.08;
+  color: var(--k-color-primary);
+  opacity: 0.08;
 }
 
 .chart-label {
-  fill: var(--k-color-muted-foreground);
+  color: var(--k-color-muted-foreground);
   font-family: var(--k-font-family-mono);
   font-size: 12px;
 }
 
 .chart-selected-label {
-  fill: var(--k-color-foreground);
-  stroke: var(--k-color-surface);
+  color: var(--k-color-foreground);
   stroke-width: 4px;
   stroke-linejoin: round;
   paint-order: stroke;
