@@ -1,5 +1,9 @@
 const CATALOG_URL = "./data/questions/catalog.v1.json";
 const ROUTER_URL = "./data/questions/router.v1.json";
+const LIVE_VIEWS = new Map([
+  ["rates.bonds", { href: "#rates-desk", label: "Rates viewを開く" }],
+  ["fx.carry_leverage", { href: "#fx-desk", label: "FX viewを開く" }],
+]);
 
 const input = document.querySelector("#question-query");
 const button = document.querySelector("#question-route");
@@ -40,9 +44,10 @@ function createResult(recipe, rank) {
   const top = document.createElement("div");
   top.className = "route-result-top";
 
+  const liveView = LIVE_VIEWS.get(recipe.question_id);
   const badge = document.createElement("span");
   badge.className = "route-badge";
-  badge.textContent = recipe.question_id === "rates.bonds" ? "LIVE" : "PLANNED";
+  badge.textContent = liveView ? "LIVE" : "PLANNED";
 
   const desk = document.createElement("span");
   desk.className = "route-desk";
@@ -60,10 +65,10 @@ function createResult(recipe, rank) {
 
   article.append(top, title, needs, output);
 
-  if (recipe.question_id === "rates.bonds") {
+  if (liveView) {
     const link = document.createElement("a");
-    link.href = "#rates-desk";
-    link.textContent = "現在動いているRates viewを開く";
+    link.href = liveView.href;
+    link.textContent = liveView.label;
     article.append(link);
   } else {
     const state = document.createElement("span");
