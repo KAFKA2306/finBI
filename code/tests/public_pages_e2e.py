@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 URL = os.environ.get("FINBI_PUBLIC_URL", "https://kafka2306.github.io/finBI/")
-PUBLIC_DESIGN_TOKENS_URL = f"{URL.rstrip('/')}/.kafka-design/kafka-tokens.css"
+PUBLIC_DESIGN_TOKENS_URL = f"{URL.rstrip('/')}/kafka-design/kafka-tokens.css"
 CANONICAL_FX_URL = (
     "https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json"
 )

@@ -60,17 +60,16 @@ jobs:
 
       - name: Build public root
         run: |
-          mkdir -p site/data/snapshots site/data/questions site/code site/.kafka-design
-          touch site/.nojekyll
-          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
-          cp web/.kafka-design/*.css site/.kafka-design/
+          mkdir -p site/data/snapshots site/data/questions site/code site/kafka-design
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
+          sed 's#".kafka-design/#"kafka-design/#g' web/design-tokens.css > site/design-tokens.css
+          cp web/.kafka-design/*.css site/kafka-design/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
 
       - name: Smoke-test public routes
         run: |
-          test -f site/.nojekyll
           python -m http.server 8123 -d site >/tmp/finbi-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
@@ -80,9 +79,11 @@ jobs:
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
           curl --fail --silent http://127.0.0.1:8123/styles.css | grep -q 'design-tokens.css'
           curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'kafka-design:managed-start'
+          curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q '"kafka-design/kafka-tokens.css"'
+          ! curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q '".kafka-design/'
           curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'desk-card:not(.is-live)'
-          curl --fail --silent http://127.0.0.1:8123/.kafka-design/kafka-tokens.css | grep -q -- '--k-color-canvas'
-          curl --fail --silent http://127.0.0.1:8123/.kafka-design/kafka-components.css | grep -q 'k-dashboard-decision'
+          curl --fail --silent http://127.0.0.1:8123/kafka-design/kafka-tokens.css | grep -q -- '--k-color-canvas'
+          curl --fail --silent http://127.0.0.1:8123/kafka-design/kafka-components.css | grep -q 'k-dashboard-decision'
           curl --fail --silent http://127.0.0.1:8123/fx.css | grep -q -- '--k-dimension-table-row'
           curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q 'https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json'
           ! curl --fail --silent http://127.0.0.1:8123/fx.js | grep -q './data/snapshots/investor2-fx-overlay.json'
@@ -137,10 +138,10 @@ jobs:
       - name: Build Pages artifact
         if: steps.pages.outputs.enabled == 'true'
         run: |
-          mkdir -p site/data/snapshots site/data/questions site/code site/.kafka-design
-          touch site/.nojekyll
-          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/design-tokens.css web/styles.css site/
-          cp web/.kafka-design/*.css site/.kafka-design/
+          mkdir -p site/data/snapshots site/data/questions site/code site/kafka-design
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
+          sed 's#".kafka-design/#"kafka-design/#g' web/design-tokens.css > site/design-tokens.css
+          cp web/.kafka-design/*.css site/kafka-design/
           cp data/snapshots/*.json site/data/snapshots/
           cp data/questions/*.json site/data/questions/
           cp code/static_bi.py site/code/
