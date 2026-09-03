@@ -39,8 +39,13 @@ def assert_period_query(driver, expected_start, expected_end):
 
 def assert_fx_view(driver):
     wait_text(driver, "#fx-status", lambda value: "read-only investor2 output" in value)
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-schema").text == "investor2.fx-overlay.v1"
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-overlay-status").text == "UNVERIFIED"
+    assert (
+        driver.find_element(By.CSS_SELECTOR, "#fx-schema").text
+        == "investor2.fx-overlay.v1"
+    )
+    assert (
+        driver.find_element(By.CSS_SELECTOR, "#fx-overlay-status").text == "UNVERIFIED"
+    )
     assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text == "—"
     assert driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text == "—"
 
