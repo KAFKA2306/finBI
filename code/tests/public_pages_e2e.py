@@ -1,12 +1,32 @@
+import json
 import os
 import time
 from urllib.parse import parse_qs, urlparse
+from urllib.request import Request, urlopen
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 URL = os.environ.get("FINBI_PUBLIC_URL", "https://kafka2306.github.io/finBI/")
+CANONICAL_FX_URL = (
+    "https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json"
+)
+
+
+def fetch_canonical_fx():
+    request = Request(
+        f"{CANONICAL_FX_URL}?e2e={time.time_ns()}",
+        headers={"Cache-Control": "no-cache"},
+    )
+    with urlopen(request, timeout=30) as response:
+        artifact = json.load(response)
+    assert artifact["schema_version"] == "investor2.fx-overlay.v1", artifact
+    assert artifact["status"] in {"VERIFIED", "TEST_ONLY", "UNVERIFIED"}, artifact
+    if artifact["status"] == "UNVERIFIED":
+        assert set(artifact) == {"schema_version", "status", "reason"}, artifact
+        assert artifact["reason"].strip(), artifact
+    return artifact
 
 
 def wait_text(driver, selector, predicate, timeout=90):
@@ -37,21 +57,29 @@ def assert_period_query(driver, expected_start, expected_end):
     assert query.get("end") == [expected_end], query
 
 
-def assert_fx_view(driver):
-    wait_text(driver, "#fx-status", lambda value: "read-only investor2 output" in value)
+def assert_fx_view(driver, canonical):
+    expected_status = canonical["status"]
+    wait_text(
+        driver,
+        "#fx-status",
+        lambda value: expected_status in value and "read-only investor2 output" in value,
+    )
     assert (
         driver.find_element(By.CSS_SELECTOR, "#fx-schema").text
-        == "investor2.fx-overlay.v1"
+        == canonical["schema_version"]
     )
     assert (
-        driver.find_element(By.CSS_SELECTOR, "#fx-overlay-status").text == "UNVERIFIED"
+        driver.find_element(By.CSS_SELECTOR, "#fx-overlay-status").text
+        == expected_status
     )
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text == "—"
-    assert driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text == "—"
 
-    reason = driver.find_element(By.CSS_SELECTOR, "#fx-reason").text
-    assert "canonical realized daily swap history" in reason, reason
-    assert "actual portfolio position snapshot" in reason, reason
+    if expected_status == "UNVERIFIED":
+        assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text == "—"
+        assert driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text == "—"
+        assert driver.find_element(By.CSS_SELECTOR, "#fx-reason").text == canonical["reason"]
+    else:
+        assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text != "—"
+        assert driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text != "—"
 
     links = [
         element.get_attribute("href")
@@ -62,7 +90,7 @@ def assert_fx_view(driver):
     assert any("/issues/252" in href for href in links), links
 
 
-def run_viewport(width, height):
+def run_viewport(width, height, canonical):
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
@@ -71,7 +99,7 @@ def run_viewport(width, height):
     driver = webdriver.Chrome(options=options)
     try:
         driver.get(URL)
-        assert_fx_view(driver)
+        assert_fx_view(driver, canonical)
         wait_text(driver, "#status", lambda value: "比較完了" in value)
         wait_text(
             driver, "#curve-brief-status", lambda value: "verified snapshots" in value
@@ -128,7 +156,7 @@ def run_viewport(width, height):
 
         shared_url = f"{URL}?start=2026-07-21&end=2026-07-22"
         driver.get(shared_url)
-        assert_fx_view(driver)
+        assert_fx_view(driver, canonical)
         wait_text(driver, "#status", lambda value: "比較完了" in value)
         wait_text(
             driver,
@@ -154,8 +182,9 @@ def run_viewport(width, height):
 
 
 def main():
+    canonical = fetch_canonical_fx()
     for width, height in ((1280, 900), (390, 844)):
-        run_viewport(width, height)
+        run_viewport(width, height, canonical)
         time.sleep(1)
 
 
