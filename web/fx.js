@@ -1,4 +1,5 @@
-const FX_OVERLAY_URL = "./data/snapshots/investor2-fx-overlay.json";
+const FX_OVERLAY_URL =
+  "https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json";
 const FX_OVERLAY_SCHEMA = "investor2.fx-overlay.v1";
 
 const fxStyles = document.createElement("link");
@@ -110,7 +111,7 @@ function renderOverlay(result) {
 
 async function initFx() {
   try {
-    const response = await fetch(FX_OVERLAY_URL);
+    const response = await fetch(FX_OVERLAY_URL, { cache: "no-store" });
     if (!response.ok) throw new Error(`canonical output fetch failed: ${response.status}`);
     renderOverlay(await response.json());
   } catch (error) {
