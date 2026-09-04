@@ -1,0 +1,16 @@
+name: design conformance
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    uses: KAFKA2306/design/.github/workflows/conformance.yml@5764ddad8a90af757bcb03a7a569e338f616c176
+    with:
+      consumer_path: .
