@@ -164,7 +164,9 @@ def assert_fx_view(driver, canonical):
     )
 
     primary_action = driver.find_element(By.CSS_SELECTOR, ".fx-decision .primary-link")
-    secondary_action = driver.find_element(By.CSS_SELECTOR, ".fx-decision .secondary-link")
+    secondary_action = driver.find_element(
+        By.CSS_SELECTOR, ".fx-decision .secondary-link"
+    )
 
     if expected_status == "VERIFIED":
         assert primary_action.text == "FX詳細と根拠", primary_action.text
