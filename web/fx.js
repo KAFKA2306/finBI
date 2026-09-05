@@ -8,6 +8,8 @@ fxStyles.href = "./fx.css";
 document.head.append(fxStyles);
 
 const status = document.querySelector("#fx-status");
+const primaryAction = document.querySelector(".fx-decision .primary-link");
+const secondaryAction = document.querySelector(".fx-decision .secondary-link");
 const percent = new Intl.NumberFormat("ja-JP", {
   style: "percent",
   minimumFractionDigits: 1,
@@ -21,6 +23,23 @@ const decimal = new Intl.NumberFormat("ja-JP", {
 function setText(selector, value) {
   const element = document.querySelector(selector);
   if (element) element.textContent = value;
+}
+
+function setDecisionActions(overlayStatus) {
+  if (!primaryAction || !secondaryAction) return;
+
+  if (overlayStatus === "VERIFIED") {
+    primaryAction.textContent = "FX詳細と根拠";
+    primaryAction.href = "#fx-details";
+    secondaryAction.textContent = "Ratesを見る";
+    secondaryAction.href = "#rates-desk";
+    return;
+  }
+
+  primaryAction.textContent = "Ratesを比較する";
+  primaryAction.href = "#rates-desk";
+  secondaryAction.textContent = "FXの根拠を見る";
+  secondaryAction.href = "#fx-details";
 }
 
 function optionalPercent(value) {
@@ -98,6 +117,7 @@ function renderOverlay(result) {
   validateOverlay(result);
   setText("#fx-schema", result.schema_version);
   setText("#fx-overlay-status", result.status);
+  setDecisionActions(result.status);
   clearCanonicalMetrics();
 
   if (result.status === "UNVERIFIED") {
@@ -117,6 +137,7 @@ async function initFx() {
   } catch (error) {
     clearCanonicalMetrics();
     setText("#fx-overlay-status", "UNVERIFIED");
+    setDecisionActions("UNVERIFIED");
     setText("#fx-reason", `Canonical outputを読み込めません: ${error.message}`);
     status.textContent = "UNVERIFIED · fail closed";
   }
