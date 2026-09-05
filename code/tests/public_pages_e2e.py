@@ -163,6 +163,22 @@ def assert_fx_view(driver, canonical):
         == expected_status
     )
 
+    primary_action = driver.find_element(By.CSS_SELECTOR, ".fx-decision .primary-link")
+    secondary_action = driver.find_element(
+        By.CSS_SELECTOR, ".fx-decision .secondary-link"
+    )
+
+    if expected_status == "VERIFIED":
+        assert primary_action.text == "FX詳細と根拠", primary_action.text
+        assert primary_action.get_attribute("href").endswith("#fx-details")
+        assert secondary_action.text == "Ratesを見る", secondary_action.text
+        assert secondary_action.get_attribute("href").endswith("#rates-desk")
+    else:
+        assert primary_action.text == "Ratesを比較する", primary_action.text
+        assert primary_action.get_attribute("href").endswith("#rates-desk")
+        assert secondary_action.text == "FXの根拠を見る", secondary_action.text
+        assert secondary_action.get_attribute("href").endswith("#fx-details")
+
     if expected_status == "UNVERIFIED":
         assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text == "—"
         assert (
