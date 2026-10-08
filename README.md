@@ -74,3 +74,7 @@ GitHub Actionsはfast quality gate、canonical investor2 production artifact、P
 - Master: https://github.com/KAFKA2306/finBI/issues/19
 - Issues: https://github.com/KAFKA2306/finBI/issues
 - Actions: https://github.com/KAFKA2306/finBI/actions
+
+## Operational ontology
+
+[Project ontology](ontology/project.yaml) defines domain objects, evidence-bearing relations, guarded actions and outcome metrics under the [shared Causal–Evidence Core](https://github.com/KAFKA2306/know/blob/main/ontology/causal-evidence-core.yaml). This contract does not add real-world execution capability or replace this repository's canonical source.
