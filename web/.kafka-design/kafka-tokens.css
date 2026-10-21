@@ -1,5 +1,6 @@
 /* Generated from tokens/foundation.tokens.json. Do not edit. */
 :root {
+  color-scheme: light;
   --k-dimension-app-bar: 44px;
   --k-dimension-control-height: 32px;
   --k-dimension-radius: 2px;
@@ -32,6 +33,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --k-color-accent: #7DD3FC;
   --k-color-border: #1E293B;
   --k-color-canvas: #0B0F17;
@@ -43,4 +45,21 @@
   --k-color-success: #4ADE80;
   --k-color-surface: #111827;
   --k-color-warning: #FBBF24;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --k-color-accent: #7DD3FC;
+    --k-color-border: #1E293B;
+    --k-color-canvas: #0B0F17;
+    --k-color-danger: #F87171;
+    --k-color-focus: #60A5FA;
+    --k-color-foreground: #F1F5F9;
+    --k-color-muted-foreground: #94A3B8;
+    --k-color-primary: #60A5FA;
+    --k-color-success: #4ADE80;
+    --k-color-surface: #111827;
+    --k-color-warning: #FBBF24;
+  }
 }
