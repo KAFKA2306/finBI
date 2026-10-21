@@ -1,17 +1,35 @@
 {
   "schemaVersion": 1,
-  "designSha": "f2d5c85e196c0f92239de0607c8fce6bf1b20433",
+  "designSha": "a43543d5172caf35547b06e86e093cfcb8a9deaf",
   "preset": "financial-dashboard",
-  "configHash": "2354084acdaa2ed9ec2282570e663473a10bb66bab3c9a8b7228f1dc9a1a077c",
-  "manifestHash": "097bc8f17893fbc00476858253099d31199b0d026317e7afe40e8f6aae46a770",
+  "configHash": "ac8ff9a4fe2e821119d74fd32c8f862b9010b281ed78d88f7cea02ba3073c998",
+  "manifestHash": "0daa4f3e493fea8825ddf9e7d695f1500d924f4b7dbfa8c619479c326f36f67c",
   "logoHash": null,
   "installedRegistryItems": [],
   "managedFiles": [
-    {"path": "web/.kafka-design/kafka-tokens.css", "sha256": "897ef1dfb22bf1a9671ad96075104af78eca6d5e02427135cd7d0b6d647af6d8"},
-    {"path": "web/.kafka-design/kafka-globals.css", "sha256": "2304371a0c507131844c2fbaa8e9725dedc72ba3165226ba6f2d1862812256bc"},
-    {"path": "web/.kafka-design/kafka-components.css", "sha256": "6236943bda6adc5bbd82f6fee9f600b1cffd1d25bc515b64843b5b7f51fd0cde"},
-    {"path": "web/.kafka-design/portable-conformance.mjs", "sha256": "5281b91caadee07e92b5876ad3547a6531229bb57107ba3bcff4be20ddc3e6d4"},
-    {"path": "web/.kafka-design/conformance-policy.mjs", "sha256": "1622dce9e752aa5b1fc700d1fa894da5f08a957fb088dad7a59be26529a8b54a"}
+    {
+      "path": "web/.kafka-design/kafka-tokens.css",
+      "sha256": "c90057f2c868eacb5dc41cf5252379e790521e857be0ee4c343a837a04cf7d40"
+    },
+    {
+      "path": "web/.kafka-design/kafka-globals.css",
+      "sha256": "2304371a0c507131844c2fbaa8e9725dedc72ba3165226ba6f2d1862812256bc"
+    },
+    {
+      "path": "web/.kafka-design/kafka-components.css",
+      "sha256": "e1282d56bfb343c0422763dc24c95c6a1e45f828facb2a4f42738076bdccb7e7"
+    },
+    {
+      "path": "web/.kafka-design/portable-conformance.mjs",
+      "sha256": "5281b91caadee07e92b5876ad3547a6531229bb57107ba3bcff4be20ddc3e6d4"
+    },
+    {
+      "path": "web/.kafka-design/conformance-policy.mjs",
+      "sha256": "93c2f7a8f694bbe2092237e73444f050062a5ad40dedf4b298e5211743144d21"
+    }
   ],
-  "integration": {"cssEntry": "web/design-tokens.css", "blockHash": "17f3ce126f165b8f41c25f87a57a6fa1272796478cd4a150ec085cdc36dcdec7"}
+  "integration": {
+    "cssEntry": "web/design-tokens.css",
+    "blockHash": "17f3ce126f165b8f41c25f87a57a6fa1272796478cd4a150ec085cdc36dcdec7"
+  }
 }
