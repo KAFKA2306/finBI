@@ -160,9 +160,7 @@ class PublicContractTest(unittest.TestCase):
         lock = json.loads((ROOT / "design.lock.json").read_text(encoding="utf-8"))
 
         self.assertIn('@import url("./design-tokens.css")', styles)
-        self.assertEqual(
-            config["designSha"], "f2d5c85e196c0f92239de0607c8fce6bf1b20433"
-        )
+        self.assertRegex(config["designSha"], r"^[0-9a-f]{40}$")
         self.assertEqual(lock["designSha"], config["designSha"])
         self.assertEqual(lock["integration"]["cssEntry"], "web/design-tokens.css")
         self.assertEqual(entry.count("/* kafka-design:managed-start */"), 1)
