@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "designSha": "f2d5c85e196c0f92239de0607c8fce6bf1b20433",
+  "designSha": "a43543d5172caf35547b06e86e093cfcb8a9deaf",
   "preset": "financial-dashboard",
   "cssEntry": "web/design-tokens.css",
   "managedDir": "web/.kafka-design"

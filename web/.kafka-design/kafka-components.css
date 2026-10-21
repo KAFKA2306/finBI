@@ -766,12 +766,16 @@
   }
 }
 
-@media (max-width: 24rem) {
+@media (pointer: coarse) {
   .k-button,
   .k-input,
-  .k-tabs-tab {
+  .k-tabs-tab,
+  .k-dashboard-nav a {
     min-height: var(--k-dimension-touch-target);
   }
+}
+
+@media (max-width: 24rem) {
 
   .k-filter-count {
     width: 100%;
