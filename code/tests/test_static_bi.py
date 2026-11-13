@@ -66,6 +66,12 @@ class StaticBITest(unittest.TestCase):
         self.assertAlmostEqual(result["long_move_bp"], 11.0)
         self.assertAlmostEqual(result["short_move_bp"], 5.0)
 
+    def test_curve_rejects_mixed_observation_frequency(self):
+        short = self.short_snapshot()
+        short["frequency"] = "Monthly"
+        with self.assertRaisesRegex(ValueError, "matching observation frequency"):
+            compare_curve(self.snapshot(), short, "2026-07-20", "2026-07-23")
+
     def test_curve_requires_distinct_series(self):
         with self.assertRaisesRegex(ValueError, "distinct series"):
             compare_curve(self.snapshot(), self.snapshot(), "2026-07-20", "2026-07-23")

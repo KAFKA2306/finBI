@@ -157,6 +157,8 @@ def compare_curve(
         or short_snapshot["unit"].casefold() != "percent"
     ):
         raise ValueError("curve comparison requires percent series")
+    if long_snapshot["frequency"] != short_snapshot["frequency"]:
+        raise ValueError("curve comparison requires matching observation frequency")
     if long_snapshot["source"]["series_id"] == short_snapshot["source"]["series_id"]:
         raise ValueError("curve comparison requires distinct series")
 
