@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from datetime import UTC, date, datetime
 from typing import Any
 
@@ -72,6 +73,8 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         )
     except ValueError as exc:
         raise ValueError("invalid latest_available_observation") from exc
+    if latest_available > retrieved_at.date():
+        raise ValueError("latest available observation is later than retrieved_at")
 
     observations = snapshot.get("observations")
     if not isinstance(observations, list) or len(observations) < 2:
@@ -96,6 +99,8 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
         previous_date = row_date
         if not isinstance(row["value"], (int, float)) or isinstance(row["value"], bool):
             raise ValueError("observation value must be numeric")
+        if not math.isfinite(row["value"]):
+            raise ValueError("observation value must be finite")
 
     if snapshot["observation_start"] != observations[0]["date"]:
         raise ValueError("observation_start does not match first observation")

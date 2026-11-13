@@ -94,6 +94,24 @@ class StaticBITest(unittest.TestCase):
         ):
             validate_snapshot(data)
 
+    def test_nonfinite_observation_fails_closed(self):
+        for value in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(value=repr(value)):
+                data = self.snapshot()
+                data["observations"][1]["value"] = value
+                with self.assertRaisesRegex(
+                    ValueError, "observation value must be finite"
+                ):
+                    validate_snapshot(data)
+
+    def test_availability_cannot_postdate_retrieval(self):
+        data = self.snapshot()
+        data["availability"]["latest_available_observation"] = "2026-07-25"
+        with self.assertRaisesRegex(
+            ValueError, "latest available observation is later than retrieved_at"
+        ):
+            validate_snapshot(data)
+
     def test_unverified_availability_fails_closed(self):
         data = self.snapshot()
         data["availability"]["verified"] = False
