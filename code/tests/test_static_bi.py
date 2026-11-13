@@ -99,7 +99,9 @@ class StaticBITest(unittest.TestCase):
             with self.subTest(value=repr(value)):
                 data = self.snapshot()
                 data["observations"][1]["value"] = value
-                with self.assertRaisesRegex(ValueError, "observation value must be finite"):
+                with self.assertRaisesRegex(
+                    ValueError, "observation value must be finite"
+                ):
                     validate_snapshot(data)
 
     def test_availability_cannot_postdate_retrieval(self):
