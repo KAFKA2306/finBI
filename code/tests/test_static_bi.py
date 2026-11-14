@@ -72,6 +72,12 @@ class StaticBITest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "matching observation frequency"):
             compare_curve(self.snapshot(), short, "2026-07-20", "2026-07-23")
 
+    def test_curve_rejects_mixed_retrieval_times(self):
+        short = self.short_snapshot()
+        short["retrieved_at"] = "2026-07-25T20:17:00Z"
+        with self.assertRaisesRegex(ValueError, "matching retrieval timestamps"):
+            compare_curve(self.snapshot(), short, "2026-07-20", "2026-07-23")
+
     def test_curve_requires_distinct_series(self):
         with self.assertRaisesRegex(ValueError, "distinct series"):
             compare_curve(self.snapshot(), self.snapshot(), "2026-07-20", "2026-07-23")
