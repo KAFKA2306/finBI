@@ -159,6 +159,10 @@ def compare_curve(
         raise ValueError("curve comparison requires percent series")
     if long_snapshot["frequency"] != short_snapshot["frequency"]:
         raise ValueError("curve comparison requires matching observation frequency")
+    if _parse_timestamp(long_snapshot["retrieved_at"], "retrieved_at") != _parse_timestamp(
+        short_snapshot["retrieved_at"], "retrieved_at"
+    ):
+        raise ValueError("curve comparison requires matching retrieval timestamps")
     if long_snapshot["source"]["series_id"] == short_snapshot["source"]["series_id"]:
         raise ValueError("curve comparison requires distinct series")
 
