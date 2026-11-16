@@ -18,7 +18,7 @@ canonical data / analytics
 | View | State | Authority |
 |---|---|---|
 | FX | **CANONICAL** | `KAFKA2306/investor2` の公開 `investor2.fx-overlay.v1` artifactを直接read-only表示。statusは上流artifactに追従し、finBIではcarry / leverage / break-even / stress / PnLを再計算しない |
-| Rates | **LIVE** | 保存済みTreasury snapshotを `code/static_bi.py` で比較 |
+| Rates | **HISTORICAL SNAPSHOT** | 2026-07-23までの保存済みTreasury snapshotを `code/static_bi.py` で比較。リアルタイム更新ではない |
 | Portfolio | PLANNED | private/canonical position output待ち |
 | Frontier | PLANNED | investor2 canonical frontier output待ち |
 | Valuation / Macro / Products / Tax / Backtest / Audit | PLANNED | owning sourceの正準output接続待ち |
