@@ -34,6 +34,26 @@ class StaticBITest(unittest.TestCase):
         self.assertEqual(result["direction"], "up")
         self.assertEqual(result["calendar_days"], 3)
 
+    def test_current_fred_snapshot_matches_published_observations(self):
+        snapshots = ROOT / "data" / "snapshots"
+        long = json.loads((snapshots / "fred-dgs10.json").read_text(encoding="utf-8"))
+        short = json.loads((snapshots / "fred-dgs2.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(long["observations"]), 84)
+        self.assertEqual(len(short["observations"]), 84)
+        self.assertEqual(
+            long["observations"][-1], {"date": "2026-11-17", "value": 5.10}
+        )
+        self.assertEqual(
+            short["observations"][-1], {"date": "2026-11-17", "value": 4.80}
+        )
+        self.assertEqual(
+            [row["date"] for row in long["observations"]],
+            [row["date"] for row in short["observations"]],
+        )
+        self.assertNotIn("2026-11-11", {row["date"] for row in long["observations"]})
+        result = compare_curve(long, short, "2026-11-10", "2026-11-17")
+        self.assertEqual(result["spread_change_bp"], 5.0)
+
     def test_2s10s_brief_rejects_steepening_hypothesis(self):
         result = compare_curve(
             self.snapshot(), self.short_snapshot(), "2026-07-20", "2026-07-23"

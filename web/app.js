@@ -9,8 +9,8 @@ function syncSystemTheme({ matches } = systemTheme) {
 syncSystemTheme(systemTheme);
 systemTheme.addEventListener("change", syncSystemTheme);
 
-const SNAPSHOT_URL = "./data/snapshots/fred-dgs10-2026-07-20_2026-07-23.json";
-const SHORT_SNAPSHOT_URL = "./data/snapshots/fred-dgs2-2026-07-20_2026-07-23.json";
+const SNAPSHOT_URL = "./data/snapshots/fred-dgs10.json";
+const SHORT_SNAPSHOT_URL = "./data/snapshots/fred-dgs2.json";
 const worker = new Worker("./worker.mjs", { type: "module" });
 const SVG_NS = "http://www.w3.org/2000/svg";
 const requested = new URLSearchParams(window.location.search);
@@ -58,7 +58,7 @@ function addMeta(label, value) {
 }
 
 function formatDate(value) {
-  return new Intl.DateTimeFormat("ja-JP", { month: "short", day: "numeric" }).format(new Date(`${value}T00:00:00Z`));
+  return new Intl.DateTimeFormat("ja-JP", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
 function formatNumber(value) {
@@ -88,7 +88,7 @@ function restoreSelection(dates) {
     end.value = requestedEnd;
     return;
   }
-  start.value = dates[0];
+  start.value = dates.at(-Math.min(20, dates.length));
   end.value = dates.at(-1);
 }
 
@@ -101,11 +101,12 @@ function syncUrl() {
 }
 
 function chooseChartPoint(date) {
+  if (pending) return;
   if (chartPickPhase === "start") {
     start.value = date;
     chartPickPhase = "end";
     status.textContent = `${formatDate(date)}を開始日にしました。次に終了日を選んでください。`;
-    chartHint.textContent = "2点目を選ぶと比較します。selectから選ぶ方法も使えます。";
+    chartHint.textContent = "終了日をグラフまたは日付一覧で選んでください。";
     renderChart();
     return;
   }
@@ -116,12 +117,13 @@ function chooseChartPoint(date) {
   }
   end.value = date;
   chartPickPhase = "start";
-  chartHint.textContent = "グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。";
+  chartHint.textContent = "10年債の推移。グラフから比較日を2つ選べます。";
   runComparison();
 }
 
 function renderChart(selectedStart = start.value, selectedEnd = end.value) {
   const rows = snapshot.observations;
+  const selectableDates = new Set(Array.from(start.options, (option) => option.value));
   const values = rows.map((row) => row.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -163,16 +165,18 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
     const dot = el("circle", {
       cx,
       cy,
-      r: selected ? 7 : 5,
+      r: selected ? 6 : 2,
       fill: selected ? "var(--k-color-accent)" : "var(--k-color-surface)",
       stroke: "var(--k-color-primary)",
       class: `chart-dot dynamic${selected ? " is-selected" : ""}`,
       "aria-hidden": "true",
     });
-    const hit = el("circle", {
-      cx,
-      cy,
-      r: 18,
+    const cellWidth = plotWidth / (rows.length - 1);
+    const hit = el("rect", {
+      x: cx - cellWidth / 2,
+      y: top,
+      width: cellWidth,
+      height: plotHeight,
       fill: "currentColor",
       class: "chart-hit dynamic",
       role: "button",
@@ -180,8 +184,11 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
       tabindex: "-1",
       "data-date": row.date,
     });
-    hit.addEventListener("click", () => chooseChartPoint(row.date));
-    chart.append(dot, hit);
+    chart.append(dot);
+    if (selectableDates.has(row.date)) {
+      hit.addEventListener("click", () => chooseChartPoint(row.date));
+      chart.append(hit);
+    }
 
     if (selected) {
       const role = isStart ? "開始" : "終了";
@@ -205,7 +212,9 @@ function renderChart(selectedStart = start.value, selectedEnd = end.value) {
 
 function setBusy(value) {
   pending = value;
-  compareButton.disabled = value;
+  for (const control of [start, end, compareButton, ...quickPicks.querySelectorAll("button")]) {
+    control.disabled = value;
+  }
   compareButton.textContent = value ? "計算中…" : "比べる";
 }
 
@@ -245,7 +254,9 @@ worker.addEventListener("message", (event) => {
   setBusy(false);
   if (event.data.error) {
     status.textContent = `計算失敗: ${event.data.error}`;
-    curveBriefStatus.textContent = `2s10s計算失敗: ${event.data.error}`;
+    curveBriefStatus.textContent = `金利差を計算できません: ${event.data.error}`;
+    curveBriefHeadline.textContent = "—";
+    curveBriefDetail.textContent = "";
     headline.textContent = "—";
     story.textContent = "snapshotと比較条件を確認してください。";
     return;
@@ -264,8 +275,8 @@ worker.addEventListener("message", (event) => {
   const brief = event.data.brief;
   const shape = brief.curve_shape === "FLATTENED" ? "フラット化" : brief.curve_shape === "STEEPENED" ? "スティープ化" : "横ばい";
   curveBriefHeadline.textContent = `${brief.start_spread_bp.toFixed(1)} bp → ${brief.end_spread_bp.toFixed(1)} bp · ${shape}`;
-  curveBriefDetail.textContent = `10年は${signed(brief.long_move_bp)} bp、2年は${signed(brief.short_move_bp)} bp。2s10sスプレッドは${signed(brief.spread_change_bp)} bp変化したため、「この期間にスティープ化した」という仮説は${brief.decision}です。`;
-  curveBriefStatus.textContent = `${brief.start_date} → ${brief.end_date} · ${brief.unit} · verified snapshots`;
+  curveBriefDetail.textContent = `10年債 ${signed(brief.long_move_bp)} bp、2年債 ${signed(brief.short_move_bp)} bp。10年と2年の差は ${signed(brief.spread_change_bp)} bp。`;
+  curveBriefStatus.textContent = `${brief.start_date} → ${brief.end_date} · FREDの観測値`;
   syncUrl();
 });
 
@@ -299,7 +310,9 @@ async function init() {
     longResponse.json(),
     shortResponse.json(),
   ]);
-  const dates = snapshot.observations.map((row) => row.date);
+  const shortDates = new Set(shortSnapshot.observations.map((row) => row.date));
+  const dates = snapshot.observations.filter((row) => shortDates.has(row.date)).map((row) => row.date);
+  if (dates.length < 2) throw new Error("2年債と10年債で共通する観測日が足りません。");
 
   for (const date of dates) {
     for (const select of [start, end]) {
@@ -324,9 +337,10 @@ async function init() {
   addMeta("観測期間", `${snapshot.observation_start} → ${snapshot.observation_end}`);
   addMeta("取得時刻", snapshot.retrieved_at);
 
-  addQuickPick(dates[0], dates.at(-1), "全期間");
-  if (dates.length >= 3) addQuickPick(dates[0], dates[1], "最初");
-  if (dates.length >= 3) addQuickPick(dates.at(-2), dates.at(-1), "直近");
+  const last = dates.at(-1);
+  if (dates.length > 5) addQuickPick(dates.at(-5), last, "直近5観測日");
+  if (dates.length > 20) addQuickPick(dates.at(-20), last, "直近20観測日");
+  addQuickPick(dates[0], last, "全期間");
 
   renderChart();
   status.textContent = "データを読み込みました。";

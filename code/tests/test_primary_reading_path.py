@@ -13,6 +13,8 @@ class PrimaryReadingPathTest(unittest.TestCase):
         self.assertIn('href="#fx-desk"', html)
         self.assertIn('href="#rates-desk"', html)
         self.assertNotIn('class="desk-card is-live"', html)
+        self.assertLess(html.index('id="rates-desk"'), html.index('id="fx-desk"'))
+        self.assertLess(html.index('id="compare"'), html.index('id="chart"'))
         self.assertLess(
             html.index('id="fx-desk"'), html.index('class="utility-drawer"')
         )
@@ -33,8 +35,8 @@ class PrimaryReadingPathTest(unittest.TestCase):
         ]
         positions = [html.index(marker) for marker in markers]
         self.assertEqual(positions, sorted(positions))
-        self.assertIn("USD exposure overlay の正準状態", html)
-        self.assertIn("詳細と根拠", html)
+        self.assertIn("米ドル比率と追加ヘッジ", html)
+        self.assertIn("米ドル比率の根拠", html)
 
 
 if __name__ == "__main__":
