@@ -18,7 +18,7 @@ canonical data / analytics
 | View | State | Authority |
 |---|---|---|
 | FX | **CANONICAL** | `KAFKA2306/investor2` の公開 `investor2.fx-overlay.v1` artifactを直接read-only表示。statusは上流artifactに追従し、finBIではcarry / leverage / break-even / stress / PnLを再計算しない |
-| Rates | **HISTORICAL SNAPSHOT** | 2026-07-23までの保存済みTreasury snapshotを `code/static_bi.py` で比較。リアルタイム更新ではない |
+| Rates | **HISTORICAL SNAPSHOT** | 2026-07-20〜2026-11-17の84観測日を `code/static_bi.py` で比較。画面に観測期間と取得時刻を表示する |
 | Portfolio | PLANNED | private/canonical position output待ち |
 | Frontier | PLANNED | investor2 canonical frontier output待ち |
 | Valuation / Macro / Products / Tax / Backtest / Audit | PLANNED | owning sourceの正準output接続待ち |
@@ -43,9 +43,9 @@ https://github.com/KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.
 
 ## Rates authority
 
-保存済みTreasury snapshotを使い、開始日・終了日の比較、basis point差、2s10s curve shapeを表示します。`code/static_bi.py` はRatesのpresentation-layer calculationだけを所有します。
+FREDの米国債2年・10年利回りを、任意の共通観測日2日で比較できます。直近5観測日、直近20観測日、全期間をワンクリックで選べます。比較日のURLを共有すると同じ日付が開きます。`code/static_bi.py` はRatesのpresentation-layer calculationだけを所有します。
 
-snapshotのsource、observed range、retrieved_at、availabilityが不足・矛盾する場合はfail closedします。
+現行の保存データは `data/snapshots/fred-dgs2.json` と `data/snapshots/fred-dgs10.json` です。各ファイルにFREDの系列URL、取得時刻、元のCSVのURLとSHA-256を記録します。2026年7月分の旧保存データも取得時点の証拠として参照できます。
 
 ## Public / private boundary
 

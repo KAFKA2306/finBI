@@ -39,7 +39,9 @@ class StaticBoundaryTests(unittest.TestCase):
             snapshots,
             [
                 "fred-dgs10-2026-07-20_2026-07-23.json",
+                "fred-dgs10.json",
                 "fred-dgs2-2026-07-20_2026-07-23.json",
+                "fred-dgs2.json",
             ],
         )
 

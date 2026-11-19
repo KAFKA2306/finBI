@@ -102,9 +102,9 @@ def assert_decision_first_layout(driver, width, height):
         };
         return {
           fxStatus: rect('#fx-overlay-status'),
-          fxAction: rect('.fx-decision .primary-link'),
+          comparison: rect('#compare'),
           rates: rect('#rates-desk'),
-          chart: rect('#chart'),
+          curve: rect('#curve-brief-heading'),
           utility: rect('.utility-drawer'),
           viewport: window.innerHeight,
         };
@@ -112,21 +112,18 @@ def assert_decision_first_layout(driver, width, height):
     )
 
     viewport = layout["viewport"]
-    assert layout["fxStatus"]["top"] < viewport, layout
-    assert layout["fxAction"]["bottom"] < viewport, layout
-
+    assert layout["rates"]["top"] < viewport, layout
+    assert layout["comparison"]["bottom"] < viewport, layout
+    assert layout["curve"]["bottom"] < viewport, layout
     if width >= 900:
-        assert layout["rates"]["top"] < viewport, layout
-        assert layout["chart"]["top"] < viewport, layout
+        assert layout["fxStatus"]["top"] < viewport, layout
     else:
-        assert layout["rates"]["top"] < viewport * 2, layout
-        assert layout["chart"]["top"] < viewport * 2, layout
-
+        assert layout["rates"]["top"] < layout["fxStatus"]["top"], layout
     assert layout["utility"]["top"] > layout["rates"]["top"], layout
 
 
 def click_chart_date(driver, date, timeout=30):
-    selector = f"circle.chart-hit[data-date='{date}']"
+    selector = f"rect.chart-hit[data-date='{date}']"
 
     def _click(_driver):
         element = _driver.find_element(By.CSS_SELECTOR, selector)
@@ -168,31 +165,24 @@ def assert_fx_view(driver, canonical):
         By.CSS_SELECTOR, ".fx-decision .secondary-link"
     )
 
-    if expected_status == "VERIFIED":
-        assert primary_action.text == "FX詳細と根拠", primary_action.text
-        assert primary_action.get_attribute("href").endswith("#fx-details")
-        assert secondary_action.text == "Ratesを見る", secondary_action.text
-        assert secondary_action.get_attribute("href").endswith("#rates-desk")
-    else:
-        assert primary_action.text == "Ratesを比較する", primary_action.text
-        assert primary_action.get_attribute("href").endswith("#rates-desk")
-        assert secondary_action.text == "FXの根拠を見る", secondary_action.text
-        assert secondary_action.get_attribute("href").endswith("#fx-details")
-
     if expected_status == "UNVERIFIED":
-        assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text == "—"
-        assert (
-            driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text == "—"
-        )
+        assert not primary_action.is_displayed()
+        assert secondary_action.is_displayed()
+        assert secondary_action.get_attribute("href").endswith("#rates-desk")
+        assert not driver.find_element(By.CSS_SELECTOR, "#fx-measures").is_displayed()
+        assert not driver.find_element(By.CSS_SELECTOR, "#fx-details").is_displayed()
+        needed = driver.find_element(By.CSS_SELECTOR, "#fx-data-needed")
+        assert needed.is_displayed()
+        assert len(needed.find_elements(By.TAG_NAME, "a")) == 2
         assert (
             driver.find_element(By.CSS_SELECTOR, "#fx-reason").text
             == canonical["reason"]
         )
     else:
+        assert primary_action.is_displayed()
+        assert primary_action.get_attribute("href").endswith("#fx-details")
+        assert driver.find_element(By.CSS_SELECTOR, "#fx-measures").is_displayed()
         assert driver.find_element(By.CSS_SELECTOR, "#fx-current-exposure").text != "—"
-        assert (
-            driver.find_element(By.CSS_SELECTOR, "#fx-incremental-exposure").text != "—"
-        )
 
     links = [
         element.get_attribute("href")
@@ -221,12 +211,14 @@ def run_viewport(width, height, canonical):
         assert_decision_first_layout(driver, width, height)
         wait_text(driver, "#status", lambda value: "比較完了" in value)
         wait_text(
-            driver, "#curve-brief-status", lambda value: "verified snapshots" in value
+            driver,
+            "#curve-brief-status",
+            lambda value: "2026-10-20 → 2026-11-17" in value,
         )
 
         metadata = driver.find_element(By.CSS_SELECTOR, "#metadata").text
-        assert "2026-07-20 → 2026-07-23" in metadata, metadata
-        assert "2026-07-24T20:17:00Z" in metadata, metadata
+        assert "2026-07-20 → 2026-11-17" in metadata, metadata
+        assert "2026-11-19T11:36:39Z" in metadata, metadata
 
         source = driver.find_element(By.CSS_SELECTOR, "#source-link").get_attribute(
             "href"
@@ -243,11 +235,19 @@ def run_viewport(width, height, canonical):
             By.CSS_SELECTOR, "#curve-brief-headline"
         ).text
         curve_detail = driver.find_element(By.CSS_SELECTOR, "#curve-brief-detail").text
-        assert "39.0 bp → 34.0 bp" in curve_headline, curve_headline
+        assert "33.0 bp → 30.0 bp" in curve_headline, curve_headline
         assert "フラット化" in curve_headline, curve_headline
-        assert "10年は+11.0 bp" in curve_detail, curve_detail
-        assert "2年は+16.0 bp" in curve_detail, curve_detail
-        assert "REJECT" in curve_detail, curve_detail
+        assert "10年債 -2.0 bp" in curve_detail, curve_detail
+        assert "2年債 +1.0 bp" in curve_detail, curve_detail
+        assert_period_query(driver, "2026-10-20", "2026-11-17")
+
+        driver.find_element(By.CSS_SELECTOR, "#quick-picks button").click()
+        wait_text(
+            driver,
+            "#curve-brief-status",
+            lambda value: "2026-11-10 → 2026-11-17" in value,
+        )
+        assert_period_query(driver, "2026-11-10", "2026-11-17")
 
         click_chart_date(driver, "2026-07-20")
         wait_text(driver, "#status", lambda value: "次に終了日" in value)

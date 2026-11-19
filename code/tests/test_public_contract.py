@@ -72,8 +72,8 @@ class PublicContractTest(unittest.TestCase):
         self.assertIn('id="curve-short-source"', html)
         self.assertIn('document.querySelector("#start")', app)
         self.assertIn('document.querySelector("#end")', app)
-        self.assertIn("fred-dgs10-2026-07-20_2026-07-23.json", app)
-        self.assertIn("fred-dgs2-2026-07-20_2026-07-23.json", app)
+        self.assertIn("fred-dgs10.json", app)
+        self.assertIn("fred-dgs2.json", app)
 
     def test_theme_follows_system_color_scheme_without_second_palette(self):
         app = (ROOT / "web" / "app.js").read_text(encoding="utf-8")

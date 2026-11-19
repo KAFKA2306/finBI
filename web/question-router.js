@@ -1,7 +1,7 @@
 const CATALOG_URL = "./data/questions/catalog.v1.json";
-const LIVE_VIEWS = new Map([
-  ["rates.bonds", { href: "#rates-desk", label: "Rates viewを開く" }],
-  ["fx.carry_leverage", { href: "#fx-desk", label: "FX viewを開く" }],
+const PUBLIC_VIEWS = new Map([
+  ["rates.bonds", { href: "#rates-desk", label: "米国債の保存データを比較", state: "保存データ" }],
+  ["fx.carry_leverage", { href: "#fx-desk", label: "米ドル比率の検証状況を確認", state: "上流の検証状況" }],
 ]);
 
 const input = document.querySelector("#question-query");
@@ -43,10 +43,10 @@ function createResult(recipe, rank) {
   const top = document.createElement("div");
   top.className = "route-result-top";
 
-  const liveView = LIVE_VIEWS.get(recipe.question_id);
+  const view = PUBLIC_VIEWS.get(recipe.question_id);
   const badge = document.createElement("span");
   badge.className = "route-badge";
-  badge.textContent = liveView ? "LIVE" : "PLANNED";
+  badge.textContent = view.state;
 
   const desk = document.createElement("span");
   desk.className = "route-desk";
@@ -64,17 +64,10 @@ function createResult(recipe, rank) {
 
   article.append(top, title, needs, output);
 
-  if (liveView) {
-    const link = document.createElement("a");
-    link.href = liveView.href;
-    link.textContent = liveView.label;
-    article.append(link);
-  } else {
-    const state = document.createElement("span");
-    state.className = "route-state";
-    state.textContent = "BI viewは未接続 — 数値は表示しません";
-    article.append(state);
-  }
+  const link = document.createElement("a");
+  link.href = view.href;
+  link.textContent = view.label;
+  article.append(link);
   return article;
 }
 
@@ -99,7 +92,7 @@ function routeQuestion() {
   results.replaceChildren();
   if (!ranked.length) {
     const message = document.createElement("p");
-    message.textContent = "対応するBI viewがまだありません。BI要件候補として扱います。";
+    message.textContent = "該当する公開画面はありません。";
     results.append(message);
     return;
   }
@@ -130,8 +123,8 @@ async function initQuestionRouter() {
     recipesById = new Map(
       catalog.recipes.map((recipe) => [recipe.question_id, recipe]),
     );
-    routes = catalog.routes;
-    results.textContent = `${recipesById.size}個のBI要件を読み込みました。金融の論点を入力してください。`;
+    routes = catalog.routes.filter((route) => PUBLIC_VIEWS.has(route.question_id));
+    results.textContent = "米国債利回りか米ドル比率を入力してください。";
   } catch (error) {
     results.textContent = `BIカタログを読み込めません: ${error.message}`;
   }
@@ -143,13 +136,8 @@ input.addEventListener("keydown", (event) => {
 });
 
 [
-  "何を買うべき？",
-  "USDJPY 3倍は？",
-  "効率的フロンティア",
-  "益利回りとEPS CAGR",
-  "世界のM2は？",
-  "予定納税はいくら？",
-  "このニュースは信じられる？",
+  "米国債",
+  "米ドル比率 FX",
 ].forEach(addExample);
 
 initQuestionRouter();

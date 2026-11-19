@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="正準FX outputと保存済み米国債snapshotを、状態・判断・比較・根拠の順で確認するFinancial BI。">
+  <meta name="description" content="米国債の2年・10年利回りを任意の2日で比較し、米ドルエクスポージャーの検証状況を確認できます。">
   <meta name="theme-color" content="#f7f3ea" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111712" media="(prefers-color-scheme: dark)">
   <title>finBI — Financial BI</title>
@@ -16,66 +16,19 @@
         <strong>finBI</strong>
         <span>Financial BI</span>
       </div>
-      <nav class="appnav" aria-label="Primary">
-        <a href="#fx-desk">FX</a>
-        <a href="#rates-desk">Rates</a>
+      <nav class="appnav" aria-label="分析画面">
+        <a href="#rates-desk">米国債</a>
+        <a href="#fx-desk">米ドル比率</a>
       </nav>
       <span class="publication-state">PUBLIC · READ-ONLY</span>
     </header>
 
-    <section class="live-overview" aria-label="Live decision surfaces">
-      <article id="fx-desk" class="card decision-card fx-decision">
-        <div class="surface-header">
-          <div>
-            <p class="eyebrow">FX · Canonical</p>
-            <h1>USD exposure</h1>
-          </div>
-          <strong id="fx-overlay-status" class="state-value">—</strong>
-        </div>
-
-        <p class="surface-lead">USD exposure overlay の正準状態をそのまま表示します。finBIでは再計算しません。</p>
-        <p id="fx-reason" class="decision-reason">canonical outputを読み込み中…</p>
-
-        <div class="decision-kpis" aria-label="FX decision measures">
-          <div>
-            <span>Current USD</span>
-            <strong id="fx-current-exposure">—</strong>
-          </div>
-          <div>
-            <span>Add USD</span>
-            <strong id="fx-incremental-exposure">—</strong>
-          </div>
-          <div>
-            <span>Total USD</span>
-            <strong id="fx-total-exposure">—</strong>
-          </div>
-        </div>
-
-        <div class="surface-actions">
-          <a class="primary-link" href="#fx-details">詳細と根拠</a>
-          <a class="secondary-link" href="#rates-desk">Ratesを見る</a>
-        </div>
-
-        <div class="surface-footer">
-          <p class="status" id="fx-status" role="status">investor2 FX overlayを読み込み中…</p>
-          <p class="schema-line">Schema <strong id="fx-schema">—</strong></p>
-        </div>
-
-        <details class="source-drawer">
-          <summary>Source</summary>
-          <p class="source-row">
-            <a href="https://github.com/KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md" target="_blank" rel="noreferrer">FX overlay contract</a>
-            · <a href="https://github.com/KAFKA2306/investor2/issues/251" target="_blank" rel="noreferrer">swap evidence #251</a>
-            · <a href="https://github.com/KAFKA2306/investor2/issues/252" target="_blank" rel="noreferrer">portfolio overlay #252</a>
-          </p>
-        </details>
-      </article>
-
+    <section class="live-overview" aria-label="米国債と米ドル比率">
       <section id="rates-desk" class="card decision-card rates-decision" aria-labelledby="rates-heading">
         <div class="surface-header">
           <div>
-            <p class="eyebrow">Rates · Historical snapshot</p>
-            <h2 id="rates-heading">米国10年債 snapshot</h2>
+            <p class="eyebrow">米国債 · 保存データ</p>
+            <h1 id="rates-heading">米国債の利回りを比べる</h1>
           </div>
           <div class="kicker">
             <strong id="series-name">データを読み込み中…</strong>
@@ -83,20 +36,7 @@
           </div>
         </div>
 
-        <p class="chart-hint" id="chart-hint">グラフの点を2つ選ぶと比較できます。1点目が開始日、2点目が終了日です。</p>
-        <div class="chart-wrap">
-          <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc" aria-describedby="chart-hint">
-            <title id="chart-title">米国10年国債利回りの推移</title>
-            <desc id="chart-desc">保存済み期間の各観測値を線で結んだグラフです。</desc>
-          </svg>
-        </div>
-
-        <div class="big-answer" aria-live="polite">
-          <span class="value" id="headline">—</span>
-          <span class="story" id="story">開始日と終了日を選ぶと、差を計算します。</span>
-        </div>
-
-        <div class="inline-compare" aria-label="Rates comparison controls">
+        <div class="inline-compare" aria-label="比較日を選択">
           <label>開始日
             <select id="start" aria-label="比較の開始日"></select>
           </label>
@@ -105,29 +45,93 @@
           </label>
           <button class="primary" id="compare" type="button">比べる</button>
         </div>
+        <div class="chips rates-presets" id="quick-picks" aria-label="比較する期間"></div>
+        <div class="big-answer" aria-live="polite">
+          <span class="value" id="headline">—</span>
+          <span class="story" id="story">開始日と終了日を選ぶと、差を計算します。</span>
+        </div>
+
+        <article class="curve-summary" aria-labelledby="curve-brief-heading">
+          <h2 id="curve-brief-heading">2年と10年を比較</h2>
+          <div class="big-answer" aria-live="polite">
+            <span class="value" id="curve-brief-headline">—</span>
+            <span class="story" id="curve-brief-detail">同じ開始日・終了日で2年債と10年債を比較します。</span>
+          </div>
+          <p class="status" id="curve-brief-status" role="status">金利差を読み込み中…</p>
+          <p class="source-row">
+            <a id="curve-long-source" href="#" target="_blank" rel="noreferrer">FRED DGS10</a>
+            ・ <a id="curve-short-source" href="#" target="_blank" rel="noreferrer">FRED DGS2</a>
+          </p>
+        </article>
+
+        <p class="chart-hint" id="chart-hint">10年債の推移。グラフから比較日を2つ選べます。</p>
+        <div class="chart-wrap">
+          <svg id="chart" viewBox="0 0 760 360" role="img" aria-labelledby="chart-title chart-desc" aria-describedby="chart-hint">
+            <title id="chart-title">米国10年国債利回りの推移</title>
+            <desc id="chart-desc">保存した観測日ごとの10年債利回りです。</desc>
+          </svg>
+        </div>
+
         <div class="surface-actions">
           <a id="source-link" class="secondary-link" href="#" target="_blank" rel="noreferrer">DGS10一次情報を確認</a>
         </div>
-        <p class="status" id="status" role="status">snapshotを読み込み中…</p>
+        <p class="status" id="status" role="status">保存データを読み込み中…</p>
       </section>
-    </section>
-
-    <section class="support-grid" aria-label="Comparison and evidence">
-      <article class="card curve-card" aria-labelledby="curve-brief-heading">
-        <p class="eyebrow">Comparison Brief · 2s10s</p>
-        <h2 id="curve-brief-heading">2年と10年を、同じ期間で比べる</h2>
-        <div class="big-answer" aria-live="polite">
-          <span class="value" id="curve-brief-headline">—</span>
-          <span class="story" id="curve-brief-detail">同じ開始日・終了日で2年債と10年債を比較します。</span>
+      <article id="fx-desk" class="card decision-card fx-decision">
+        <div class="surface-header">
+          <div>
+            <p class="eyebrow">FX · investor2</p>
+            <h2>米ドル比率と追加ヘッジ</h2>
+          </div>
+          <strong id="fx-overlay-status" class="state-value">—</strong>
         </div>
-        <p class="status" id="curve-brief-status" role="status">2s10s snapshotを読み込み中…</p>
-        <p class="source-row">
-          出典:
-          <a id="curve-long-source" href="#" target="_blank" rel="noreferrer">FRED DGS10</a>
-          · <a id="curve-short-source" href="#" target="_blank" rel="noreferrer">FRED DGS2</a>
-        </p>
+
+        <p class="surface-lead">ポートフォリオの米ドル比率とリスクを確認します。</p>
+        <p id="fx-reason" class="decision-reason">canonical outputを読み込み中…</p>
+
+        <div class="decision-kpis" id="fx-measures" hidden aria-label="米ドル比率">
+          <div>
+            <span>現在</span>
+            <strong id="fx-current-exposure">—</strong>
+          </div>
+          <div>
+            <span>追加</span>
+            <strong id="fx-incremental-exposure">—</strong>
+          </div>
+          <div>
+            <span>合計</span>
+            <strong id="fx-total-exposure">—</strong>
+          </div>
+        </div>
+
+        <ul id="fx-data-needed" class="fx-data-needed" hidden>
+          <li><a href="https://github.com/KAFKA2306/investor2/issues/251">日次スワップ履歴の整備状況</a></li>
+          <li><a href="https://github.com/KAFKA2306/investor2/issues/252">保有残高の集計状況</a></li>
+        </ul>
+        <div class="surface-actions">
+          <a class="primary-link" href="#fx-details" hidden>米ドル比率の根拠</a>
+          <a class="secondary-link" href="#rates-desk">米国債を比較</a>
+        </div>
+
+        <div class="surface-footer">
+          <p class="status" id="fx-status" role="status">investor2 FX overlayを読み込み中…</p>
+          <p class="schema-line">Schema <strong id="fx-schema">—</strong></p>
+        </div>
+
+        <details class="source-drawer">
+          <summary>FXのデータと検証条件</summary>
+          <p class="source-row">
+            <a href="https://github.com/KAFKA2306/investor2/blob/main/docs/specs/fx_overlay_contract.md" target="_blank" rel="noreferrer">investor2 USD exposure overlay の仕様</a>
+            · <a href="https://kafka2306.github.io/investor2/artifacts/api/v1/portfolio/fx-overlay.json" target="_blank" rel="noreferrer">取得元のJSON</a>
+            · <a href="https://github.com/KAFKA2306/investor2/issues/251" target="_blank" rel="noreferrer">日次スワップ履歴</a>
+            · <a href="https://github.com/KAFKA2306/investor2/issues/252" target="_blank" rel="noreferrer">保有残高の反映</a>
+          </p>
+        </details>
       </article>
 
+    </section>
+
+    <section class="support-grid" aria-label="米国債データの根拠">
       <aside class="card rates-evidence" aria-labelledby="trust-heading">
         <div class="evidence-heading">
           <div>
@@ -136,18 +140,13 @@
           </div>
         </div>
         <dl class="meta" id="metadata"></dl>
-        <div class="quick-picks">
-          <p>比較プリセット</p>
-          <div class="chips" id="quick-picks"></div>
-        </div>
       </aside>
     </section>
 
-    <section id="fx-details" class="detail-section" aria-labelledby="fx-details-heading">
+    <section id="fx-details" class="detail-section" aria-labelledby="fx-details-heading" hidden>
       <div class="section-heading">
         <div>
-          <p class="eyebrow">FX · Details</p>
-          <h2 id="fx-details-heading">必要なときだけ詳細を見る</h2>
+          <h2 id="fx-details-heading">米ドル比率とリスクの内訳</h2>
         </div>
         <p class="section-lead">primary decisionの後に、exposure / margin / OOS risk-returnを確認します。</p>
       </div>
@@ -181,17 +180,17 @@
     </section>
 
     <details class="utility-drawer">
-      <summary>View Finder / 実装情報</summary>
+      <summary>画面の探し方と計算方法</summary>
       <section class="utility-content">
         <section class="ask-panel" aria-labelledby="ask-heading">
           <div>
             <p class="eyebrow">View Finder</p>
-            <h3 id="ask-heading">質問から既存BIを探す</h3>
-            <p class="section-lead">未接続データから答えを生成する機能ではありません。</p>
+            <h3 id="ask-heading">分析画面を探す</h3>
+            <p class="section-lead">米国債利回りと米ドル比率の画面を探せます。</p>
           </div>
           <div class="ask-row">
             <label for="question-query">金融の論点
-              <input id="question-query" type="search" placeholder="例: USDJPY 3倍は効率的？" autocomplete="off">
+              <input id="question-query" type="search" placeholder="例: 2年と10年の利回り" autocomplete="off">
             </label>
             <button class="primary" id="question-route" type="button">見るべきBIを探す</button>
           </div>
