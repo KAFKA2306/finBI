@@ -1,5 +1,6 @@
 import json
 import os
+import tempfile
 import time
 from urllib.error import URLError
 from urllib.parse import parse_qs, urlparse
@@ -101,6 +102,8 @@ def assert_decision_first_layout(driver, width, height):
           return {top: box.top + window.scrollY, bottom: box.bottom + window.scrollY};
         };
         return {
+          screening: rect('.screening-entry'),
+          screenAction: rect('.screening-entry .screening-link'),
           fxStatus: rect('#fx-overlay-status'),
           comparison: rect('#compare'),
           rates: rect('#rates-desk'),
@@ -112,12 +115,11 @@ def assert_decision_first_layout(driver, width, height):
     )
 
     viewport = layout["viewport"]
-    assert layout["rates"]["top"] < viewport, layout
-    assert layout["comparison"]["bottom"] < viewport, layout
-    assert layout["curve"]["bottom"] < viewport, layout
-    if width >= 900:
-        assert layout["fxStatus"]["top"] < viewport, layout
-    else:
+    assert layout["screening"]["top"] < viewport, layout
+    assert layout["screenAction"]["bottom"] < viewport, layout
+    assert layout["screening"]["bottom"] < layout["rates"]["top"], layout
+    assert layout["comparison"]["top"] < layout["curve"]["top"], layout
+    if width < 900:
         assert layout["rates"]["top"] < layout["fxStatus"]["top"], layout
     assert layout["utility"]["top"] > layout["rates"]["top"], layout
 
@@ -297,6 +299,47 @@ def run_viewport(width, height, canonical):
             "return document.documentElement.scrollWidth > document.documentElement.clientWidth;"
         )
         assert not overflow, f"horizontal overflow at {width}x{height}"
+
+        # Public ETF screen: real CSV input -> filter -> comparison, no private data.
+        driver.get(f"{URL.rstrip('/')}/screener.html")
+        wait_text(driver, "#screen-title", lambda v: "大量のETF" in v)
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", suffix=".csv", delete=False
+        ) as fixture:
+            fixture.write(
+                "分野,ティッカー,商品名,参考規模(百万USD),経費率(%),"
+                "1か月騰落率(%),形態,基準日,出典URL\\n"
+                "半導体,SMH,Semiconductor fund,1000,0.35,-18,L,"
+                "2026-11-20,https://example.com/smh\\n"
+                "公益,XLU,Utilities fund,2000,0.08,3,L,"
+                "2026-11-20,https://example.com/xlu\\n"
+                "半導体,SOXL,Leveraged fund,900,0.75,-50,L3X,"
+                "2026-11-20,https://example.com/soxl\\n"
+            )
+            path = fixture.name
+        try:
+            driver.find_element(By.CSS_SELECTOR, "#data-file").send_keys(path)
+            wait_text(driver, "#source-count", lambda v: v == "3")
+            wait_text(driver, "#metric-count", lambda v: v == "2")
+            driver.find_element(
+                By.CSS_SELECTOR, '[data-preset="semis"]'
+            ).click()
+            wait_text(driver, "#metric-count", lambda v: v == "1")
+            driver.find_element(
+                By.CSS_SELECTOR, "#table-body input[type=checkbox]"
+            ).click()
+            WebDriverWait(driver, 10).until(
+                lambda d: len(d.find_elements(By.CSS_SELECTOR, ".compare-tile")) == 1
+            )
+            assert driver.find_element(
+                By.CSS_SELECTOR, "#export"
+            ).is_enabled()
+            overflow = driver.execute_script(
+                "return document.documentElement.scrollWidth > document.documentElement.clientWidth;"
+            )
+            assert not overflow, f"screener horizontal overflow at {width}x{height}"
+        finally:
+            os.unlink(path)
     finally:
         driver.quit()
 
