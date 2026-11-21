@@ -321,9 +321,7 @@ def run_viewport(width, height, canonical):
             driver.find_element(By.CSS_SELECTOR, "#data-file").send_keys(path)
             wait_text(driver, "#source-count", lambda v: v == "3")
             wait_text(driver, "#metric-count", lambda v: v == "2")
-            driver.find_element(
-                By.CSS_SELECTOR, '[data-preset="semis"]'
-            ).click()
+            driver.find_element(By.CSS_SELECTOR, '[data-preset="semis"]').click()
             wait_text(driver, "#metric-count", lambda v: v == "1")
             driver.find_element(
                 By.CSS_SELECTOR, "#table-body input[type=checkbox]"
@@ -331,9 +329,7 @@ def run_viewport(width, height, canonical):
             WebDriverWait(driver, 10).until(
                 lambda d: len(d.find_elements(By.CSS_SELECTOR, ".compare-tile")) == 1
             )
-            assert driver.find_element(
-                By.CSS_SELECTOR, "#export"
-            ).is_enabled()
+            assert driver.find_element(By.CSS_SELECTOR, "#export").is_enabled()
             overflow = driver.execute_script(
                 "return document.documentElement.scrollWidth > document.documentElement.clientWidth;"
             )
