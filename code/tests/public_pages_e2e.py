@@ -228,9 +228,11 @@ def run_viewport(width, height, canonical):
     downloads = Path(tempfile.mkdtemp(prefix="finbi-public-io-"))
     options.add_experimental_option(
         "prefs",
-        {"download.default_directory": str(downloads),
-         "download.prompt_for_download": False,
-         "download.directory_upgrade": True},
+        {
+            "download.default_directory": str(downloads),
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+        },
     )
     driver = webdriver.Chrome(options=options)
     driver.execute_cdp_cmd(
