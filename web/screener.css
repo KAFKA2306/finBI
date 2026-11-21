@@ -49,7 +49,7 @@
 .sector-bar-row .bar { height:12px; background:var(--k-color-canvas); border:1px solid var(--k-color-border); }
 .sector-bar-row .bar span { display:block; height:100%; background:var(--k-color-primary); }
 .sector-bar-row strong { text-align:right; font-variant-numeric:tabular-nums; font-family:var(--k-font-family-mono); }
-#fee-chart { width:100%; height:auto; min-height:185px; overflow:visible; }
+svg[id="fee-chart"] { width:100%; height:auto; min-height:185px; overflow:visible; }
 .chart-explain { color:var(--k-color-muted-foreground); font-size:10px; line-height:1.5; margin:0; }
 .table-section { min-width:0; overflow:hidden; }
 .table-toolbar { display:flex; justify-content:space-between; align-items:flex-end; gap:var(--k-dimension-space3); padding:var(--k-dimension-space4); }
