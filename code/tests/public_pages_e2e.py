@@ -1,5 +1,8 @@
+import csv
 import json
 import os
+from pathlib import Path
+import shutil
 import tempfile
 import time
 from urllib.error import URLError
@@ -126,16 +129,7 @@ def assert_decision_first_layout(driver, width, height):
 
 def click_chart_date(driver, date, timeout=30):
     selector = f"rect.chart-hit[data-date='{date}']"
-
-    def _click(_driver):
-        element = _driver.find_element(By.CSS_SELECTOR, selector)
-        _driver.execute_script(
-            "arguments[0].dispatchEvent(new MouseEvent('click', {bubbles:true}));",
-            element,
-        )
-        return True
-
-    WebDriverWait(driver, timeout).until(_click)
+    scroll_then_click(driver, selector, timeout=timeout)
 
 
 def scroll_then_click(driver, selector, timeout=20):
@@ -231,7 +225,18 @@ def run_viewport(width, height, canonical):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument(f"--window-size={width},{height}")
+    downloads = Path(tempfile.mkdtemp(prefix="finbi-public-io-"))
+    options.add_experimental_option(
+        "prefs",
+        {"download.default_directory": str(downloads),
+         "download.prompt_for_download": False,
+         "download.directory_upgrade": True},
+    )
     driver = webdriver.Chrome(options=options)
+    driver.execute_cdp_cmd(
+        "Page.setDownloadBehavior",
+        {"behavior": "allow", "downloadPath": str(downloads)},
+    )
     try:
         emulate_color_scheme(driver, "dark")
         driver.get(URL)
@@ -358,6 +363,18 @@ def run_viewport(width, height, canonical):
                 lambda d: len(d.find_elements(By.CSS_SELECTOR, ".compare-tile")) == 1
             )
             assert driver.find_element(By.CSS_SELECTOR, "#export").is_enabled()
+            # Verify actual output bytes, not merely the enabled state of a button.
+            scroll_then_click(driver, "#export")
+            exported = downloads / "finbi-etf-filtered-2026-11-20.csv"
+            WebDriverWait(driver, 20).until(
+                lambda _: exported.is_file() and exported.stat().st_size > 50
+            )
+            with exported.open(encoding="utf-8-sig", newline="") as result:
+                exported_rows = list(csv.DictReader(result))
+            assert len(exported_rows) == 1, exported_rows
+            assert exported_rows[0]["ティッカー"] == "SMH", exported_rows
+            assert exported_rows[0]["基準日"] == "2026-11-20", exported_rows
+            assert exported_rows[0]["分野"] == "半導体", exported_rows
             overflow = driver.execute_script(
                 "return document.documentElement.scrollWidth > document.documentElement.clientWidth;"
             )
@@ -366,6 +383,7 @@ def run_viewport(width, height, canonical):
             os.unlink(path)
     finally:
         driver.quit()
+        shutil.rmtree(downloads, ignore_errors=True)
 
 
 def main():
