@@ -26,6 +26,9 @@ jobs:
       - name: Run fast quality gates
         run: uvx --from prek==0.4.11 prek run --all-files
 
+      - name: Verify ETF screening view
+        run: node --test code/tests/test_screener.mjs
+
       - name: Verify canonical design contract
         run: node web/.kafka-design/portable-conformance.mjs --consumer "$GITHUB_WORKSPACE"
 
@@ -61,7 +64,7 @@ jobs:
       - name: Build public root
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code site/kafka-design
-          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css web/screener.html web/screener.css web/screener.js web/screener-core.mjs site/
           sed 's#".kafka-design/#"kafka-design/#g' web/design-tokens.css > site/design-tokens.css
           cp web/.kafka-design/*.css site/kafka-design/
           cp data/snapshots/*.json site/data/snapshots/
@@ -77,6 +80,10 @@ jobs:
           curl --fail --silent http://127.0.0.1:8123/ | grep -q 'Financial BI'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q 'USD exposure overlay'
           curl --fail --silent http://127.0.0.1:8123/ | grep -q '2年と10年を'
+          curl --fail --silent http://127.0.0.1:8123/screener.html | grep -q 'ETFスクリーナー'
+          curl --fail --silent http://127.0.0.1:8123/screener.js | grep -q 'readEtfCsv'
+          curl --fail --silent http://127.0.0.1:8123/screener-core.mjs | grep -q '20,000銘柄'
+          curl --fail --silent http://127.0.0.1:8123/screener.css | grep -q 'k-color-primary'
           curl --fail --silent http://127.0.0.1:8123/styles.css | grep -q 'design-tokens.css'
           curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q 'kafka-design:managed-start'
           curl --fail --silent http://127.0.0.1:8123/design-tokens.css | grep -q '"kafka-design/kafka-tokens.css"'
@@ -142,7 +149,7 @@ jobs:
         if: steps.pages.outputs.enabled == 'true'
         run: |
           mkdir -p site/data/snapshots site/data/questions site/code site/kafka-design
-          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css site/
+          cp web/index.html web/app.js web/fx.js web/fx.css web/question-router.js web/worker.mjs web/styles.css web/screener.html web/screener.css web/screener.js web/screener-core.mjs site/
           sed 's#".kafka-design/#"kafka-design/#g' web/design-tokens.css > site/design-tokens.css
           cp web/.kafka-design/*.css site/kafka-design/
           cp data/snapshots/*.json site/data/snapshots/
