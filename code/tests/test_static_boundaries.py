@@ -26,6 +26,10 @@ class StaticBoundaryTests(unittest.TestCase):
                 "fx.js",
                 "index.html",
                 "question-router.js",
+                "screener-core.mjs",
+                "screener.css",
+                "screener.html",
+                "screener.js",
                 "styles.css",
                 "worker.mjs",
             ],
@@ -57,6 +61,8 @@ class StaticBoundaryTests(unittest.TestCase):
                 WEB_DIR / "fx.js",
                 WEB_DIR / "question-router.js",
                 WEB_DIR / "worker.mjs",
+                WEB_DIR / "screener-core.mjs",
+                WEB_DIR / "screener.js",
             ]
         )
         self.assertIsNone(re.search(r"[A-Za-z]:\\\\(?:Users|ML|Documents)\\\\", source))
