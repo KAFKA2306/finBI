@@ -138,6 +138,36 @@ def click_chart_date(driver, date, timeout=30):
     WebDriverWait(driver, timeout).until(_click)
 
 
+def scroll_then_click(driver, selector, timeout=20):
+    """Perform a genuine pointer click after scrolling a control into view.
+
+    The screener's filters may be below the viewport. Selenium's implicit
+    scrolling can race the page's smooth-scroll rule. Do not dispatch a
+    synthetic JS click: that would hide controls obstructed in production.
+    """
+    element = driver.find_element(By.CSS_SELECTOR, selector)
+    driver.execute_script(
+        "arguments[0].scrollIntoView({behavior:'instant', block:'center', inline:'nearest'})",
+        element,
+    )
+
+    def genuinely_clickable(_driver):
+        return _driver.execute_script(
+            """
+            const el = arguments[0], r = el.getBoundingClientRect();
+            const x = r.left + r.width / 2, y = r.top + r.height / 2;
+            const above = document.elementFromPoint(x, y);
+            return r.width > 0 && r.height > 0 &&
+                   x >= 0 && x < innerWidth && y >= 0 && y < innerHeight &&
+                   (above === el || el.contains(above));
+            """,
+            element,
+        )
+
+    WebDriverWait(driver, timeout).until(genuinely_clickable)
+    element.click()
+
+
 def assert_period_query(driver, expected_start, expected_end):
     query = parse_qs(urlparse(driver.current_url).query)
     assert query.get("start") == [expected_start], query
@@ -321,11 +351,9 @@ def run_viewport(width, height, canonical):
             driver.find_element(By.CSS_SELECTOR, "#data-file").send_keys(path)
             wait_text(driver, "#source-count", lambda v: v == "3")
             wait_text(driver, "#metric-count", lambda v: v == "2")
-            driver.find_element(By.CSS_SELECTOR, '[data-preset="semis"]').click()
+            scroll_then_click(driver, '[data-preset="semis"]')
             wait_text(driver, "#metric-count", lambda v: v == "1")
-            driver.find_element(
-                By.CSS_SELECTOR, "#table-body input[type=checkbox]"
-            ).click()
+            scroll_then_click(driver, "#table-body input[type=checkbox]")
             WebDriverWait(driver, 10).until(
                 lambda d: len(d.find_elements(By.CSS_SELECTOR, ".compare-tile")) == 1
             )
