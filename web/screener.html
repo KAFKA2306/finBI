@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ETFを大量に読み込み、費用、規模、テーマ、値動きを絞り込んで比較。データはブラウザ内だけで処理します。">
+  <meta name="theme-color" content="#F7F5EF" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0B0F17" media="(prefers-color-scheme: dark)">
+  <title>ETFスクリーナー | finBI</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./screener.css">
+</head>
+<body>
+  <div class="shell screen-shell">
+    <header class="appbar" aria-label="サイト案内">
+      <div class="brand"><a href="./index.html" class="brand-home">finBI</a><span>Financial BI</span></div>
+      <nav class="appnav" aria-label="分析画面">
+        <a href="./screener.html" aria-current="page">ETF比較</a>
+        <a href="./index.html#rates-desk">米国債</a>
+        <a href="./index.html#fx-desk">米ドル比率</a>
+      </nav>
+      <span class="publication-state">PUBLIC · LOCAL DATA</span>
+    </header>
+
+    <main>
+      <section class="screen-intro" aria-labelledby="screen-title">
+        <div>
+          <p class="eyebrow">ETF SCREENING / RESEARCH DESK</p>
+          <h1 id="screen-title">大量のETFから、<br>比較する候補を絞る。</h1>
+          <p class="screen-lead">銘柄一覧を取り込み、費用・規模・値動き・テーマを同じ基準日で比較。売買判断ではなく、調査候補の整理に使います。</p>
+        </div>
+        <div class="screen-intro-action">
+          <label class="file-button" for="data-file">CSVを読み込む <span aria-hidden="true">↗</span></label>
+          <input id="data-file" type="file" accept=".csv,text/csv" aria-describedby="file-help">
+          <p id="file-help">最大20,000行・8MB。ファイルは外部へ送信しません。</p>
+          <a id="template-link" href="#data-format">入力形式を確認</a>
+        </div>
+      </section>
+
+      <section class="data-strip" aria-label="読み込んだデータの状態">
+        <div><span>データ</span><strong id="dataset-label">未読み込み</strong></div>
+        <div><span>基準日</span><strong id="as-of-label">未確認</strong></div>
+        <div><span>データ件数</span><strong id="source-count">—</strong></div>
+        <div><span>処理</span><strong>ブラウザ内のみ</strong></div>
+      </section>
+      <p id="load-message" class="feedback-line" role="status" aria-live="polite">CSVを選ぶと、結果がここに表示されます。</p>
+
+      <section class="screen-workspace" aria-label="ETFの絞り込みと結果">
+        <aside class="filters card" aria-labelledby="filter-title">
+          <div class="filters-top"><p class="eyebrow">01 / FILTER</p><h2 id="filter-title">条件を選ぶ</h2></div>
+          <label for="search">銘柄名・ティッカー
+            <input id="search" type="search" placeholder="例：XLU、電力、Vanguard" autocomplete="off">
+          </label>
+          <label for="sector">分野
+            <select id="sector"><option value="">すべての分野</option></select>
+          </label>
+          <div class="filter-split">
+            <label for="max-fee">経費率の上限（%）
+              <input id="max-fee" type="number" min="0" step="0.01" placeholder="指定なし">
+            </label>
+            <label for="min-size">最小規模（百万USD）
+              <input id="min-size" type="number" min="0" step="100" placeholder="指定なし">
+            </label>
+          </div>
+          <label class="check-line" for="long-only"><input id="long-only" type="checkbox" checked>レバレッジ・インバースを除外</label>
+          <label class="check-line" for="drawdown"><input id="drawdown" type="checkbox">1か月で10%以上下落した銘柄だけ</label>
+          <div class="preset-block">
+            <h3>すぐ調べる</h3>
+            <div class="preset-grid" role="group" aria-label="絞り込みの例">
+              <button type="button" data-preset="lowfee">低コスト</button>
+              <button type="button" data-preset="infra">インフラ</button>
+              <button type="button" data-preset="semis">半導体</button>
+              <button type="button" data-preset="drawdown">大幅下落</button>
+            </div>
+          </div>
+          <button class="clear-button" id="reset" type="button">条件をリセット</button>
+          <div class="privacy-note"><strong>データの扱い</strong><p>取り込んだ値はこのタブのメモリ上だけに保持します。サーバー保存、外部API送信、自動売買は行いません。</p></div>
+        </aside>
+
+        <div class="results">
+          <section class="result-summary" aria-label="絞り込み結果の要約">
+            <div class="kpi"><span>該当ETF</span><strong id="metric-count">—</strong><small id="metric-count-sub">データを選択してください</small></div>
+            <div class="kpi"><span>経費率の中央値</span><strong id="metric-fee">—</strong><small>数値のある行のみ</small></div>
+            <div class="kpi"><span>1か月下落</span><strong id="metric-decliners">—</strong><small id="metric-decliners-sub">値動きのある行のみ</small></div>
+            <div class="kpi"><span>分野数</span><strong id="metric-sectors">—</strong><small>現在の絞り込み</small></div>
+          </section>
+
+          <section class="insight-grid" aria-label="分布の可視化">
+            <article class="card insight-card">
+              <div class="insight-heading"><div><p class="eyebrow">02 / MAP</p><h2>どの分野が多い？</h2></div><span>件数 / 上位8分野</span></div>
+              <div id="sector-chart" class="sector-chart" role="img" aria-label="該当ETFの分野別件数">データを読み込むと表示されます。</div>
+            </article>
+            <article class="card insight-card">
+              <div class="insight-heading"><div><p class="eyebrow">03 / DISTRIBUTION</p><h2>費用と値動き</h2></div><span>各点＝1銘柄</span></div>
+              <svg id="fee-chart" viewBox="0 0 480 210" role="img" aria-label="経費率と1か月騰落率の散布図"><title>経費率と1か月騰落率</title></svg>
+              <p class="chart-explain">横軸：経費率（%）／縦軸：1か月騰落率（%）。未取得値は描画しません。</p>
+            </article>
+          </section>
+
+          <section class="card table-section" aria-labelledby="table-title">
+            <div class="table-toolbar">
+              <div><p class="eyebrow">04 / SHORTLIST</p><h2 id="table-title">銘柄を比較する</h2><p id="table-status" class="table-caption" role="status">データがありません。</p></div>
+              <div class="table-actions">
+                <label for="sort">並び順
+                  <select id="sort"><option value="size">規模が大きい順</option><option value="fee">経費率が低い順</option><option value="m1">1か月上昇順</option><option value="m1asc">1か月下落順</option><option value="pe">PER参考が低い順</option></select>
+                </label>
+                <button id="export" type="button" disabled>結果をCSVで保存</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table class="etf-table"><thead><tr><th scope="col">比較</th><th scope="col">ETF</th><th scope="col">分野</th><th scope="col" class="numeric">規模（百万USD）</th><th scope="col" class="numeric">経費率</th><th scope="col" class="numeric">1か月</th><th scope="col" class="numeric">PER参考</th><th scope="col">根拠</th></tr></thead><tbody id="table-body"><tr><td colspan="8" class="table-empty">CSVを読み込むと、ここに候補が表示されます。</td></tr></tbody></table>
+            </div>
+            <div class="table-foot"><span id="row-limit-note">最大200行を画面表示。出力CSVには該当行すべてを含みます。</span><span>ETFの騰落率とPERは提供された値です。</span></div>
+          </section>
+
+          <section class="card compare-card" aria-labelledby="compare-title">
+            <div class="compare-head"><div><p class="eyebrow">05 / SIDE BY SIDE</p><h2 id="compare-title">選んだ銘柄を並べる</h2></div><button id="clear-selected" type="button">選択を解除</button></div>
+            <p id="compare-help">表の左側で、最大4銘柄を選べます。</p>
+            <div id="compare-grid" class="compare-grid" aria-live="polite"></div>
+          </section>
+        </div>
+      </section>
+
+      <details class="format-drawer" id="data-format"><summary>入力データの形式・出典・数値の注意</summary>
+        <div class="format-content">
+          <p>ExcelなどからCSV（UTF-8）で保存して読み込みます。必要な列は「ティッカー」「商品名」「分野」「基準日」。基準日は同一のYYYY-MM-DDにしてください。</p>
+          <p>任意列：「参考規模(百万USD)」「経費率(%)」「ベータ」「1か月騰落率(%)」「1年騰落率(%)」「年初来騰落率(%)」「ETF PER参考」「形態」「商品条件点」「調査区分」「出典URL」「注意事項」。空欄は未取得のまま扱います。</p>
+          <p>参考規模の意味、PER算出法、騰落率が分配金込みかどうかは元データ提供者に依存します。異なる定義・通貨を混ぜたデータの比較は行わないでください。結果の中央値は表示用の計算であり、投資推奨や将来収益の予測ではありません。</p>
+          <p>出典は元CSVの「出典URL」を銘柄ごとに示します。検証対象の元データは利用者自身が管理し、この公開サイトには保存されません。</p>
+          <button id="template" type="button">CSVの空テンプレートを保存</button>
+        </div>
+      </details>
+    </main>
+    <footer class="screen-footer"><span>finBI · Read-only analysis</span><a href="https://github.com/KAFKA2306/finBI">ソースコード</a></footer>
+  </div>
+  <script type="module" src="./screener.js"></script>
+</body>
+</html>
