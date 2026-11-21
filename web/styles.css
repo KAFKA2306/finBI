@@ -839,3 +839,22 @@ code {
 .fx-data-needed {
   padding-inline-start: var(--k-dimension-space4);
 }
+
+/* Screening is a first-class decision view; values come from the canonical design tokens. */
+.screening-entry {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: var(--k-dimension-space4);
+  align-items: center;
+  margin-top: var(--k-dimension-space3);
+  padding: var(--k-dimension-space4);
+}
+.screening-entry p:not(.eyebrow) {
+  margin: var(--k-dimension-space2) 0 0;
+  font-size: var(--k-font-size-small);
+  color: var(--k-color-muted-foreground);
+}
+.screening-entry .primary-link { white-space: nowrap; }
+@media (max-width: 560px) {
+  .screening-entry { grid-template-columns: 1fr; }
+}
