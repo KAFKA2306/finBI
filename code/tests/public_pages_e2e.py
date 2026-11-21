@@ -308,13 +308,13 @@ def run_viewport(width, height, canonical):
         ) as fixture:
             fixture.write(
                 "分野,ティッカー,商品名,参考規模(百万USD),経費率(%),"
-                "1か月騰落率(%),形態,基準日,出典URL\\n"
+                "1か月騰落率(%),形態,基準日,出典URL\n"
                 "半導体,SMH,Semiconductor fund,1000,0.35,-18,L,"
-                "2026-11-20,https://example.com/smh\\n"
+                "2026-11-20,https://example.com/smh\n"
                 "公益,XLU,Utilities fund,2000,0.08,3,L,"
-                "2026-11-20,https://example.com/xlu\\n"
+                "2026-11-20,https://example.com/xlu\n"
                 "半導体,SOXL,Leveraged fund,900,0.75,-50,L3X,"
-                "2026-11-20,https://example.com/soxl\\n"
+                "2026-11-20,https://example.com/soxl\n"
             )
             path = fixture.name
         try:
