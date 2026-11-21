@@ -19,7 +19,7 @@
 .feedback-line { min-height:20px; margin:var(--k-dimension-space2) 0 var(--k-dimension-space3); font-size:12px; color:var(--k-color-muted-foreground); }
 .feedback-line.is-error { color:var(--k-color-danger); font-weight:700; }
 .screen-workspace { display:grid; grid-template-columns:254px minmax(0,1fr); gap:var(--k-dimension-space3); align-items:start; }
-.filters { padding:var(--k-dimension-space4); display:grid; gap:var(--k-dimension-space3); position:sticky; top:var(--k-dimension-space3); }
+.filters { padding:var(--k-dimension-space4); display:grid; gap:var(--k-dimension-space3); position:static; }
 .filters-top { border-bottom:1px solid var(--k-color-border); padding-bottom:var(--k-dimension-space3); }
 .filters label { display:grid; gap:var(--k-dimension-space1); font-size:12px; font-weight:650; }
 .filters input:not([type="checkbox"]),.filters select,.table-toolbar select { width:100%; min-width:0; padding:0 var(--k-dimension-space2); border:1px solid var(--k-color-border); border-radius:var(--k-dimension-radius); color:var(--k-color-foreground); background:var(--k-color-surface); }
@@ -94,3 +94,6 @@ svg[id="fee-chart"] { width:100%; height:auto; min-height:185px; overflow:visibl
 @media (max-width:1080px) { .screen-workspace { grid-template-columns:225px minmax(0,1fr); } .insight-grid { grid-template-columns:1fr; } }
 @media (max-width:820px) { .screen-intro { grid-template-columns:1fr; } .screen-workspace { grid-template-columns:1fr; } .filters { position:static; grid-template-columns:repeat(2,minmax(0,1fr)); } .filters-top,.preset-block,.privacy-note { grid-column:1/-1; } .result-summary { grid-template-columns:repeat(2,minmax(0,1fr)); } .compare-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:560px) { .screen-intro { padding:var(--k-dimension-space4) 0; } .data-strip { grid-template-columns:1fr 1fr; } .data-strip>div:nth-child(3) { border-left:0; border-top:1px solid var(--k-color-border); } .data-strip>div:nth-child(4) { border-top:1px solid var(--k-color-border); } .table-toolbar { display:grid; } .table-actions { flex-wrap:wrap; } .filters { display:grid; grid-template-columns:1fr; } .filters-top,.preset-block,.privacy-note { grid-column:auto; } .compare-grid { grid-template-columns:1fr 1fr; } .screen-intro h1 { font-size:clamp(1.45rem,5.5vw,2rem); } }
+
+/* Keep the filter panel sticky only when the whole panel fits in the viewport. */
+@media (min-width:821px) and (min-height:1100px) { .filters { position:sticky; top:var(--k-dimension-space3); } }
